@@ -39,7 +39,6 @@ public class AdditionBuilder implements Builder<Addition>{
         addition.setName(name);
         addition.setPrice(price);
         addition.setGeneric(generic);
-        addition.setCategories(Collections.EMPTY_LIST);
         return addition;
     }
     

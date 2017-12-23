@@ -16,18 +16,15 @@ public class AdditionDTO extends DTO{
     private String name;
     private float price;
 
-    private List<String> categories;
-    
     private boolean generic;
 
     public AdditionDTO() {
     }
 
-    public AdditionDTO(String uuid, String name, float price, List<String> categories, boolean generic) {
+    public AdditionDTO(String uuid, String name, float price, boolean generic) {
         super(uuid);
         this.name = name;
         this.price = price;
-        this.categories = categories;
         this.generic = generic;
     }
 
@@ -47,14 +44,6 @@ public class AdditionDTO extends DTO{
 
     public void setPrice(float price) {
         this.price = price;
-    }
-
-    public List<String> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(List<String> categories) {
-        this.categories = categories;
     }
 
     public void setGeneric(boolean generic) {

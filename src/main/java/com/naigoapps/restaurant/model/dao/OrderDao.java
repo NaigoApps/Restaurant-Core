@@ -5,9 +5,7 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
-import com.naigoapps.restaurant.model.DiningTable;
-import com.naigoapps.restaurant.model.Ordination;
-import com.naigoapps.restaurant.model.RequiredDish;
+import com.naigoapps.restaurant.model.Order;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -17,21 +15,21 @@ import javax.persistence.TypedQuery;
  *
  * @author naigo
  */
-public class RequiredDishDao extends Dao{
+public class OrderDao extends Dao{
     
-    public List<RequiredDish> findByOrdination(String uuid){
+    public List<Order> findByOrdination(String uuid){
         EntityManager em = getEntityManager();
-        Query q = em.createQuery("FROM RequiredDish rd where rd.ordination.uuid = :ordination", RequiredDish.class)
+        Query q = em.createQuery("FROM Order rd where rd.ordination.uuid = :ordination", Order.class)
                 .setParameter("ordination", uuid);
-        List<RequiredDish> orders = q.getResultList();
+        List<Order> orders = q.getResultList();
         return orders;
     }
     
-    public RequiredDish findByUuid(String uuid){
+    public Order findByUuid(String uuid){
         EntityManager em = getEntityManager();
-        TypedQuery<RequiredDish> q = em.createQuery("FROM RequiredDish rd where rd.uuid = :uuid", RequiredDish.class)
+        TypedQuery<Order> q = em.createQuery("FROM Order rd where rd.uuid = :uuid", Order.class)
                 .setParameter("uuid", uuid);
-        RequiredDish order = q.getSingleResult();
+        Order order = q.getSingleResult();
         return order;
     }
 }

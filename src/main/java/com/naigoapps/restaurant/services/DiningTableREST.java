@@ -8,18 +8,26 @@ package com.naigoapps.restaurant.services;
 import com.naigoapps.restaurant.main.EveningManager;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Evening;
+import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.RestaurantTable;
 import com.naigoapps.restaurant.model.Waiter;
 import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import com.naigoapps.restaurant.model.dao.DiningTableDao;
+import com.naigoapps.restaurant.model.dao.PrinterDao;
 import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
 import com.naigoapps.restaurant.model.dao.WaiterDao;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.printing.PartialBillPrinter;
+import com.naigoapps.restaurant.services.utils.ResponseBuilder;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.print.PrintException;
 import javax.transaction.Transactional;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -28,7 +36,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -51,6 +58,9 @@ public class DiningTableREST {
 
     @Inject
     DiningTableDao dtDao;
+
+    @Inject
+    PrinterDao pDao;
 
     @GET
     public Response getByEvening() {
@@ -163,15 +173,39 @@ public class DiningTableREST {
         }
     }
 
-
     @DELETE
     @Transactional
-    public Response deleteDiningTable(String uuid){
-        
+    public Response deleteDiningTable(String uuid) {
+
         dtDao.removeByUuid(uuid);
-        
+
         return Response
                 .status(Response.Status.OK)
                 .build();
+    }
+
+    @POST
+    @Path("print-partial-bill")
+    public Response printPartialBill(String diningTableUuid) {
+        DiningTable table = dtDao.findByUuid(diningTableUuid, DiningTable.class);
+        if (table != null) {
+            Printer mainPrinter = pDao.findMainPrinter();
+            if (mainPrinter != null) {
+                try {
+                    PrinterService service = new PrinterService(mainPrinter);
+                    service.accept(new PartialBillPrinter(), table);
+                    service.cut();
+                    service.doPrint();
+                    return ResponseBuilder.ok();
+                } catch (IOException ex) {
+                    return ResponseBuilder.badRequest("Problema di stampa inaspettato");
+                } catch (PrintException ex) {
+                    return ResponseBuilder.badRequest("Problema di stampa");
+                }
+            }else{
+                return ResponseBuilder.notFound("Stampante principale non trovata");
+            }
+        }
+        return ResponseBuilder.notFound("Tavolo non trovato");
     }
 }

@@ -5,8 +5,8 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
+import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Ordination;
-import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -24,14 +24,6 @@ public class OrdinationDao extends Dao{
         q.executeUpdate();
     }
     
-    
-    public Ordination findByUuid(String uuid){
-        TypedQuery<Ordination> q = getEntityManager().createQuery("FROM Ordination o where o.uuid = :uuid", Ordination.class);
-        q.setParameter("uuid", uuid);
-        Ordination o = q.getSingleResult();
-        return o;
-    }
-    
     public List<Ordination> findByDiningTable(String uuid){
         TypedQuery<Ordination> q = getEntityManager().createQuery("FROM Ordination o where o.table.uuid = :uuid", Ordination.class);
         q.setParameter("uuid", uuid);
@@ -39,10 +31,10 @@ public class OrdinationDao extends Dao{
         return o;
     }
     
-    public int nextProgressive(LocalDate date){
+    public int nextProgressive(Evening e){
         TypedQuery<Integer> q = getEntityManager().createQuery(
-                "SELECT max(o.progressive) FROM Ordination o WHERE o.table.evening.day = :date", Integer.class);
-        q.setParameter("date", date);
+                "SELECT max(o.progressive) FROM Ordination o WHERE o.table.evening = :evening", Integer.class);
+        q.setParameter("evening", e);
         Integer progressive = q.getSingleResult();
         if(progressive != null){
             return progressive + 1;

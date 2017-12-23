@@ -7,6 +7,7 @@ package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.model.DishStatus;
+import com.naigoapps.restaurant.model.Location;
 import com.naigoapps.restaurant.model.builders.CategoryBuilder;
 import com.naigoapps.restaurant.model.dao.CategoryDao;
 import com.naigoapps.restaurant.model.dao.LocationDao;
@@ -24,7 +25,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -104,7 +104,7 @@ public class CategoryREST {
     @Transactional
     public Response updateCategoryLocation(@PathParam("uuid") String uuid, String location){
         Category c = categoryDao.findByUuid(uuid);
-        c.setLocation(lDao.findByUuid(location));
+        c.setLocation(lDao.findByUuid(location, Location.class));
         return Response.status(200).entity(DTOAssembler.fromCategory(c)).build();
     }
         

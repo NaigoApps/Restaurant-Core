@@ -6,8 +6,10 @@
 package com.naigoapps.restaurant.model.dao;
 
 import com.naigoapps.restaurant.model.Location;
+import com.naigoapps.restaurant.model.Printer;
 import java.util.List;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 /**
  *
@@ -21,11 +23,11 @@ public class LocationDao extends Dao{
         return locations;
     }
     
-    public Location findByUuid(String uuid){
-        Query q = getEntityManager().createQuery("FROM Location l where l.uuid = :uuid", Location.class);
-        q.setParameter("uuid", uuid);
-        Location location = (Location) q.getSingleResult();
-        return location;
+    public List<Location> findByPrinter(Printer p){
+        TypedQuery<Location> q = getEntityManager().createQuery("FROM Location l where l.printer = :printer", Location.class);
+        q.setParameter("printer", p);
+        List<Location> locations = q.getResultList();
+        return locations;
     }
     
     public void removeByUuid(String uuid){

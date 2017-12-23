@@ -6,20 +6,21 @@
 package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.main.EveningManager;
+import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.model.DiningTable;
-import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Ordination;
-import com.naigoapps.restaurant.model.RequiredDish;
+import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.builders.OrdinationBuilder;
-import com.naigoapps.restaurant.model.builders.RequiredDishBuilder;
+import com.naigoapps.restaurant.model.builders.OrderBuilder;
+import com.naigoapps.restaurant.model.dao.AdditionDao;
 import com.naigoapps.restaurant.model.dao.DishDao;
 import com.naigoapps.restaurant.model.dao.OrdinationDao;
-import com.naigoapps.restaurant.model.dao.RequiredDishDao;
+import com.naigoapps.restaurant.model.dao.OrderDao;
+import com.naigoapps.restaurant.model.dao.PhaseDao;
 import com.naigoapps.restaurant.services.dto.OrdinationDTO;
-import com.naigoapps.restaurant.services.dto.RequiredDishDTO;
+import com.naigoapps.restaurant.services.dto.OrderDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +32,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -54,11 +55,17 @@ public class OrdinationREST {
     OrdinationDao oDao;
 
     @Inject
-    RequiredDishDao doDao;
+    OrderDao doDao;
 
     @Inject
     DishDao dDao;
-    
+
+    @Inject
+    PhaseDao pDao;
+
+    @Inject
+    AdditionDao aDao;
+
     @Inject
     PrinterREST printService;
 
@@ -80,37 +87,41 @@ public class OrdinationREST {
 
     @POST
     @Transactional
-    public Response createOrdination(RequiredDishDTO[] orders) {
-        if (orders != null && orders.length > 0) {
+    public Response createOrdination(OrdinationDTO ordinationDto) {
+        if (ordinationDto != null && ordinationDto.getOrders().size() > 0) {
             Evening e = eveningManager.getSelectedEvening();
             DiningTable table = e.getDiningTables().stream()
-                    .filter(t -> t.getUuid().equals(orders[0].getTable()))
+                    .filter(t -> t.getUuid().equals(ordinationDto.getTable()))
                     .findFirst()
                     .orElse(null);
             if (table != null) {
-                Ordination ordination = null;
+                Ordination ordination;
                 synchronized (locks.ORDINATION_PROGRESSIVE()) {
                     ordination = new OrdinationBuilder()
-                            .progressive(oDao.nextProgressive(LocalDate.now()))
+                            .progressive(oDao.nextProgressive(e))
                             .creationTime(LocalDateTime.now())
                             .table(table)
                             .getContent();
                     oDao.persist(ordination);
-                    RequiredDishBuilder oBuilder = new RequiredDishBuilder();
-                    List<RequiredDish> rd = new ArrayList<>();
-                    for (RequiredDishDTO order : orders) {
-                        for (int j = 0; j < order.getQuantity(); j++) {
-                            RequiredDish o = oBuilder
-                                    .dish(dDao.findByUuid(order.getDish()))
-                                    .ordination(ordination)
-                                    .price(order.getPrice())
-                                    .getContent();
-                            rd.add(o);
-                            oDao.persist(o);
-                        }
+                    OrderBuilder oBuilder = new OrderBuilder();
+                    List<Order> rd = new ArrayList<>();
+                    for (OrderDTO order : ordinationDto.getOrders()) {
+                        Order o = oBuilder
+                                .dish(dDao.findByUuid(order.getDish()))
+                                .ordination(ordination)
+                                .price(order.getPrice())
+                                .phase(pDao.findByUuid(order.getPhase()))
+                                .getContent();
+                        rd.add(o);
+                        List<Addition> additions = new ArrayList<>();
+                        order.getAdditions().stream().forEach(additionUuid -> {
+                            Addition addition = aDao.findByUuid(additionUuid);
+                            additions.add(addition);
+                        });
+                        o.setAdditions(additions);
+                        oDao.persist(o);
                     }
                     ordination.setOrders(rd);
-                    printService.print(ordination.getUuid());
                 }
                 return Response.status(Response.Status.CREATED).entity(DTOAssembler.fromOrdination(ordination)).build();
             }
@@ -120,26 +131,54 @@ public class OrdinationREST {
     }
 
     @PUT
-    @Path("dish")
+    @Path("{uuid}/orders")
     @Transactional
-    public Response updateDish(@QueryParam("order") String orderUuid, @QueryParam("dish") String dishUuid) {
-        Evening current = eveningManager.getSelectedEvening();
-        RequiredDish order = doDao.findByUuid(orderUuid);
-        Dish dish = dDao.findByUuid(dishUuid);
-        if (current != null && order != null && dish != null && order.getOrdination().getTable().getEvening().equals(current)) {
-            order.setDish(dish);
-            order.setPrice(dish.getPrice());
-            return Response.status(Response.Status.OK).entity(DTOAssembler.fromRequiredDish(order)).build();
+    public Response editOrders(@PathParam("uuid") String ordinationUuid, OrderDTO[] orders) {
+        if (orders != null) {
+            Evening e = eveningManager.getSelectedEvening();
+            Ordination ordination = oDao.findByUuid(ordinationUuid, Ordination.class);
+            if (ordination != null) {
+                ordination.getOrders().forEach(o -> {
+                    o.setOrdination(null);
+                    o.getAdditions().forEach(addition -> {
+                        aDao.delete(addition);
+                    });
+                    oDao.delete(o);
+                });
+                ordination.getOrders().clear();
+                OrderBuilder oBuilder = new OrderBuilder();
+                List<Order> rd = new ArrayList<>();
+                for (OrderDTO order : orders) {
+                    Order o = oBuilder
+                            .dish(dDao.findByUuid(order.getDish()))
+                            .ordination(ordination)
+                            .price(order.getPrice())
+                            .phase(pDao.findByUuid(order.getPhase()))
+                            .getContent();
+                    List<Addition> additions = new ArrayList<>();
+                    order.getAdditions().stream().forEach(additionUuid -> {
+                        Addition addition = aDao.findByUuid(additionUuid);
+                        additions.add(addition);
+                    });
+                    o.setAdditions(additions);
+                    oDao.persist(o);
+                    rd.add(o);
+                }
+                ordination.setOrders(rd);
+                ordination.setDirty(true);
+                return Response.status(Response.Status.OK).entity(DTOAssembler.fromOrdination(ordination)).build();
+            }
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
 
     @DELETE
     @Transactional
-    public Response deleteOrdination(String uuid){
-        
+    public Response deleteOrdination(String uuid) {
+
         oDao.removeByUuid(uuid);
-        
+
         return Response
                 .status(Response.Status.OK)
                 .build();

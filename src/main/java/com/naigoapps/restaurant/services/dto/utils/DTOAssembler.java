@@ -12,7 +12,7 @@ import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Location;
 import com.naigoapps.restaurant.model.Ordination;
-import com.naigoapps.restaurant.model.RequiredDish;
+import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.Phase;
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.RestaurantTable;
@@ -24,12 +24,11 @@ import com.naigoapps.restaurant.services.dto.DishDTO;
 import com.naigoapps.restaurant.services.dto.EveningDTO;
 import com.naigoapps.restaurant.services.dto.LocationDTO;
 import com.naigoapps.restaurant.services.dto.OrdinationDTO;
-import com.naigoapps.restaurant.services.dto.RequiredDishDTO;
+import com.naigoapps.restaurant.services.dto.OrderDTO;
 import com.naigoapps.restaurant.services.dto.PhaseDTO;
 import com.naigoapps.restaurant.services.dto.PrinterDTO;
 import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
 import com.naigoapps.restaurant.services.dto.WaiterDTO;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 /**
@@ -75,7 +74,7 @@ public class DTOAssembler {
     }
 
     public static PrinterDTO fromPrinter(Printer printer) {
-        return new PrinterDTO(printer.getUuid(), printer.getName());
+        return new PrinterDTO(printer.getUuid(), printer.getName(), printer.isMain(), printer.getLineCharacters());
     }
 
     public static LocationDTO fromLocation(Location location) {
@@ -118,9 +117,6 @@ public class DTOAssembler {
                 addition.getUuid(),
                 addition.getName(),
                 addition.getPrice(),
-                addition.getCategories().stream()
-                        .map(cat -> cat.getUuid())
-                        .collect(Collectors.toList()),
                 addition.isGeneric());
     }
 
@@ -129,26 +125,23 @@ public class DTOAssembler {
                 o.getUuid(),
                 o.getTable().getUuid(),
                 o.getCreationTime(),
-                o.getConfirmTime(),
-                o.getTable().getUuid(),
                 o.getOrders().stream()
-                        .map(DTOAssembler::fromRequiredDish)
-                        .collect(Collectors.toList()));
+                        .map(DTOAssembler::fromOrder)
+                        .collect(Collectors.toList()),
+                o.isDirty());
     }
 
-    public static RequiredDishDTO fromRequiredDish(RequiredDish dish) {
-        return new RequiredDishDTO(
-                dish.getUuid(),
-                dish.getOrdination().getUuid(),
-                dish.getOrdination().getTable().getUuid(),
-                1,
-                dish.getDish().getUuid(),
-                dish.getAdditions().stream()
-                        .map(DTOAssembler::fromAddition)
+    public static OrderDTO fromOrder(Order order) {
+        return new OrderDTO(
+                order.getUuid(),
+                order.getOrdination().getUuid(),
+                order.getDish().getUuid(),
+                order.getAdditions().stream()
+                        .map(a -> a.getUuid())
                         .collect(Collectors.toList()),
-                dish.getPrice(),
-                dish.getNotes(),
-                (dish.getPhase() != null) ? dish.getPhase().getUuid() : null);
+                order.getPrice(),
+                order.getNotes(),
+                (order.getPhase() != null) ? order.getPhase().getUuid() : null);
     }
 
     public static DiningTableDTO fromDiningTable(DiningTable diningTable) {

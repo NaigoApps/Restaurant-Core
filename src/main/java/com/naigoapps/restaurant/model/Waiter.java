@@ -21,16 +21,6 @@ public class Waiter extends BaseEntity {
     private String cf;
     private WaiterStatus status;
 
-    public Waiter() {
-    }
-    
-    public Waiter(Waiter w){
-        this.name = w.name;
-        this.surname = w.surname;
-        this.cf = w.cf;
-        this.status = w.status;
-    }
-    
     public String getName() {
         return name;
     }

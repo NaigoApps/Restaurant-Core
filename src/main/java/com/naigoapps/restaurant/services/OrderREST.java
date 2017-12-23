@@ -10,13 +10,13 @@ import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Phase;
-import com.naigoapps.restaurant.model.RequiredDish;
-import com.naigoapps.restaurant.model.builders.RequiredDishBuilder;
+import com.naigoapps.restaurant.model.Order;
+import com.naigoapps.restaurant.model.builders.OrderBuilder;
 import com.naigoapps.restaurant.model.dao.DishDao;
 import com.naigoapps.restaurant.model.dao.OrdinationDao;
 import com.naigoapps.restaurant.model.dao.PhaseDao;
-import com.naigoapps.restaurant.model.dao.RequiredDishDao;
-import com.naigoapps.restaurant.services.dto.RequiredDishDTO;
+import com.naigoapps.restaurant.model.dao.OrderDao;
+import com.naigoapps.restaurant.services.dto.OrderDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ public class OrderREST {
     EveningManager eveningManager;
 
     @Inject
-    RequiredDishDao rdDao;
+    OrderDao rdDao;
 
     @Inject
     OrdinationDao oDao;
@@ -60,12 +60,12 @@ public class OrderREST {
     public Response getOrders() {
         Evening e = eveningManager.getSelectedEvening();
         if (e != null) {
-            List<RequiredDishDTO> orders = new ArrayList<>();
+            List<OrderDTO> orders = new ArrayList<>();
             e.getDiningTables()
                     .forEach(dt -> dt.getOrdinations()
                         .forEach(o -> orders.addAll(
                         o.getOrders().stream()
-                            .map(DTOAssembler::fromRequiredDish)
+                            .map(DTOAssembler::fromOrder)
                             .collect(Collectors.toList()))));
             return Response.status(Response.Status.OK).entity(orders).build();
         } else {
@@ -75,19 +75,19 @@ public class OrderREST {
 
     @POST
     @Transactional
-    public Response createOrder(RequiredDishDTO dto) {
+    public Response createOrder(OrderDTO dto) {
         if (dto.getOrdination() != null) {
             Evening e = eveningManager.getSelectedEvening();
-            Ordination o = oDao.findByUuid(dto.getOrdination());
+            Ordination o = oDao.findByUuid(dto.getOrdination(), Ordination.class);
             if (o.getTable().getEvening().equals(e)) {
-                RequiredDish order = new RequiredDishBuilder()
+                Order order = new OrderBuilder()
                         .ordination(o)
                         .dish(dDao.findByUuid(dto.getDish()))
                         .price(dto.getPrice())
                         .phase(pDao.findByUuid(dto.getPhase()))
                         .getContent();
                 oDao.persist(order);
-                return Response.status(Response.Status.CREATED).entity(DTOAssembler.fromRequiredDish(order)).build();
+                return Response.status(Response.Status.CREATED).entity(DTOAssembler.fromOrder(order)).build();
             }
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -99,12 +99,12 @@ public class OrderREST {
     @Transactional
     public Response updateDish(@PathParam("uuid") String orderUuid, String dishUuid) {
         Evening current = eveningManager.getSelectedEvening();
-        RequiredDish order = rdDao.findByUuid(orderUuid);
+        Order order = rdDao.findByUuid(orderUuid);
         Dish dish = dDao.findByUuid(dishUuid);
         if (current != null && order != null && dish != null && order.getOrdination().getTable().getEvening().equals(current)) {
             order.setDish(dish);
             order.setPrice(dish.getPrice());
-            return Response.status(Response.Status.OK).entity(DTOAssembler.fromRequiredDish(order)).build();
+            return Response.status(Response.Status.OK).entity(DTOAssembler.fromOrder(order)).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
@@ -114,10 +114,10 @@ public class OrderREST {
     @Transactional
     public Response updatePrice(@PathParam("uuid") String orderUuid, float price) {
         Evening current = eveningManager.getSelectedEvening();
-        RequiredDish order = rdDao.findByUuid(orderUuid);
+        Order order = rdDao.findByUuid(orderUuid);
         if (current != null && order != null && order.getOrdination().getTable().getEvening().equals(current)) {
             order.setPrice(price);
-            return Response.status(Response.Status.OK).entity(DTOAssembler.fromRequiredDish(order)).build();
+            return Response.status(Response.Status.OK).entity(DTOAssembler.fromOrder(order)).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
@@ -127,10 +127,10 @@ public class OrderREST {
     @Transactional
     public Response updateNotes(@PathParam("uuid") String orderUuid, String notes) {
         Evening current = eveningManager.getSelectedEvening();
-        RequiredDish order = rdDao.findByUuid(orderUuid);
+        Order order = rdDao.findByUuid(orderUuid);
         if (current != null && order != null && order.getOrdination().getTable().getEvening().equals(current)) {
             order.setNotes(notes);
-            return Response.status(Response.Status.OK).entity(DTOAssembler.fromRequiredDish(order)).build();
+            return Response.status(Response.Status.OK).entity(DTOAssembler.fromOrder(order)).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
@@ -140,11 +140,11 @@ public class OrderREST {
     @Transactional
     public Response updatePhase(@PathParam("uuid") String orderUuid, String phaseUuid) {
         Evening current = eveningManager.getSelectedEvening();
-        RequiredDish order = rdDao.findByUuid(orderUuid);
+        Order order = rdDao.findByUuid(orderUuid);
         Phase phase = pDao.findByUuid(phaseUuid);
         if (current != null && order != null && phase != null && order.getOrdination().getTable().getEvening().equals(current)) {
             order.setPhase(phase);
-            return Response.status(Response.Status.OK).entity(DTOAssembler.fromRequiredDish(order)).build();
+            return Response.status(Response.Status.OK).entity(DTOAssembler.fromOrder(order)).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).build();
     }

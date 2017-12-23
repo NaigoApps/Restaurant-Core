@@ -15,9 +15,6 @@ public class RestaurantTableBuilder implements Builder<RestaurantTable>{
 
     private String name;
 
-    public RestaurantTableBuilder() {
-    }
-    
     public RestaurantTableBuilder name(String name){
         this.name = name;
         return this;

@@ -16,6 +16,8 @@ import javax.persistence.Table;
 @Table(name = "phases")
 public class Phase extends BaseEntity{
     private String name;
+    
+    private int priority;
 
     public String getName() {
         return name;
@@ -24,5 +26,15 @@ public class Phase extends BaseEntity{
     public void setName(String name) {
         this.name = name;
     }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+ 
+    
     
 }

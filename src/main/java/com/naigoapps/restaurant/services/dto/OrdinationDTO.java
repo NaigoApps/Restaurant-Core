@@ -14,33 +14,31 @@ import java.util.List;
  */
 public class OrdinationDTO extends DTO{
     
-    private String diningTable;
-
     private LocalDateTime creationTime;
-    private LocalDateTime confirmTime;
+    
+    private boolean dirty;
     
     private String table;
     
-    private List<RequiredDishDTO> orders;
+    private List<OrderDTO> orders;
     
     public OrdinationDTO() {
     }
 
-    public OrdinationDTO(String uuid, String diningTable, LocalDateTime creationTime, LocalDateTime confirmTime, String table, List<RequiredDishDTO> orders) {
+    public OrdinationDTO(String uuid, String table, LocalDateTime creationTime, List<OrderDTO> orders, boolean dirty) {
         super(uuid);
-        this.diningTable = diningTable;
         this.creationTime = creationTime;
-        this.confirmTime = confirmTime;
         this.table = table;
         this.orders = orders;
+        this.dirty = dirty;
     }
 
-    public String getDiningTable() {
-        return diningTable;
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
     }
 
-    public void setDiningTable(String diningTable) {
-        this.diningTable = diningTable;
+    public boolean isDirty() {
+        return dirty;
     }
     
     
@@ -53,14 +51,6 @@ public class OrdinationDTO extends DTO{
         this.creationTime = creationTime;
     }
 
-    public void setConfirmTime(LocalDateTime confirmTime) {
-        this.confirmTime = confirmTime;
-    }
-
-    public LocalDateTime getConfirmTime() {
-        return confirmTime;
-    }
-
     public String getTable() {
         return table;
     }
@@ -69,11 +59,11 @@ public class OrdinationDTO extends DTO{
         this.table = table;
     }
 
-    public List<RequiredDishDTO> getOrders() {
+    public List<OrderDTO> getOrders() {
         return orders;
     }
 
-    public void setOrders(List<RequiredDishDTO> orders) {
+    public void setOrders(List<OrderDTO> orders) {
         this.orders = orders;
     }
 

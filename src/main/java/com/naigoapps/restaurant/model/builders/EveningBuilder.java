@@ -18,10 +18,6 @@ public class EveningBuilder implements Builder<Evening>{
     private LocalDate day;
     private float coverCharge;
 
-    public EveningBuilder() {
-        this.coverCharge = Evening.DEFAULT_COVER_CHARGE;
-    }
-    
     public EveningBuilder day(LocalDate day){
         this.day = day;
         return this;

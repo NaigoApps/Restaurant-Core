@@ -5,7 +5,6 @@
  */
 package com.naigoapps.restaurant.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -19,7 +18,7 @@ import javax.persistence.Table;
 public class Location extends BaseEntity{
     private String name;
     
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     private Printer printer;
 
     public void setName(String name) {

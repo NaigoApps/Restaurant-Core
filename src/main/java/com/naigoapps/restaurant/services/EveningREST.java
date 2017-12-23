@@ -10,7 +10,6 @@ import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.builders.EveningBuilder;
 import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.EveningDao;
-import com.naigoapps.restaurant.services.dto.EveningDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -52,8 +51,8 @@ public class EveningREST {
         if (d != null) {
             Evening chosen = eveningDao.findByDate(d);
             if (chosen == null) {
+                //FIXME Cover charge
                 chosen = new EveningBuilder()
-                        .coverCharge(Evening.DEFAULT_COVER_CHARGE)
                         .day(d)
                         .getContent();
                 eveningDao.persist(chosen);

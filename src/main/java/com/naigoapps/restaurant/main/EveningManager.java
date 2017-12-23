@@ -7,6 +7,7 @@ package com.naigoapps.restaurant.main;
 
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.dao.EveningDao;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -25,7 +26,7 @@ public class EveningManager {
     
     @PostConstruct
     public void init() {
-        System.out.println("***** CREATED_EVENING_MANAGER *****");
+        Logger.getLogger(this.getClass().getName()).info("***** CREATED_EVENING_MANAGER *****");
     }
 
     public Evening getSelectedEvening() {

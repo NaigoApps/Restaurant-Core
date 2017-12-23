@@ -18,12 +18,32 @@ public class Printer extends BaseEntity {
 
     private String name;
 
+    private boolean main;
+
+    private int lineCharacters;
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setMain(boolean main) {
+        this.main = main;
+    }
+
+    public boolean isMain() {
+        return main;
+    }
+
+    public int getLineCharacters() {
+        return lineCharacters;
+    }
+
+    public void setLineCharacters(int lineCharacters) {
+        this.lineCharacters = lineCharacters;
     }
 
 }

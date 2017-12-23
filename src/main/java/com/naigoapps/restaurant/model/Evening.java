@@ -6,12 +6,11 @@
 package com.naigoapps.restaurant.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.ws.rs.core.Response;
 
 /**
  *
@@ -19,16 +18,18 @@ import javax.ws.rs.core.Response;
  */
 @Entity
 @Table(name = "evenings")
-public class Evening extends BaseEntity{
+public class Evening extends BaseEntity {
 
-    public static float DEFAULT_COVER_CHARGE = 1.0f;
-    
     private LocalDate day;
-    
+
     private float coverCharge;
-    
-    @OneToMany(mappedBy = "evening", fetch = FetchType.EAGER)
+
+    @OneToMany(mappedBy = "evening")
     private List<DiningTable> diningTables;
+
+    public Evening() {
+        diningTables = new ArrayList<>();
+    }
 
     public void setDay(LocalDate day) {
         this.day = day;
@@ -44,6 +45,16 @@ public class Evening extends BaseEntity{
 
     public void setDiningTables(List<DiningTable> diningTables) {
         this.diningTables = diningTables;
+        diningTables.forEach(table -> {
+            table.setEvening(this);
+        });
+    }
+    
+    public void addDiningTable(DiningTable table){
+        if(!this.diningTables.contains(table)){
+            this.diningTables.add(table);
+            table.setEvening(this);
+        }
     }
 
     public float getCoverCharge() {
@@ -54,9 +65,4 @@ public class Evening extends BaseEntity{
         this.coverCharge = coverCharge;
     }
 
-    public void addDiningTable(DiningTable diningTable) {
-        this.diningTables.add(diningTable);
-        diningTable.setEvening(this);
-    }
-    
 }

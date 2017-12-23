@@ -42,6 +42,7 @@ public class OrdinationBuilder implements Builder<Ordination>{
         result.setCreationTime(creationTime);
         result.setTable(table);
         result.setOrders(Collections.EMPTY_LIST);
+        result.setDirty(true);
         return result;
     }
     

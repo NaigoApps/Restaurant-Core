@@ -5,10 +5,12 @@
  */
 package com.naigoapps.restaurant.model;
 
+import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -23,19 +25,26 @@ public class Category extends BaseEntity {
 
     private String name;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     private Location location;
 
-    @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "category")
     private List<Dish> dishes;
+    
+    @ManyToMany
+    @JoinTable(name = "category_addition",
+            joinColumns = {
+                @JoinColumn(name = "category_id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "addition_id")})
+    private List<Addition> additions;
 
     public Category() {
+        this.dishes = new ArrayList<>();
+        this.additions = new ArrayList<>();
     }
-
-    public Category(Category c) {
-        this.name = c.name;
-    }
-
+    
+    
     public String getName() {
         return name;
     }
@@ -46,10 +55,13 @@ public class Category extends BaseEntity {
 
     public void setDishes(List<Dish> dishes) {
         this.dishes = dishes;
+        dishes.forEach(dish -> {
+            dish.setCategory(this);
+        });
     }
-
-    public void addDish(Dish d) {
-        if (!this.dishes.contains(d)) {
+    
+    public void addDish(Dish d){
+        if(!this.dishes.contains(d)){
             this.dishes.add(d);
             d.setCategory(this);
         }
@@ -67,4 +79,13 @@ public class Category extends BaseEntity {
         this.location = location;
     }
 
+    public List<Addition> getAdditions() {
+        return additions;
+    }
+
+    public void setAdditions(List<Addition> additions) {
+        this.additions = additions;
+    }
+
+    
 }

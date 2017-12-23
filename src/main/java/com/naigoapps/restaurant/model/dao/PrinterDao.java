@@ -5,10 +5,7 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
-import com.naigoapps.restaurant.model.Dish;
-import com.naigoapps.restaurant.model.Phase;
 import com.naigoapps.restaurant.model.Printer;
-import com.naigoapps.restaurant.model.RestaurantTable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -19,17 +16,17 @@ import javax.persistence.Query;
  */
 public class PrinterDao extends Dao{
 
-    public Printer findByUuid(String uuid){
-        Query q = getEntityManager().createQuery("FROM Printer p where p.uuid = :uuid", Printer.class);
-        q.setParameter("uuid", uuid);
-        Printer printer = (Printer) q.getSingleResult();
-        return printer;
-    }
-    
     public List<Printer> findAll(){
         EntityManager em = getEntityManager();
         Query q = em.createQuery("FROM Printer p ORDER BY p.name", Printer.class);
         List<Printer> printers = q.getResultList();
         return printers;
+    }
+    
+    public Printer findMainPrinter(){
+        EntityManager em = getEntityManager();
+        Query q = em.createQuery("FROM Printer p WHERE p.main=true", Printer.class);
+        List<Printer> printers = q.getResultList();
+        return printers.size() > 0 ? printers.get(0) : null;
     }
 }

@@ -5,13 +5,7 @@
  */
 package com.naigoapps.restaurant.model;
 
-import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 /**
@@ -24,18 +18,9 @@ public class Addition extends BaseEntity {
 
     private String name;
     private float price;
-    
+
     private boolean generic;
-
-    @ManyToMany(fetch = FetchType.EAGER,
-            cascade = CascadeType.PERSIST)
-    @JoinTable(name = "addition_category",
-            joinColumns = {
-                @JoinColumn(name = "addition_id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "category_id")})
-    private List<Category> categories;
-
+    
     public String getName() {
         return name;
     }
@@ -52,14 +37,6 @@ public class Addition extends BaseEntity {
         this.price = price;
     }
 
-    public List<Category> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(List<Category> categories) {
-        this.categories = categories;
-    }
-
     public boolean isGeneric() {
         return generic;
     }
@@ -67,7 +44,5 @@ public class Addition extends BaseEntity {
     public void setGeneric(boolean generic) {
         this.generic = generic;
     }
-    
-    
 
 }

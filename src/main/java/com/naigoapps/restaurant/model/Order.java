@@ -5,10 +5,9 @@
  */
 package com.naigoapps.restaurant.model;
 
+import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -20,30 +19,45 @@ import javax.persistence.Table;
  * @author naigo
  */
 @Entity
-@Table(name = "required_dishes")
-public class RequiredDish extends BaseEntity {
+@Table(name = "orders")
+public class Order extends BaseEntity {
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     private Ordination ordination;
-    
-    @ManyToOne(cascade = CascadeType.PERSIST)
+
+    @ManyToOne
     private Dish dish;
-    
-    @ManyToMany(fetch = FetchType.EAGER,
-            cascade = CascadeType.PERSIST)
+
+    @ManyToMany
     @JoinTable(name = "order_addition",
             joinColumns = {
                 @JoinColumn(name = "order_id")},
             inverseJoinColumns = {
                 @JoinColumn(name = "addition_id")})
     private List<Addition> additions;
-    
+
     private float price;
-    
+
     private String notes;
-    
-    @ManyToOne(cascade = CascadeType.PERSIST)
+
+    @ManyToOne
     private Phase phase;
+
+    @ManyToOne
+    private Bill bill;
+
+    public Order() {
+        additions = new ArrayList<>();
+    }
+
+    public void setBill(Bill bill) {
+        this.bill = bill;
+        bill.addOrder(this);
+    }
+
+    public Bill getBill() {
+        return bill;
+    }
 
     public Phase getPhase() {
         return phase;
@@ -52,8 +66,6 @@ public class RequiredDish extends BaseEntity {
     public void setPhase(Phase phase) {
         this.phase = phase;
     }
-
-    
 
     public Dish getDish() {
         return dish;
@@ -89,11 +101,33 @@ public class RequiredDish extends BaseEntity {
 
     public void setOrdination(Ordination ordination) {
         this.ordination = ordination;
+        ordination.addOrder(this);
     }
 
     public Ordination getOrdination() {
         return ordination;
     }
 
-    
+    public boolean isTheSame(Order other) {
+        if (notes != null || other.notes != null) {
+            return false;
+        }
+        if(dish != null && other.dish == null ||
+                dish == null && other.dish != null){
+            return false;
+        }
+        if (dish != null && other.dish != null && !dish.equals(other.dish)) {
+            return false;
+        }
+        if (!additions.stream()
+                .noneMatch(a -> !other.additions.contains(a))) {
+            return false;
+        }
+        if (!other.additions.stream()
+                .noneMatch(a -> !additions.contains(a))) {
+            return false;
+        }
+        return true;
+    }
+
 }

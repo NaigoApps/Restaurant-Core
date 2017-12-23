@@ -6,9 +6,9 @@
 package com.naigoapps.restaurant.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -24,15 +24,25 @@ public class Ordination extends BaseEntity{
     private int progressive;
     
     private LocalDateTime creationTime;
-    private LocalDateTime confirmTime;
 
     @ManyToOne
     private DiningTable table;
     
-    @OneToMany(mappedBy = "ordination", fetch = FetchType.EAGER)
-    private List<RequiredDish> orders;
+    @OneToMany(mappedBy = "ordination")
+    private List<Order> orders;
+    
+    private boolean dirty;
 
     public Ordination() {
+        orders = new ArrayList<>();
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
+    public boolean isDirty() {
+        return dirty;
     }
 
     public void setProgressive(int progressive) {
@@ -43,11 +53,21 @@ public class Ordination extends BaseEntity{
         return progressive;
     }
     
-    public void setOrders(List<RequiredDish> orders) {
+    public void setOrders(List<Order> orders) {
         this.orders = orders;
+        orders.forEach(order -> {
+            order.setOrdination(this);
+        });
+    }
+    
+    public void addOrder(Order order){
+        if(!this.orders.contains(order)){
+            this.orders.add(order);
+            order.setOrdination(this);
+        }
     }
 
-    public List<RequiredDish> getOrders() {
+    public List<Order> getOrders() {
         return orders;
     }
 
@@ -59,22 +79,13 @@ public class Ordination extends BaseEntity{
         return creationTime;
     }
 
-    public void setConfirmTime(LocalDateTime confirmTime) {
-        this.confirmTime = confirmTime;
-    }
-
-    public LocalDateTime getConfirmTime() {
-        return confirmTime;
-    }
-    
-    
-
     public DiningTable getTable() {
         return table;
     }
 
     public void setTable(DiningTable table) {
         this.table = table;
+        table.addOrdination(this);
     }
     
     

@@ -5,7 +5,6 @@
  */
 package com.naigoapps.restaurant.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -18,28 +17,20 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "dishes")
-public class Dish extends BaseEntity{
-    @ManyToOne(cascade = CascadeType.PERSIST)
+public class Dish extends BaseEntity {
+
+    @ManyToOne
     private Category category;
+
     private String name;
+
     private float price;
+
     private String description;
+
     @Enumerated(EnumType.STRING)
     private DishStatus status;
 
-    public Dish() {
-    }
-
-    
-    
-    public Dish(Dish d){
-        this.category = d.category;
-        this.name = d.name;
-        this.price = d.price;
-        this.description = d.description;
-        this.status = d.status;
-    }
-    
     public DishStatus getStatus() {
         return status;
     }
@@ -47,14 +38,14 @@ public class Dish extends BaseEntity{
     public void setStatus(DishStatus status) {
         this.status = status;
     }
-    
+
     public Category getCategory() {
         return category;
     }
-    
-    
+
     public void setCategory(Category category) {
         this.category = category;
+        category.addDish(this);
     }
 
     public String getName() {
@@ -81,5 +72,4 @@ public class Dish extends BaseEntity{
         this.description = description;
     }
 
-    
 }

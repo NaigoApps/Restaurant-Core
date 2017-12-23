@@ -11,17 +11,13 @@ import java.util.List;
  *
  * @author naigo
  */
-public class RequiredDishDTO extends DTO{
+public class OrderDTO extends DTO{
 
     private String dish;
     
-    private int quantity;
-    
     private String ordination;
     
-    private String table;
-    
-    private List<AdditionDTO> additions;
+    private List<String> additions;
     
     private float price;
     
@@ -29,15 +25,13 @@ public class RequiredDishDTO extends DTO{
     
     private String phase;
 
-    public RequiredDishDTO() {
+    public OrderDTO() {
     }
 
-    public RequiredDishDTO(String uuid, String ordination, String table, int quantity, String dish, List<AdditionDTO> additions, float price, String notes, String phase) {
+    public OrderDTO(String uuid, String ordination, String dish, List<String> additions, float price, String notes, String phase) {
         super(uuid);
         this.dish = dish;
-        this.table = table;
         this.ordination = ordination;
-        this.quantity = quantity;
         this.additions = additions;
         this.price = price;
         this.notes = notes;
@@ -52,24 +46,6 @@ public class RequiredDishDTO extends DTO{
         this.ordination = ordination;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public String getTable() {
-        return table;
-    }
-
-    public void setTable(String table) {
-        this.table = table;
-    }
-
-    
-    
     public String getPhase() {
         return phase;
     }
@@ -102,11 +78,11 @@ public class RequiredDishDTO extends DTO{
         this.notes = notes;
     }
 
-    public List<AdditionDTO> getAdditions() {
+    public List<String> getAdditions() {
         return additions;
     }
 
-    public void setAdditions(List<AdditionDTO> additions) {
+    public void setAdditions(List<String> additions) {
         this.additions = additions;
     }
 
