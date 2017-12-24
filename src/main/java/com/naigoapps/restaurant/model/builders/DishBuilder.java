@@ -19,6 +19,7 @@ public class DishBuilder implements Builder<Dish>{
     private String description;
     private float price;
     private Category category;
+    private DishStatus status;
     
     public DishBuilder name(String name){
         this.name = name;
@@ -40,6 +41,11 @@ public class DishBuilder implements Builder<Dish>{
         return this;
     }
     
+    public DishBuilder status(DishStatus value){
+        this.status = value;
+        return this;
+    }
+    
     
     @Override
     public Dish getContent() {
@@ -47,7 +53,7 @@ public class DishBuilder implements Builder<Dish>{
         result.setName(name);
         result.setDescription(description);
         result.setPrice(price);
-        result.setStatus(DishStatus.ACTIVE);
+        result.setStatus(this.status != null ? this.status : DishStatus.ACTIVE);
         result.setCategory(category);
         return result;
     }

@@ -5,7 +5,6 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
-import com.naigoapps.restaurant.model.DishStatus;
 import com.naigoapps.restaurant.model.Waiter;
 import com.naigoapps.restaurant.model.WaiterStatus;
 

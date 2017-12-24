@@ -8,9 +8,11 @@ package com.naigoapps.restaurant.model;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  *
@@ -20,6 +22,7 @@ import javax.persistence.Table;
 @Table(name = "evenings")
 public class Evening extends BaseEntity {
 
+    @Column(unique = true)
     private LocalDate day;
 
     private float coverCharge;

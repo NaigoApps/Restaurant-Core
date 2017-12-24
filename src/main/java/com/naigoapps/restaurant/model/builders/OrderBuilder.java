@@ -5,13 +5,15 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
-import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.Addition;
+import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Phase;
 import com.naigoapps.restaurant.model.Order;
-import com.naigoapps.restaurant.services.dto.PhaseDTO;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  *
@@ -22,7 +24,14 @@ public class OrderBuilder implements Builder<Order>{
     private Dish dish;
     private Ordination ordination;
     private float price;
+    private String notes;
     private Phase phase;
+    private Bill bill;
+    private List<Addition> additions;
+
+    public OrderBuilder() {
+        additions = new ArrayList<>();
+    }
     
     public OrderBuilder dish(Dish dish){
         this.dish = dish;
@@ -40,11 +49,20 @@ public class OrderBuilder implements Builder<Order>{
         return this;
     }
     
+    public OrderBuilder notes(String notes){
+        this.notes = notes;
+        return this;
+    }
+    
     public OrderBuilder phase(Phase phase){
         this.phase = phase;
         return this;
     }
     
+    public OrderBuilder addition(Addition a){
+        this.additions.add(a);
+        return this;
+    }
     
     @Override
     public Order getContent() {
@@ -52,8 +70,9 @@ public class OrderBuilder implements Builder<Order>{
         result.setDish(dish);
         result.setOrdination(ordination);
         result.setPrice(price);
+        result.setNotes(notes);
         result.setPhase(phase);
-        result.setAdditions(Collections.EMPTY_LIST);
+        result.setAdditions(additions);
         return result;
     }
     

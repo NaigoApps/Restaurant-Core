@@ -6,9 +6,12 @@
 package com.naigoapps.restaurant.model.builders;
 
 import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.Ordination;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  *
@@ -16,9 +19,16 @@ import java.util.Collections;
  */
 public class OrdinationBuilder implements Builder<Ordination>{
 
-    int progressive;
-    LocalDateTime creationTime;
-    DiningTable table;
+    private int progressive;
+    private LocalDateTime creationTime;
+    private DiningTable table;
+    private boolean dirty;
+    private List<Order> orders;
+
+    public OrdinationBuilder() {
+        orders = new ArrayList<>();
+    }
+    
     
     public OrdinationBuilder progressive(int progressive){
         this.progressive = progressive;
@@ -35,14 +45,24 @@ public class OrdinationBuilder implements Builder<Ordination>{
         return this;
     }
     
+    public OrdinationBuilder dirty(boolean dirty){
+        this.dirty = dirty;
+        return this;
+    }
+    
+    public OrdinationBuilder order(Order o){
+        this.orders.add(o);
+        return this;
+    }
+    
     @Override
     public Ordination getContent() {
         Ordination result = new Ordination();
         result.setProgressive(progressive);
         result.setCreationTime(creationTime);
         result.setTable(table);
-        result.setOrders(Collections.EMPTY_LIST);
-        result.setDirty(true);
+        result.setDirty(this.dirty);
+        result.setOrders(orders);
         return result;
     }
     

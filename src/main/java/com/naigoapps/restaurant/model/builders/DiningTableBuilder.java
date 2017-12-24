@@ -5,12 +5,16 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
+import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Evening;
+import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.RestaurantTable;
 import com.naigoapps.restaurant.model.Waiter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  *
@@ -24,6 +28,15 @@ public class DiningTableBuilder implements Builder<DiningTable>{
     private Waiter waiter;
     private RestaurantTable table;
     private int coverCharges;
+    private List<Ordination> ordinations;
+    private List<Bill> bills;
+
+    public DiningTableBuilder() {
+        ordinations = new ArrayList<>();
+        bills = new ArrayList<>();
+    }
+    
+    
     
     public DiningTableBuilder waiter(Waiter waiter){
         this.waiter = waiter;
@@ -50,13 +63,18 @@ public class DiningTableBuilder implements Builder<DiningTable>{
         return this;
     }
     
-    public DiningTableBuilder opened(){
-        this.closed = false;
+    public DiningTableBuilder closed(boolean value){
+        this.closed = value;
         return this;
     }
     
-    public DiningTableBuilder closed(){
-        this.closed = true;
+    public DiningTableBuilder bill(Bill bill){
+        this.bills.add(bill);
+        return this;
+    }
+    
+    public DiningTableBuilder ordination(Ordination o){
+        this.ordinations.add(o);
         return this;
     }
     
@@ -69,7 +87,8 @@ public class DiningTableBuilder implements Builder<DiningTable>{
         result.setWaiter(waiter);
         result.setTable(table);
         result.setCoverCharges(coverCharges);
-        result.setOrdinations(Collections.EMPTY_LIST);
+        result.setOrdinations(ordinations);
+        result.setBills(bills);
         return result;
     }
     

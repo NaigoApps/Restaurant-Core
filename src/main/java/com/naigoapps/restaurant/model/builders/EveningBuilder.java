@@ -5,9 +5,11 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
+import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Evening;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -17,7 +19,12 @@ public class EveningBuilder implements Builder<Evening>{
 
     private LocalDate day;
     private float coverCharge;
+    private List<DiningTable> diningTables;
 
+    public EveningBuilder() {
+        diningTables = new ArrayList<>();
+    }
+    
     public EveningBuilder day(LocalDate day){
         this.day = day;
         return this;
@@ -28,12 +35,17 @@ public class EveningBuilder implements Builder<Evening>{
         return this;
     }
     
+    public EveningBuilder diningTable(DiningTable table){
+        this.diningTables.add(table);
+        return this;
+    }
+    
     @Override
     public Evening getContent() {
         Evening result = new Evening();
         result.setDay(day);
         result.setCoverCharge(coverCharge);
-        result.setDiningTables(new ArrayList<>());
+        result.setDiningTables(diningTables);
         return result;
     }
     

@@ -4,13 +4,28 @@
             <actionName>CUSTOM-test</actionName>
             <displayName>test</displayName>
             <goals>
-                <goal>test</goal>
+                <goal>sonar:sonar</goal>
             </goals>
+            <properties>
+                <skipTests>true</skipTests>
+            </properties>
         </action>
         <action>
             <actionName>CUSTOM-sonar</actionName>
             <displayName>sonar</displayName>
             <goals>
+                <goal>sonar:sonar</goal>
+            </goals>
+            <properties>
+                <skipTests>true</skipTests>
+            </properties>
+        </action>
+        <action>
+            <actionName>CUSTOM-build</actionName>
+            <displayName>build</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
                 <goal>sonar:sonar</goal>
             </goals>
             <properties>
