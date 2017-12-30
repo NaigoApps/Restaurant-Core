@@ -43,6 +43,7 @@ public class CategoryREST {
     LocationDao lDao;
     
     @GET
+    @Transactional
     public Response findAll() {
         List<CategoryDTO> categories = categoryDao.findAll().stream()
                 .map(category -> DTOAssembler.fromCategory(category))

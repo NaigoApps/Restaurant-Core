@@ -7,21 +7,25 @@ package com.naigoapps.restaurant.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 /**
  *
  * @author naigo
  */
+@Entity
+@Table(name = "bills")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Bill extends BaseEntity {
-    
+
     @ManyToOne
     private DiningTable table;
-    
+
     @OneToMany(mappedBy = "bill")
     private List<Order> orders;
 
@@ -39,9 +43,9 @@ public class Bill extends BaseEntity {
             order.setBill(this);
         });
     }
-    
-    public void addOrder(Order order){
-        if(!this.orders.contains(order)){
+
+    public void addOrder(Order order) {
+        if (!this.orders.contains(order)) {
             this.orders.add(order);
             order.setBill(this);
         }
@@ -49,13 +53,14 @@ public class Bill extends BaseEntity {
 
     public void setTable(DiningTable table) {
         this.table = table;
-        table.addBill(this);
+        if (table != null) {
+            table.addBill(this);
+        }
     }
+    
 
     public DiningTable getTable() {
         return table;
     }
-    
-    
 
 }

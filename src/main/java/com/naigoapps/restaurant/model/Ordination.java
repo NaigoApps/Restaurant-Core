@@ -19,18 +19,18 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "ordinations")
-public class Ordination extends BaseEntity{
+public class Ordination extends BaseEntity {
 
     private int progressive;
-    
+
     private LocalDateTime creationTime;
 
     @ManyToOne
     private DiningTable table;
-    
+
     @OneToMany(mappedBy = "ordination")
     private List<Order> orders;
-    
+
     private boolean dirty;
 
     public Ordination() {
@@ -52,16 +52,16 @@ public class Ordination extends BaseEntity{
     public int getProgressive() {
         return progressive;
     }
-    
+
     public void setOrders(List<Order> orders) {
         this.orders = orders;
         orders.forEach(order -> {
             order.setOrdination(this);
         });
     }
-    
-    public void addOrder(Order order){
-        if(!this.orders.contains(order)){
+
+    public void addOrder(Order order) {
+        if (!this.orders.contains(order)) {
             this.orders.add(order);
             order.setOrdination(this);
         }
@@ -85,8 +85,9 @@ public class Ordination extends BaseEntity{
 
     public void setTable(DiningTable table) {
         this.table = table;
-        table.addOrdination(this);
+        if (table != null) {
+            table.addOrdination(this);
+        }
     }
-    
-    
+
 }

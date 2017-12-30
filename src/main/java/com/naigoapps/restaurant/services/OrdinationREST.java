@@ -85,51 +85,6 @@ public class OrdinationREST {
         }
     }
 
-    @POST
-    @Transactional
-    public Response createOrdination(OrdinationDTO ordinationDto) {
-        if (ordinationDto != null && ordinationDto.getOrders().size() > 0) {
-            Evening e = eveningManager.getSelectedEvening();
-            DiningTable table = e.getDiningTables().stream()
-                    .filter(t -> t.getUuid().equals(ordinationDto.getTable()))
-                    .findFirst()
-                    .orElse(null);
-            if (table != null) {
-                Ordination ordination;
-                synchronized (locks.ORDINATION_PROGRESSIVE()) {
-                    ordination = new OrdinationBuilder()
-                            .progressive(oDao.nextProgressive(e))
-                            .creationTime(LocalDateTime.now())
-                            .table(table)
-                            .getContent();
-                    oDao.persist(ordination);
-                    OrderBuilder oBuilder = new OrderBuilder();
-                    List<Order> rd = new ArrayList<>();
-                    for (OrderDTO order : ordinationDto.getOrders()) {
-                        Order o = oBuilder
-                                .dish(dDao.findByUuid(order.getDish()))
-                                .ordination(ordination)
-                                .price(order.getPrice())
-                                .phase(pDao.findByUuid(order.getPhase()))
-                                .getContent();
-                        rd.add(o);
-                        List<Addition> additions = new ArrayList<>();
-                        order.getAdditions().stream().forEach(additionUuid -> {
-                            Addition addition = aDao.findByUuid(additionUuid);
-                            additions.add(addition);
-                        });
-                        o.setAdditions(additions);
-                        oDao.persist(o);
-                    }
-                    ordination.setOrders(rd);
-                }
-                return Response.status(Response.Status.CREATED).entity(DTOAssembler.fromOrdination(ordination)).build();
-            }
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        return Response.status(Response.Status.BAD_REQUEST).build();
-    }
-
     @PUT
     @Path("{uuid}/orders")
     @Transactional

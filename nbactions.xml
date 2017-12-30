@@ -1,35 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
         <action>
-            <actionName>CUSTOM-test</actionName>
-            <displayName>test</displayName>
+            <actionName>CUSTOM-Sonar</actionName>
+            <displayName>Sonar</displayName>
             <goals>
                 <goal>sonar:sonar</goal>
             </goals>
-            <properties>
-                <skipTests>true</skipTests>
-            </properties>
         </action>
-        <action>
-            <actionName>CUSTOM-sonar</actionName>
-            <displayName>sonar</displayName>
-            <goals>
-                <goal>sonar:sonar</goal>
-            </goals>
-            <properties>
-                <skipTests>true</skipTests>
-            </properties>
-        </action>
-        <action>
-            <actionName>CUSTOM-build</actionName>
-            <displayName>build</displayName>
-            <goals>
-                <goal>clean</goal>
-                <goal>install</goal>
-                <goal>sonar:sonar</goal>
-            </goals>
-            <properties>
-                <skipTests>true</skipTests>
-            </properties>
-        </action>
+        
+        
     </actions>

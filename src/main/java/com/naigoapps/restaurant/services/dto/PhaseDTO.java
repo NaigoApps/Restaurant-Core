@@ -13,6 +13,7 @@ public class PhaseDTO extends DTO{
     private String name;
 
     public PhaseDTO() {
+        super();
     }
 
     public PhaseDTO(String uuid, String name) {

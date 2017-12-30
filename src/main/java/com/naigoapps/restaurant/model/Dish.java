@@ -45,7 +45,9 @@ public class Dish extends BaseEntity {
 
     public void setCategory(Category category) {
         this.category = category;
-        category.addDish(this);
+        if (category != null) {
+            category.addDish(this);
+        }
     }
 
     public String getName() {

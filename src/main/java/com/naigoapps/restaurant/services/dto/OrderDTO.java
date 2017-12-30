@@ -5,6 +5,7 @@
  */
 package com.naigoapps.restaurant.services.dto;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -13,78 +14,62 @@ import java.util.List;
  */
 public class OrderDTO extends DTO{
 
-    private String dish;
+    private final String dish;
     
-    private String ordination;
+    private final List<String> additions;
     
-    private List<String> additions;
+    private final float price;
     
-    private float price;
+    private final String notes;
     
-    private String notes;
+    private final String phase;
     
-    private String phase;
+    private final String bill;
 
     public OrderDTO() {
+        this.dish = null;
+        this.additions = null;
+        this.price = 0;
+        this.notes = null;
+        this.phase = null;
+        this.bill = null;
     }
 
-    public OrderDTO(String uuid, String ordination, String dish, List<String> additions, float price, String notes, String phase) {
+
+    public OrderDTO(String dish, List<String> additions, float price, String notes, String phase, String bill, String uuid) {
         super(uuid);
         this.dish = dish;
-        this.ordination = ordination;
         this.additions = additions;
         this.price = price;
         this.notes = notes;
         this.phase = phase;
-    }
-
-    public String getOrdination() {
-        return ordination;
-    }
-
-    public void setOrdination(String ordination) {
-        this.ordination = ordination;
-    }
-
-    public String getPhase() {
-        return phase;
-    }
-
-    public void setPhase(String phase) {
-        this.phase = phase;
+        this.bill = bill;
     }
 
     public String getDish() {
         return dish;
     }
 
-    public void setDish(String dish) {
-        this.dish = dish;
+    public List<String> getAdditions() {
+        return Collections.unmodifiableList(additions);
     }
 
     public float getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
-        this.price = price;
-    }
-
     public String getNotes() {
         return notes;
     }
 
-    public void setNotes(String notes) {
-        this.notes = notes;
+    public String getPhase() {
+        return phase;
     }
 
-    public List<String> getAdditions() {
-        return additions;
+    public String getBill() {
+        return bill;
     }
 
-    public void setAdditions(List<String> additions) {
-        this.additions = additions;
-    }
-
+   
     
 }

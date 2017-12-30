@@ -34,6 +34,11 @@ public class BillBuilder implements Builder<Bill>{
         return this;
     }
     
+    public BillBuilder orders(List<Order> orders){
+        this.orders.addAll(orders);
+        return this;
+    }
+    
     @Override
     public Bill getContent() {
         Bill result = new Bill();

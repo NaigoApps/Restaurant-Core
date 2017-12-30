@@ -19,7 +19,10 @@ public class WaiterDTO extends DTO{
     private WaiterStatus status;
 
     public WaiterDTO() {
+        super();
     }
+
+    
     
     public WaiterDTO(String uuid, String name, String surname, String cf, WaiterStatus status) {
         super(uuid);

@@ -6,6 +6,8 @@
 package com.naigoapps.restaurant.services.dto.utils;
 
 import com.naigoapps.restaurant.model.Addition;
+import com.naigoapps.restaurant.model.BaseEntity;
+import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Dish;
@@ -18,6 +20,7 @@ import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.RestaurantTable;
 import com.naigoapps.restaurant.model.Waiter;
 import com.naigoapps.restaurant.services.dto.AdditionDTO;
+import com.naigoapps.restaurant.services.dto.BillDTO;
 import com.naigoapps.restaurant.services.dto.CategoryDTO;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.DishDTO;
@@ -95,6 +98,9 @@ public class DTOAssembler {
                 category.getLocation() != null ? category.getLocation().getUuid() : null,
                 category.getDishes().stream()
                         .map(DTOAssembler::fromDish)
+                        .collect(Collectors.toList()),
+                category.getAdditions().stream()
+                        .map(DTOAssembler::fromAddition)
                         .collect(Collectors.toList())
         );
     }
@@ -122,37 +128,54 @@ public class DTOAssembler {
 
     public static OrdinationDTO fromOrdination(Ordination o) {
         return new OrdinationDTO(
-                o.getUuid(),
-                o.getTable().getUuid(),
                 o.getCreationTime(),
+                o.getProgressive(),
                 o.getOrders().stream()
                         .map(DTOAssembler::fromOrder)
                         .collect(Collectors.toList()),
-                o.isDirty());
+                o.isDirty(),
+                o.getUuid());
     }
 
     public static OrderDTO fromOrder(Order order) {
         return new OrderDTO(
-                order.getUuid(),
-                order.getOrdination().getUuid(),
                 order.getDish().getUuid(),
                 order.getAdditions().stream()
                         .map(a -> a.getUuid())
                         .collect(Collectors.toList()),
                 order.getPrice(),
                 order.getNotes(),
-                (order.getPhase() != null) ? order.getPhase().getUuid() : null);
+                uuid(order.getPhase()),
+                uuid(order.getBill()),
+                order.getUuid());
     }
 
     public static DiningTableDTO fromDiningTable(DiningTable diningTable) {
         return new DiningTableDTO(
-                diningTable.getUuid(),
                 diningTable.getCoverCharges(),
-                diningTable.getWaiter().getUuid(),
+                uuid(diningTable.getWaiter()),
                 diningTable.getOrdinations().stream()
-                        .map(o -> o.getUuid())
+                        .map(DTOAssembler::fromOrdination)
+                        .collect(Collectors.toList()),
+                diningTable.getBills().stream()
+                        .map(DTOAssembler::fromBill)
                         .collect(Collectors.toList()),
                 diningTable.getDate(),
-                diningTable.getTable().getUuid());
+                diningTable.getTable().getUuid(),
+                diningTable.isClosed(),
+                diningTable.getUuid());
+    }
+
+    public static BillDTO fromBill(Bill bill) {
+        return new BillDTO(
+                bill.getUuid(),
+                uuid(bill.getTable()),
+                bill.getOrders().stream()
+                        .map(order -> uuid(order))
+                        .collect(Collectors.toList()));
+    }
+
+    private static String uuid(BaseEntity entity) {
+        return entity != null ? entity.getUuid() : null;
     }
 }

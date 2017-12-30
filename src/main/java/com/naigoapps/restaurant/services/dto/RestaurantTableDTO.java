@@ -13,6 +13,7 @@ public class RestaurantTableDTO extends DTO{
     private String name;
 
     public RestaurantTableDTO() {
+        super();
     }
 
     public RestaurantTableDTO(String uuid, String name) {

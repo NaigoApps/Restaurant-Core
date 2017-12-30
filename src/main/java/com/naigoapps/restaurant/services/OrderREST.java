@@ -56,44 +56,6 @@ public class OrderREST {
     @Inject
     PhaseDao pDao;
 
-    @GET
-    public Response getOrders() {
-        Evening e = eveningManager.getSelectedEvening();
-        if (e != null) {
-            List<OrderDTO> orders = new ArrayList<>();
-            e.getDiningTables()
-                    .forEach(dt -> dt.getOrdinations()
-                        .forEach(o -> orders.addAll(
-                        o.getOrders().stream()
-                            .map(DTOAssembler::fromOrder)
-                            .collect(Collectors.toList()))));
-            return Response.status(Response.Status.OK).entity(orders).build();
-        } else {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-    }
-
-    @POST
-    @Transactional
-    public Response createOrder(OrderDTO dto) {
-        if (dto.getOrdination() != null) {
-            Evening e = eveningManager.getSelectedEvening();
-            Ordination o = oDao.findByUuid(dto.getOrdination(), Ordination.class);
-            if (o.getTable().getEvening().equals(e)) {
-                Order order = new OrderBuilder()
-                        .ordination(o)
-                        .dish(dDao.findByUuid(dto.getDish()))
-                        .price(dto.getPrice())
-                        .phase(pDao.findByUuid(dto.getPhase()))
-                        .getContent();
-                oDao.persist(order);
-                return Response.status(Response.Status.CREATED).entity(DTOAssembler.fromOrder(order)).build();
-            }
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        return Response.status(Response.Status.BAD_REQUEST).build();
-    }
-
     @PUT
     @Path("{uuid}/dish")
     @Transactional

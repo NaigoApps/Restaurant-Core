@@ -6,6 +6,7 @@
 package com.naigoapps.restaurant.services.dto;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,60 +15,58 @@ import java.util.List;
  */
 public class DiningTableDTO extends DTO{
 
-    private int coverCharges;
+    private final int coverCharges;
     
-    private String waiter;
+    private final String waiter;
     
-    private List<String> ordinations;
+    private final List<OrdinationDTO> ordinations;
     
-    private LocalDateTime openingTime;
+    private final List<BillDTO> bills;
     
-    private String table;
+    private final LocalDateTime openingTime;
+    
+    private final String table;
+    
+    private final boolean closed;
 
     public DiningTableDTO() {
+        this.coverCharges = 0;
+        this.waiter = null;
+        this.ordinations = null;
+        this.bills = null;
+        this.openingTime = null;
+        this.table = null;
+        this.closed = false;
     }
 
-    
-    public DiningTableDTO(String uuid, int coverCharges, String waiter, List<String> ordinations, LocalDateTime openingTime, String table) {
+    public DiningTableDTO(int coverCharges, String waiter, List<OrdinationDTO> ordinations, List<BillDTO> bills, LocalDateTime openingTime, String table, boolean closed, String uuid) {
         super(uuid);
         this.coverCharges = coverCharges;
         this.waiter = waiter;
         this.ordinations = ordinations;
+        this.bills = bills;
         this.openingTime = openingTime;
         this.table = table;
-    }
-
-    
-    
-    public String getWaiter() {
-        return waiter;
-    }
-
-    public void setWaiter(String waiter) {
-        this.waiter = waiter;
-    }
-
-    public List<String> getOrdinations() {
-        return ordinations;
-    }
-
-    public void setOrdinations(List<String> ordinations) {
-        this.ordinations = ordinations;
-    }
-    
-    public void setCoverCharges(int coverCharges) {
-        this.coverCharges = coverCharges;
+        this.closed = closed;
     }
 
     public int getCoverCharges() {
         return coverCharges;
     }
 
-    public void setDate(LocalDateTime date) {
-        this.openingTime = date;
+    public String getWaiter() {
+        return waiter;
     }
 
-    public LocalDateTime getDate() {
+    public List<OrdinationDTO> getOrdinations() {
+        return Collections.unmodifiableList(ordinations);
+    }
+
+    public List<BillDTO> getBills() {
+        return Collections.unmodifiableList(bills);
+    }
+
+    public LocalDateTime getOpeningTime() {
         return openingTime;
     }
 
@@ -75,9 +74,8 @@ public class DiningTableDTO extends DTO{
         return table;
     }
 
-    public void setTable(String table) {
-        this.table = table;
+    public boolean isClosed() {
+        return closed;
     }
 
-    
 }

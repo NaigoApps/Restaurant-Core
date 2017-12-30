@@ -101,7 +101,9 @@ public class Order extends BaseEntity {
 
     public void setOrdination(Ordination ordination) {
         this.ordination = ordination;
-        ordination.addOrder(this);
+        if (ordination != null) {
+            ordination.addOrder(this);
+        }
     }
 
     public Ordination getOrdination() {
@@ -112,8 +114,8 @@ public class Order extends BaseEntity {
         if (notes != null || other.notes != null) {
             return false;
         }
-        if(dish != null && other.dish == null ||
-                dish == null && other.dish != null){
+        if (dish != null && other.dish == null
+                || dish == null && other.dish != null) {
             return false;
         }
         if (dish != null && other.dish != null && !dish.equals(other.dish)) {

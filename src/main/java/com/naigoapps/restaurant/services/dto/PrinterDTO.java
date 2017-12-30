@@ -18,6 +18,7 @@ public class PrinterDTO  extends DTO{
     private int lineCharacters;
 
     public PrinterDTO() {
+        super();
     }
 
     public PrinterDTO(String uuid, String name, boolean main, int lineCharacters) {

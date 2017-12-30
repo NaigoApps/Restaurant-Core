@@ -10,10 +10,12 @@ package com.naigoapps.restaurant.services.dto;
  * @author naigo
  */
 public class DTO {
-    private String uuid;
+    private final String uuid;
 
     public DTO() {
+        this.uuid = null;
     }
+
     
     public DTO(String uuid) {
         this.uuid = uuid;
@@ -23,9 +25,4 @@ public class DTO {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-    
-    
 }

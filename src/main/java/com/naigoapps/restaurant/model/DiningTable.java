@@ -19,34 +19,34 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "dining_tables")
-public class DiningTable extends BaseEntity{
+public class DiningTable extends BaseEntity {
 
     private int coverCharges;
-    
+
     @ManyToOne
     private Evening evening;
-    
+
     @ManyToOne
     private Waiter waiter;
-    
+
     @OneToMany(mappedBy = "table")
     private List<Ordination> ordinations;
-    
+
     @OneToMany(mappedBy = "table")
     private List<Bill> bills;
-    
+
     private LocalDateTime openingTime;
-    
+
     @ManyToOne
     private RestaurantTable table;
 
     private boolean closed;
-    
+
     public DiningTable() {
         ordinations = new ArrayList<>();
         bills = new ArrayList<>();
     }
-    
+
     public Waiter getWaiter() {
         return waiter;
     }
@@ -58,31 +58,31 @@ public class DiningTable extends BaseEntity{
     public List<Ordination> getOrdinations() {
         return ordinations;
     }
-    
-    public List<Order> listOrders(){
+
+    public List<Order> listOrders() {
         return collectOrders();
     }
-    
-    private List<Order> collectOrders(){
+
+    private List<Order> collectOrders() {
         List<Order> result = new ArrayList<>();
         ordinations.forEach(ordination -> result.addAll(ordination.getOrders()));
         return result;
     }
-    
+
     public void setOrdinations(List<Ordination> orders) {
         this.ordinations = orders;
         orders.forEach(order -> {
             order.setTable(this);
         });
     }
-    
-    public void addOrdination(Ordination ordination){
-        if(!this.ordinations.contains(ordination)){
+
+    public void addOrdination(Ordination ordination) {
+        if (!this.ordinations.contains(ordination)) {
             this.ordinations.add(ordination);
             ordination.setTable(this);
         }
     }
-    
+
     public void setCoverCharges(int coverCharges) {
         this.coverCharges = coverCharges;
     }
@@ -113,7 +113,9 @@ public class DiningTable extends BaseEntity{
 
     public void setEvening(Evening evening) {
         this.evening = evening;
-        evening.addDiningTable(this);
+        if (evening != null) {
+            evening.addDiningTable(this);
+        }
     }
 
     public void setClosed(boolean closed) {
@@ -123,10 +125,10 @@ public class DiningTable extends BaseEntity{
     public boolean isClosed() {
         return closed;
     }
-    
-    public float getTotalPrice(){
-        return coverCharges * evening.getCoverCharge() +
-                collectOrders().stream()
+
+    public float getTotalPrice() {
+        return coverCharges * evening.getCoverCharge()
+                + collectOrders().stream()
                         .map(order -> order.getPrice())
                         .reduce(0.0f, (p1, p2) -> p1 + p2);
     }
@@ -141,12 +143,12 @@ public class DiningTable extends BaseEntity{
             bill.setTable(this);
         });
     }
-    
-    public void addBill(Bill bill){
-        if(!this.bills.contains(bill)){
+
+    public void addBill(Bill bill) {
+        if (!this.bills.contains(bill)) {
             this.bills.add(bill);
             bill.setTable(this);
         }
     }
-    
+
 }

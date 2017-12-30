@@ -5,37 +5,33 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
-import com.naigoapps.restaurant.model.Addition;
+import com.naigoapps.restaurant.model.Printer;
+import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Before;
 
 /**
  *
  * @author naigo
  */
-public class AdditionBuilderTest {
+public class LocationBuilderTest {
     
-    private AdditionBuilder builder;
-
+    private LocationBuilder builder;
+    
     @Before
     public void setUp() {
-        builder = new AdditionBuilder();
+        builder = new LocationBuilder();
     }
-    
+
     @Test
     public void testName() {
         assertEquals("name", builder.name("name").getContent().getName());
     }
 
     @Test
-    public void testPrice() {
-        assertEquals(5.0f, builder.price(5.0f).getContent().getPrice(), 0.0f);
-    }
-
-    @Test
-    public void testGeneric() {
-        assertTrue(builder.generic(true).getContent().isGeneric());
+    public void testPrinter() {
+        Printer printer = new PrinterBuilder().getContent();
+        assertEquals(printer, builder.printer(printer).getContent().getPrinter());
     }
 
 }

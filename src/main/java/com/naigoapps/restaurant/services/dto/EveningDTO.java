@@ -6,6 +6,8 @@
 package com.naigoapps.restaurant.services.dto;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,38 +22,26 @@ public class EveningDTO extends DTO{
     
     private List<DiningTableDTO> diningTables;
 
+    public EveningDTO() {
+    }
+
     public EveningDTO(String uuid, LocalDate day, float coverCharge, List<DiningTableDTO> diningTables) {
         super(uuid);
         this.day = day;
         this.coverCharge = coverCharge;
-        this.diningTables = diningTables;
+        this.diningTables = new ArrayList<>(diningTables);
     }
-
     
-    
-    public void setDay(LocalDate day) {
-        this.day = day;
-    }
-
     public LocalDate getDay() {
         return day;
     }
 
     public List<DiningTableDTO> getDiningTables() {
-        return diningTables;
-    }
-
-    public void setDiningTables(List<DiningTableDTO> diningTables) {
-        this.diningTables = diningTables;
+        return Collections.unmodifiableList(diningTables);
     }
 
     public float getCoverCharge() {
         return coverCharge;
     }
 
-    public void setCoverCharge(float coverCharge) {
-        this.coverCharge = coverCharge;
-    }
-    
-    
 }

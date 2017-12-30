@@ -18,14 +18,18 @@ public class CategoryDTO extends DTO{
 
     private List<DishDTO> dishes;
     
+    private List<AdditionDTO> additions;
+
     public CategoryDTO() {
     }
-
-    public CategoryDTO(String uuid, String name, String location, List<DishDTO> dishes) {
+    
+    
+    public CategoryDTO(String uuid, String name, String location, List<DishDTO> dishes, List<AdditionDTO> additions) {
         super(uuid);
         this.name = name;
         this.location = location;
         this.dishes = dishes;
+        this.additions = additions;
     }
 
     
@@ -53,6 +57,15 @@ public class CategoryDTO extends DTO{
     public List<DishDTO> getDishes() {
         return dishes;
     }
+
+    public void setAdditions(List<AdditionDTO> additions) {
+        this.additions = additions;
+    }
+
+    public List<AdditionDTO> getAdditions() {
+        return additions;
+    }
+    
     
     
 
