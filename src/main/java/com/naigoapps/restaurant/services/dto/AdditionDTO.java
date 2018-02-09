@@ -5,8 +5,6 @@
  */
 package com.naigoapps.restaurant.services.dto;
 
-import java.util.List;
-
 /**
  *
  * @author naigo

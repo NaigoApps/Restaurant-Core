@@ -71,7 +71,7 @@ public class DTOAssembler {
 
     public static PhaseDTO fromPhase(Phase phase) {
         if (phase != null) {
-            return new PhaseDTO(phase.getUuid(), phase.getName());
+            return new PhaseDTO(phase.getUuid(), phase.getName(), phase.getPriority());
         }
         return null;
     }
@@ -97,10 +97,10 @@ public class DTOAssembler {
                 category.getName(),
                 category.getLocation() != null ? category.getLocation().getUuid() : null,
                 category.getDishes().stream()
-                        .map(DTOAssembler::fromDish)
+                        .map(dish -> dish.getUuid())
                         .collect(Collectors.toList()),
                 category.getAdditions().stream()
-                        .map(DTOAssembler::fromAddition)
+                        .map(addition -> addition.getUuid())
                         .collect(Collectors.toList())
         );
     }
@@ -128,6 +128,7 @@ public class DTOAssembler {
 
     public static OrdinationDTO fromOrdination(Ordination o) {
         return new OrdinationDTO(
+                uuid(o.getTable()),
                 o.getCreationTime(),
                 o.getProgressive(),
                 o.getOrders().stream()
@@ -169,6 +170,7 @@ public class DTOAssembler {
     public static BillDTO fromBill(Bill bill) {
         return new BillDTO(
                 bill.getUuid(),
+                bill.getProgressive(),
                 uuid(bill.getTable()),
                 bill.getOrders().stream()
                         .map(order -> uuid(order))

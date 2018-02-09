@@ -20,6 +20,7 @@ import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import com.naigoapps.restaurant.model.builders.OrderBuilder;
 import com.naigoapps.restaurant.model.builders.OrdinationBuilder;
 import com.naigoapps.restaurant.model.dao.AdditionDao;
+import com.naigoapps.restaurant.model.dao.BillDao;
 import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.DishDao;
 import com.naigoapps.restaurant.model.dao.OrderDao;
@@ -30,7 +31,6 @@ import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
 import com.naigoapps.restaurant.model.dao.WaiterDao;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.OrderDTO;
-import com.naigoapps.restaurant.services.dto.OrdinationDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.printing.PartialBillPrinter;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
@@ -60,9 +60,10 @@ import javax.ws.rs.core.Response;
 @Path("/dining-tables")
 @Produces(MediaType.APPLICATION_JSON)
 public class DiningTableREST {
+
     @Inject
     Locks locks;
-    
+
     @Inject
     EveningManager eveningManager;
 
@@ -74,24 +75,27 @@ public class DiningTableREST {
 
     @Inject
     DiningTableDao dtDao;
-    
+
     @Inject
     DishDao dDao;
-    
+
     @Inject
     PhaseDao pDao;
-    
+
     @Inject
     AdditionDao aDao;
-    
+
     @Inject
     OrdinationDao ordDao;
-    
+
     @Inject
     OrderDao oDao;
 
     @Inject
     PrinterDao prDao;
+
+    @Inject
+    BillDao bDao;
 
     @GET
     @Transactional
@@ -108,49 +112,10 @@ public class DiningTableREST {
     }
 
     @POST
-    @Transactional
-    public Response addDiningTable(DiningTableDTO newDiningTable) {
-
-        Evening currentEvening = eveningManager.getSelectedEvening();
-        if (currentEvening != null) {
-            Waiter w = wDao.findByUuid(newDiningTable.getWaiter());
-            RestaurantTable rt = rtDao.findByUuid(newDiningTable.getTable());
-            if (w != null && rt != null) {
-                DiningTable diningTable = new DiningTableBuilder()
-                        .date(LocalDateTime.now())
-                        .evening(currentEvening)
-                        .waiter(w)
-                        .table(rt)
-                        .ccs(newDiningTable.getCoverCharges())
-                        .getContent();
-
-                dtDao.persist(diningTable);
-
-                return Response
-                        .status(Response.Status.CREATED)
-                        .entity(DTOAssembler.fromDiningTable(diningTable))
-                        .build();
-            }
-            return Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("Serata non selezionata")
-                    .build();
-        } else {
-
-            return Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .build();
-        }
-
-    }
-
-    
-
-    @POST
     @Path("{uuid}/ordinations")
     @Transactional
-    public Response createOrdination(@PathParam("uuid") String tableUuid, OrdinationDTO ordinationDto) {
-        if (tableUuid != null && ordinationDto != null && ordinationDto.getOrders().size() > 0) {
+    public Response createOrdination(@PathParam("uuid") String tableUuid, OrderDTO[] orders) {
+        if (tableUuid != null && orders != null && orders.length > 0) {
             Evening e = eveningManager.getSelectedEvening();
             DiningTable table = e.getDiningTables().stream()
                     .filter(t -> t.getUuid().equals(tableUuid))
@@ -163,18 +128,17 @@ public class DiningTableREST {
                             .progressive(ordDao.nextProgressive(e))
                             .creationTime(LocalDateTime.now())
                             .table(table)
+                            .dirty(true)
                             .getContent();
                     oDao.persist(ordination);
                     OrderBuilder oBuilder = new OrderBuilder();
-                    List<Order> rd = new ArrayList<>();
-                    for (OrderDTO order : ordinationDto.getOrders()) {
+                    for (OrderDTO order : orders) {
                         Order o = oBuilder
                                 .dish(dDao.findByUuid(order.getDish()))
                                 .ordination(ordination)
                                 .price(order.getPrice())
                                 .phase(pDao.findByUuid(order.getPhase()))
                                 .getContent();
-                        rd.add(o);
                         List<Addition> additions = new ArrayList<>();
                         order.getAdditions().stream().forEach(additionUuid -> {
                             Addition addition = aDao.findByUuid(additionUuid);
@@ -184,13 +148,15 @@ public class DiningTableREST {
                         oDao.persist(o);
                     }
                 }
-                return Response.status(Response.Status.CREATED).entity(DTOAssembler.fromOrdination(ordination)).build();
+                return Response.status(Response.Status.CREATED).entity(
+                        new Object[]{DTOAssembler.fromDiningTable(table), ordination.getUuid()}
+                ).build();
             }
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
-    
+
     private DiningTable findTableInEvening(Evening e, String uuid) {
         return e.getDiningTables().stream()
                 .filter(table -> table.getUuid().equals(uuid))
@@ -251,7 +217,28 @@ public class DiningTableREST {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
     }
-    
+
+    @DELETE
+    @Path("{uuid}/bills")
+    @Transactional
+    public Response removeBill(@PathParam("uuid") String tableUuid, String billUuid) {
+        Evening currentEvening = eveningManager.getSelectedEvening();
+        if (currentEvening != null) {
+            DiningTable toUpdate = findTableInEvening(currentEvening, tableUuid);
+            Bill bill = bDao.findByUuid(billUuid, Bill.class);
+            if (toUpdate != null && bill != null && toUpdate.equals(bill.getTable())) {
+                bill.clearOrders();
+                bill.setTable(null);
+                bDao.getEntityManager().remove(bill);
+                return Response.ok(DTOAssembler.fromDiningTable(toUpdate)).build();
+            } else {
+                return ResponseBuilder.notFound("Tavolo o scontrino non trovato");
+            }
+        } else {
+            return ResponseBuilder.notFound("Serata non selezionata");
+        }
+    }
+
     @PUT
     @Path("{uuid}/bills")
     @Transactional
@@ -263,11 +250,19 @@ public class DiningTableREST {
                 List<Order> orders = Arrays.stream(ordersUuids)
                         .map(uuid -> oDao.findByUuid(uuid, Order.class))
                         .collect(Collectors.toList());
-                if(orders.stream().allMatch(order -> toUpdate.equals(order.getOrdination().getTable()))){
-                    Bill bill = new BillBuilder().orders(orders).getContent();
-                    dtDao.persist(bill);
-                    return Response.ok(DTOAssembler.fromBill(bill)).build();
-                }else{
+                if (orders.stream().allMatch(order -> toUpdate.equals(order.getOrdination().getTable()))) {
+                    if (orders.stream().allMatch(order -> order.getBill() == null)) {
+                        Bill bill = new BillBuilder()
+                                .progressive(bDao.nextProgressive(currentEvening.getDay()))
+                                .table(toUpdate)
+                                .orders(orders)
+                                .getContent();
+                        dtDao.persist(bill);
+                        return Response.ok(DTOAssembler.fromDiningTable(toUpdate)).build();
+                    } else {
+                        return ResponseBuilder.badRequest("Vi sono ordini già chiusi");
+                    }
+                } else {
                     return ResponseBuilder.badRequest("Vi sono ordini non appartenenti al tavolo");
                 }
             } else {
@@ -280,17 +275,28 @@ public class DiningTableREST {
 
     @DELETE
     @Transactional
+    @Produces(MediaType.TEXT_PLAIN)
     public Response deleteDiningTable(String uuid) {
 
-        dtDao.removeByUuid(uuid);
+        DiningTable toRemove = dtDao.findByUuid(uuid);
+        if (toRemove != null) {
+            if (toRemove.getBills().size() > 0) {
+                return ResponseBuilder.badRequest("Al tavolo sono collegati degli scontrini");
+            }
+            if (toRemove.getOrdinations().size() > 0) {
+                return ResponseBuilder.badRequest("Il tavolo contiene delle comande");
+            }
+            dtDao.removeByUuid(uuid);
+            return ResponseBuilder.ok(uuid);
+        } else {
+            return ResponseBuilder.badRequest("Tavolo non trovato");
+        }
 
-        return Response
-                .status(Response.Status.OK)
-                .build();
     }
 
     @POST
     @Path("print-partial-bill")
+    @Transactional
     public Response printPartialBill(String diningTableUuid) {
         DiningTable table = dtDao.findByUuid(diningTableUuid, DiningTable.class);
         if (table != null) {
@@ -299,6 +305,7 @@ public class DiningTableREST {
                 try {
                     PrinterService service = new PrinterService(mainPrinter);
                     service.accept(new PartialBillPrinter(), table);
+                    service.lf(3);
                     service.cut();
                     service.doPrint();
                     return ResponseBuilder.ok();
@@ -307,7 +314,7 @@ public class DiningTableREST {
                 } catch (PrintException ex) {
                     return ResponseBuilder.badRequest("Problema di stampa");
                 }
-            }else{
+            } else {
                 return ResponseBuilder.notFound("Stampante principale non trovata");
             }
         }

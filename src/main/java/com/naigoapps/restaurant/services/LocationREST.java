@@ -108,11 +108,10 @@ public class LocationREST {
     
     @DELETE
     @Transactional
+    @Produces(MediaType.TEXT_PLAIN)
     public Response deleteTable(String uuid){
         lDao.removeByUuid(uuid);   
-        return Response
-                .status(Response.Status.OK)
-                .build();
+        return ResponseBuilder.ok(uuid);
     }
 
 }

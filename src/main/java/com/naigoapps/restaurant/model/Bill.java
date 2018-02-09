@@ -23,6 +23,8 @@ import javax.persistence.Table;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Bill extends BaseEntity {
 
+    private int progressive;
+    
     @ManyToOne
     private DiningTable table;
 
@@ -33,6 +35,14 @@ public class Bill extends BaseEntity {
         orders = new ArrayList<>();
     }
 
+    public int getProgressive() {
+        return progressive;
+    }
+
+    public void setProgressive(int progressive) {
+        this.progressive = progressive;
+    }
+    
     public List<Order> getOrders() {
         return orders;
     }
@@ -42,6 +52,13 @@ public class Bill extends BaseEntity {
         orders.forEach(order -> {
             order.setBill(this);
         });
+    }
+    
+    public void clearOrders(){
+        this.orders.forEach(order -> {
+            order.setBill(null);
+        });
+        this.orders.clear();
     }
 
     public void addOrder(Order order) {

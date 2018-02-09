@@ -13,6 +13,7 @@ import com.naigoapps.restaurant.model.dao.CategoryDao;
 import com.naigoapps.restaurant.model.dao.LocationDao;
 import com.naigoapps.restaurant.services.dto.CategoryDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -55,32 +56,13 @@ public class CategoryREST {
                 .build();
     }
     
-    @GET
-    @Path("menu")
-    public Response findMenu() {
-        List<CategoryDTO> categories = categoryDao.findAll().stream()
-                .map(category -> DTOAssembler.fromCategory(category))
-                .collect(Collectors.toList());
-        
-        categories.forEach(category -> {
-            category.setDishes(category.getDishes().stream()
-                    .filter(dish -> dish.getStatus() == DishStatus.ACTIVE)
-                    .collect(Collectors.toList())
-            );
-        });
-        
-        return Response
-                .status(200)
-                .entity(categories)
-                .build();
-    }
-    
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Transactional
     public Response createCategory(CategoryDTO newCategory){
         Category category = new CategoryBuilder().
-                name(newCategory.getName())
+                name(newCategory.getName()).
+                location(lDao.findByUuid(newCategory.getLocation(), Location.class))
                 .getContent();
         
         categoryDao.persist(category);
@@ -111,13 +93,10 @@ public class CategoryREST {
         
     @DELETE
     @Transactional
+    @Produces(MediaType.TEXT_PLAIN)
     public Response deleteCategory(String uuid){
-        
         categoryDao.removeByUuid(uuid);
-        
-        return Response
-                .status(200)
-                .build();
+        return ResponseBuilder.ok(uuid);
     }
 
 }

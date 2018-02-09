@@ -53,6 +53,10 @@ public class PrinterService {
         text = new ByteArrayOutputStream();
     }
 
+    public Printer getPrinter() {
+        return printer;
+    }
+    
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
     }

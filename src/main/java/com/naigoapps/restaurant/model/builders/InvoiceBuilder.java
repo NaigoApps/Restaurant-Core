@@ -24,6 +24,7 @@ public class InvoiceBuilder extends BillBuilder{
     @Override
     public Invoice getContent() {
         Invoice result = new Invoice();
+        result.setProgressive(progressive);
         result.setTable(table);
         result.setOrders(orders);
         result.setCustomer(customer);

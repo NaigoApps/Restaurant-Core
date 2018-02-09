@@ -10,6 +10,7 @@ import com.naigoapps.restaurant.model.builders.AdditionBuilder;
 import com.naigoapps.restaurant.model.dao.AdditionDao;
 import com.naigoapps.restaurant.services.dto.AdditionDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -94,12 +95,9 @@ public class AdditionREST {
         
     @DELETE
     @Transactional
+    @Produces(MediaType.TEXT_PLAIN)
     public Response deleteAddition(String uuid){
-        
         aDao.removeByUuid(uuid);
-        
-        return Response
-                .status(Response.Status.OK)
-                .build();
+        return ResponseBuilder.ok(uuid);
     }
 }

@@ -13,18 +13,24 @@ import java.util.List;
  * @author naigo
  */
 public class BillDTO extends DTO{
+    private int progressive;
     private String table;
     private List<String> orders;
 
     public BillDTO() {
     }
 
-    public BillDTO(String uuid, String table, List<String> orders) {
+    public BillDTO(String uuid, int progressive, String table, List<String> orders) {
         super(uuid);
+        this.progressive = progressive;
         this.table = table;
         this.orders = orders;
     }
 
+    public int getProgressive() {
+        return progressive;
+    }
+    
     public String getTable() {
         return table;
     }

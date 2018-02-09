@@ -70,6 +70,8 @@ public class PrinterREST {
     public Response createPrinter(PrinterDTO p) {
         Printer printer = new Printer();
         printer.setName(p.getName());
+        printer.setMain(p.isMain());
+        printer.setLineCharacters(p.getLineCharacters());
         pDao.persist(printer);
 
         return ResponseBuilder.created(DTOAssembler.fromPrinter(printer));
@@ -135,13 +137,14 @@ public class PrinterREST {
 
     @DELETE
     @Transactional
+    @Produces(MediaType.TEXT_PLAIN)
     public Response deletePrinter(String uuid) {
         Printer p = pDao.findByUuid(uuid, Printer.class);
         if (p != null) {
             List<Location> locations = lDao.findByPrinter(p);
             if (locations.isEmpty()) {
                 pDao.deleteByUuid(uuid, Printer.class);
-                return ResponseBuilder.ok();
+                return ResponseBuilder.ok(uuid);
             } else if (locations.size() > 1) {
                 return ResponseBuilder.badRequest("Stampante utilizzata nelle postazioni "
                         + locations.stream().map(l -> l.getName()).collect(Collectors.joining(", ")));
@@ -157,36 +160,70 @@ public class PrinterREST {
     @Transactional
     public Response printOrdination(String ordinationUuid) throws PrintException {
         Ordination ord = oDao.findByUuid(ordinationUuid, Ordination.class);
-
-        Map<Printer, List<Order>> printersOrders = new HashMap<>();
+        List<Printer> printers = pDao.findAll();
         Map<Phase, QuantifiedOrders> phasesMap = new HashMap<>();
-        ord.getOrders().forEach((dish) -> {
-            Printer p = dish.getDish().getCategory().getLocation().getPrinter();
-            if (!printersOrders.containsKey(p)) {
-                printersOrders.put(p, new ArrayList<>());
-            }
-            printersOrders.get(p).add(dish);
-        });
         try {
-            for (Printer p : printersOrders.keySet()) {
+            for (Printer p : printers) {
                 PrinterService service = new PrinterService(p);
-                for (Order order : printersOrders.get(p)) {
-                    if (!phasesMap.containsKey(order.getPhase())) {
-                        phasesMap.put(order.getPhase(), new QuantifiedOrders());
+                phasesMap.clear();
+                boolean needToPrint = false;
+                for (Order order : ord.getOrders()) {
+                    if (p.equals(order.getDish().getCategory().getLocation().getPrinter())) {
+                        needToPrint = true;
                     }
-                    QuantifiedOrders phaseOrders = phasesMap.get(order.getPhase());
-                    phaseOrders.addOrder(order);
+                };
+                if (needToPrint) {
+                    for (Order order : ord.getOrders()) {
+                        if (!phasesMap.containsKey(order.getPhase())) {
+                            phasesMap.put(order.getPhase(), new QuantifiedOrders());
+                        }
+                        QuantifiedOrders phaseOrders = phasesMap.get(order.getPhase());
+                        phaseOrders.addOrder(order);
+                    }
+                    service
+                            .lf(3).size(Size.STANDARD)
+                            .printCenter("Comanda " + ord.getProgressive()
+                                    + " Tavolo: " + ord.getTable().getTable().getName())
+                            .printCenter(formatTime(ord.getCreationTime()))
+                            .printCenter("Cam. " + ord.getTable().getWaiter().getName());
+                    printPhases(service, phasesMap)
+                            .lf(6)
+                            .cut()
+                            .doPrint();
                 }
-                service
-                        .lf(3).size(Size.STANDARD)
-                        .printCenter("Comanda " + ord.getProgressive() 
-                                + " Tavolo: " + ord.getTable().getTable().getName())
-                        .printCenter(formatTime(ord.getCreationTime()))
-                        .printCenter("Cam. " + ord.getTable().getWaiter().getName());
-                printPhases(service, phasesMap)
-                        .lf(6)
-                        .cut()
-                        .doPrint();
+            }
+        } catch (IOException ex) {
+            return ResponseBuilder.badRequest(ex.getMessage());
+        }
+        ord.setDirty(false);
+        return ResponseBuilder.ok(DTOAssembler.fromOrdination(ord));
+
+    }
+
+    @POST
+    @Path("abort")
+    @Transactional
+    public Response printOrdinationAbort(String ordinationUuid) throws PrintException {
+        Ordination ord = oDao.findByUuid(ordinationUuid, Ordination.class);
+        List<Printer> printers = pDao.findAll();
+        try {
+            for (Printer p : printers) {
+                PrinterService service = new PrinterService(p);
+                boolean needToPrint = false;
+                for (Order order : ord.getOrders()) {
+                    if (p.equals(order.getDish().getCategory().getLocation().getPrinter())) {
+                        needToPrint = true;
+                    }
+                }
+                if (needToPrint) {
+                    service
+                            .lf(3).size(Size.STANDARD)
+                            .printCenter("ANNULLAMENTO")
+                            .printCenter("Comanda " + ord.getProgressive() + " " + formatTime(ord.getCreationTime()))
+                            .printCenter("Tavolo: " + ord.getTable().getTable().getName())
+                            .printCenter("Cam. " + ord.getTable().getWaiter().getName())
+                            .doPrint();
+                }
             }
         } catch (IOException ex) {
             return ResponseBuilder.badRequest(ex.getMessage());
@@ -198,6 +235,7 @@ public class PrinterREST {
 
     private PrinterService printPhases(PrinterService service, Map<Phase, QuantifiedOrders> phasesMap) throws IOException {
         List<Phase> usedPhases = new ArrayList<>(phasesMap.keySet());
+        //FIXME Usare priority
         usedPhases.sort((p1, p2) -> p1.getName().compareTo(p2.getName()));
         for (Phase p : usedPhases) {
             service.printLeft(p.getName() + "...............");
@@ -214,6 +252,11 @@ public class PrinterREST {
     }
 
     private PrinterService printOrder(PrinterService service, Order o, Integer quantity) throws IOException {
+        if (service.getPrinter().equals(o.getDish().getCategory().getLocation().getPrinter())) {
+            service.size(Size.STANDARD);
+        } else {
+            service.size(Size.SMALL);
+        }
         service.printLeft(quantity + " " + o.getDish().getName());
         if (o.getAdditions().size() > 0) {
             for (Addition a : o.getAdditions()) {

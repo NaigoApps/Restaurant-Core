@@ -7,11 +7,9 @@ package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.main.EveningManager;
 import com.naigoapps.restaurant.model.Addition;
-import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Order;
-import com.naigoapps.restaurant.model.builders.OrdinationBuilder;
 import com.naigoapps.restaurant.model.builders.OrderBuilder;
 import com.naigoapps.restaurant.model.dao.AdditionDao;
 import com.naigoapps.restaurant.model.dao.DishDao;
@@ -21,15 +19,17 @@ import com.naigoapps.restaurant.model.dao.PhaseDao;
 import com.naigoapps.restaurant.services.dto.OrdinationDTO;
 import com.naigoapps.restaurant.services.dto.OrderDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
-import java.time.LocalDateTime;
+import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.print.PrintException;
 import javax.transaction.Transactional;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -86,6 +86,24 @@ public class OrdinationREST {
     }
 
     @PUT
+    @Path("{uuid}/abort")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Transactional
+    public Response sendOrdinationAbort(@PathParam("uuid") String ordinationUuid) {
+        Evening e = eveningManager.getSelectedEvening();
+        Ordination ordination = oDao.findByUuid(ordinationUuid, Ordination.class);
+        if (ordination != null) {
+            try {
+                printService.printOrdinationAbort(ordinationUuid);
+                return Response.status(Response.Status.OK).entity(ordinationUuid).build();
+            } catch (PrintException ex) {
+                return ResponseBuilder.badRequest("Impossibile stampare");
+            }
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @PUT
     @Path("{uuid}/orders")
     @Transactional
     public Response editOrders(@PathParam("uuid") String ordinationUuid, OrderDTO[] orders) {
@@ -95,9 +113,7 @@ public class OrdinationREST {
             if (ordination != null) {
                 ordination.getOrders().forEach(o -> {
                     o.setOrdination(null);
-                    o.getAdditions().forEach(addition -> {
-                        aDao.delete(addition);
-                    });
+                    o.clearAdditions();
                     oDao.delete(o);
                 });
                 ordination.getOrders().clear();

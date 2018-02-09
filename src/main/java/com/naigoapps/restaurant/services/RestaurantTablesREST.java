@@ -15,6 +15,7 @@ import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
 import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
 import com.naigoapps.restaurant.services.dto.WaiterDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -102,10 +103,9 @@ public class RestaurantTablesREST {
     
     @DELETE
     @Transactional
+    @Produces(MediaType.TEXT_PLAIN)
     public Response deleteTable(String uuid){
         tablesDao.removeByUuid(uuid);   
-        return Response
-                .status(Response.Status.OK)
-                .build();
+        return ResponseBuilder.ok(uuid);
     }
 }

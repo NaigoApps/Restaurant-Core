@@ -70,6 +70,14 @@ public class OrderTest {
         assertEquals(1, order.getAdditions().size());
         assertTrue(order.getAdditions().contains(a));
     }
+    
+    @Test
+    public void testClearAdditions(){
+        Addition a = new Addition();
+        order.setAdditions(Arrays.asList(a));
+        order.clearAdditions();
+        assertTrue(order.getAdditions().isEmpty());
+    }
 
     @Test
     public void testSetOrdination() {

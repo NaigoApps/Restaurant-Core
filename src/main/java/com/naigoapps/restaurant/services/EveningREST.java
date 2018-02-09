@@ -6,16 +6,25 @@
 package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.main.EveningManager;
+import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Evening;
+import com.naigoapps.restaurant.model.RestaurantTable;
+import com.naigoapps.restaurant.model.Waiter;
+import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import com.naigoapps.restaurant.model.builders.EveningBuilder;
 import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.EveningDao;
+import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
+import com.naigoapps.restaurant.model.dao.WaiterDao;
+import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -39,6 +48,12 @@ public class EveningREST {
     EveningDao eveningDao;
 
     @Inject
+    WaiterDao wDao;
+    
+    @Inject
+    RestaurantTableDao rtDao;
+    
+    @Inject
     DiningTableDao dtDao;
 
     @GET
@@ -54,6 +69,7 @@ public class EveningREST {
                 //FIXME Cover charge
                 chosen = new EveningBuilder()
                         .day(d)
+                        .coverCharge(1)
                         .getContent();
                 eveningDao.persist(chosen);
             }
@@ -103,4 +119,43 @@ public class EveningREST {
         }
     }
 
+
+    @POST
+    @Path("tables")
+    @Transactional
+    public Response addDiningTable(DiningTableDTO newDiningTable) {
+
+        Evening currentEvening = eveningManager.getSelectedEvening();
+        if (currentEvening != null) {
+            Waiter w = wDao.findByUuid(newDiningTable.getWaiter());
+            RestaurantTable rt = rtDao.findByUuid(newDiningTable.getTable());
+            if (w != null && rt != null) {
+                DiningTable diningTable = new DiningTableBuilder()
+                        .date(LocalDateTime.now())
+                        .evening(currentEvening)
+                        .waiter(w)
+                        .table(rt)
+                        .ccs(newDiningTable.getCoverCharges())
+                        .getContent();
+
+                dtDao.persist(diningTable);
+
+                return Response
+                        .status(Response.Status.CREATED)
+                        .entity(new Object[]{DTOAssembler.fromEvening(currentEvening), diningTable.getUuid()})
+                        .build();
+            }
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Dati del tavolo non validi")
+                    .build();
+        } else {
+
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Serata non selezionata")
+                    .build();
+        }
+
+    }
 }

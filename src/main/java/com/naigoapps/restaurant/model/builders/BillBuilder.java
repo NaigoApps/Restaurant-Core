@@ -19,9 +19,15 @@ public class BillBuilder implements Builder<Bill>{
 
     protected DiningTable table;
     protected List<Order> orders;
+    protected int progressive;
 
     public BillBuilder() {
         orders = new ArrayList<>();
+    }
+    
+    public BillBuilder progressive(int progressive){
+        this.progressive = progressive;
+        return this;
     }
     
     public BillBuilder table(DiningTable table){
@@ -42,6 +48,7 @@ public class BillBuilder implements Builder<Bill>{
     @Override
     public Bill getContent() {
         Bill result = new Bill();
+        result.setProgressive(progressive);
         result.setTable(table);
         result.setOrders(orders);
         return result;

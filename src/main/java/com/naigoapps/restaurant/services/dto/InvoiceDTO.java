@@ -21,8 +21,8 @@ public class InvoiceDTO extends BillDTO{
     }
 
 
-    public InvoiceDTO(String customer, String uuid, String table, List<String> orders) {
-        super(uuid, table, orders);
+    public InvoiceDTO(String customer, String uuid, int progressive, String table, List<String> orders) {
+        super(uuid, progressive, table, orders);
         this.customer = customer;
     }
 

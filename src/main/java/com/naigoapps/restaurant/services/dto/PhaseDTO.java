@@ -11,14 +11,16 @@ package com.naigoapps.restaurant.services.dto;
  */
 public class PhaseDTO extends DTO{
     private String name;
+    private int priority;
 
     public PhaseDTO() {
         super();
     }
 
-    public PhaseDTO(String uuid, String name) {
+    public PhaseDTO(String uuid, String name, int priority) {
         super(uuid);
         this.name = name;
+        this.priority = priority;
     }
 
     public String getName() {
@@ -28,5 +30,15 @@ public class PhaseDTO extends DTO{
     public void setName(String name) {
         this.name = name;
     }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+    
+    
     
 }

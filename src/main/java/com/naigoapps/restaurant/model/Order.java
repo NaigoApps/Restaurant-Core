@@ -52,7 +52,9 @@ public class Order extends BaseEntity {
 
     public void setBill(Bill bill) {
         this.bill = bill;
-        bill.addOrder(this);
+        if(bill != null){
+            bill.addOrder(this);
+        }
     }
 
     public Bill getBill() {
@@ -93,6 +95,10 @@ public class Order extends BaseEntity {
 
     public List<Addition> getAdditions() {
         return additions;
+    }
+    
+    public void clearAdditions(){
+        this.additions = new ArrayList<>();
     }
 
     public void setAdditions(List<Addition> additions) {

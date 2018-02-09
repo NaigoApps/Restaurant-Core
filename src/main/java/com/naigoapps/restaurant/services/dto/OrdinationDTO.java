@@ -15,6 +15,8 @@ import java.util.List;
  */
 public class OrdinationDTO extends DTO{
     
+    private String table;
+    
     private LocalDateTime creationTime;
     
     private int progressive;
@@ -26,8 +28,9 @@ public class OrdinationDTO extends DTO{
     public OrdinationDTO() {
     }
 
-    public OrdinationDTO(LocalDateTime creationTime, int progressive, List<OrderDTO> orders, boolean dirty, String uuid) {
+    public OrdinationDTO(String table, LocalDateTime creationTime, int progressive, List<OrderDTO> orders, boolean dirty, String uuid) {
         super(uuid);
+        this.table = table;
         this.creationTime = creationTime;
         this.progressive = progressive;
         this.orders = orders;
@@ -49,7 +52,9 @@ public class OrdinationDTO extends DTO{
     public boolean isDirty() {
         return dirty;
     }
-    
 
-    
+    public String getTable() {
+        return table;
+    }
+
 }

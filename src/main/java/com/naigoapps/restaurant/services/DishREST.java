@@ -13,6 +13,7 @@ import com.naigoapps.restaurant.model.dao.CategoryDao;
 import com.naigoapps.restaurant.model.dao.DishDao;
 import com.naigoapps.restaurant.services.dto.DishDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -189,12 +190,9 @@ public class DishREST {
 
     @DELETE
     @Transactional
+    @Produces(MediaType.TEXT_PLAIN)
     public Response deleteDish(String uuid){
-        
         dishDao.removeByUuid(uuid);
-        
-        return Response
-                .status(Response.Status.OK)
-                .build();
+        return ResponseBuilder.ok(uuid);
     }
 }
