@@ -6,14 +6,11 @@
 package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.main.EveningManager;
-import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.RestaurantTable;
-import com.naigoapps.restaurant.model.Waiter;
 import com.naigoapps.restaurant.model.builders.RestaurantTableBuilder;
-import com.naigoapps.restaurant.model.builders.WaiterBuilder;
 import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
 import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
-import com.naigoapps.restaurant.services.dto.WaiterDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.List;
@@ -63,7 +60,7 @@ public class RestaurantTablesREST {
     public Response getAvailableTables() {
         
         List<RestaurantTable> open = manager.getSelectedEvening().getDiningTables().stream()
-                .filter(table -> !table.isClosed())
+                .filter(table -> table.getStatus().equals(DiningTableStatus.OPEN))
                 .map(diningTable -> diningTable.getTable())
                 .collect(Collectors.toList());
         

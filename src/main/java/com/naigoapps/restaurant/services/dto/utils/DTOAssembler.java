@@ -8,10 +8,13 @@ package com.naigoapps.restaurant.services.dto.utils;
 import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.model.BaseEntity;
 import com.naigoapps.restaurant.model.Bill;
+import com.naigoapps.restaurant.model.Receipt;
 import com.naigoapps.restaurant.model.Category;
+import com.naigoapps.restaurant.model.Customer;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Evening;
+import com.naigoapps.restaurant.model.Invoice;
 import com.naigoapps.restaurant.model.Location;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Order;
@@ -22,14 +25,17 @@ import com.naigoapps.restaurant.model.Waiter;
 import com.naigoapps.restaurant.services.dto.AdditionDTO;
 import com.naigoapps.restaurant.services.dto.BillDTO;
 import com.naigoapps.restaurant.services.dto.CategoryDTO;
+import com.naigoapps.restaurant.services.dto.CustomerDTO;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.DishDTO;
 import com.naigoapps.restaurant.services.dto.EveningDTO;
+import com.naigoapps.restaurant.services.dto.InvoiceDTO;
 import com.naigoapps.restaurant.services.dto.LocationDTO;
 import com.naigoapps.restaurant.services.dto.OrdinationDTO;
 import com.naigoapps.restaurant.services.dto.OrderDTO;
 import com.naigoapps.restaurant.services.dto.PhaseDTO;
 import com.naigoapps.restaurant.services.dto.PrinterDTO;
+import com.naigoapps.restaurant.services.dto.ReceiptDTO;
 import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
 import com.naigoapps.restaurant.services.dto.WaiterDTO;
 import java.util.stream.Collectors;
@@ -163,18 +169,62 @@ public class DTOAssembler {
                         .collect(Collectors.toList()),
                 diningTable.getDate(),
                 diningTable.getTable().getUuid(),
-                diningTable.isClosed(),
+                diningTable.getStatus(),
                 diningTable.getUuid());
     }
 
     public static BillDTO fromBill(Bill bill) {
         return new BillDTO(
                 bill.getUuid(),
-                bill.getProgressive(),
                 uuid(bill.getTable()),
                 bill.getOrders().stream()
                         .map(order -> uuid(order))
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()),
+                bill.getCoverCharges(),
+                bill.getTotal()
+        );
+    }
+
+    public static ReceiptDTO fromReceipt(Receipt bill) {
+        return new ReceiptDTO(
+                bill.getProgressive(),
+                bill.getPrintTime(),
+                bill.getUuid(),
+                uuid(bill.getTable()),
+                bill.getOrders().stream()
+                        .map(order -> uuid(order))
+                        .collect(Collectors.toList()),
+                bill.getCoverCharges(),
+                bill.getTotal()
+        );
+    }
+
+    public static InvoiceDTO fromInvoice(Invoice invoice) {
+        return new InvoiceDTO(
+                invoice.getProgressive(),
+                uuid(invoice.getCustomer()),
+                invoice.getPrintTime(),
+                invoice.getUuid(),
+                uuid(invoice.getTable()),
+                invoice.getOrders().stream()
+                        .map(order -> uuid(order))
+                        .collect(Collectors.toList()),
+                invoice.getCoverCharges(),
+                invoice.getTotal()
+        );
+    }
+
+    public static CustomerDTO fromCustomer(Customer customer) {
+        return new CustomerDTO(
+                customer.getUuid(),
+                customer.getName(),
+                customer.getSurname(),
+                customer.getPiva(),
+                customer.getCf(),
+                customer.getAddress(),
+                customer.getCity(),
+                customer.getCap(),
+                customer.getDistrict());
     }
 
     private static String uuid(BaseEntity entity) {

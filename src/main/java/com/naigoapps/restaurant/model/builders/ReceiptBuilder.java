@@ -6,9 +6,8 @@
 package com.naigoapps.restaurant.model.builders;
 
 import com.naigoapps.restaurant.model.Bill;
-import com.naigoapps.restaurant.model.Customer;
 import com.naigoapps.restaurant.model.DiningTable;
-import com.naigoapps.restaurant.model.Invoice;
+import com.naigoapps.restaurant.model.Receipt;
 import com.naigoapps.restaurant.model.Order;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,64 +15,58 @@ import java.util.List;
 /**
  *
  * @author naigo
+ * @param <T>
  */
-public class InvoiceBuilder implements Builder<Invoice>{
+public class ReceiptBuilder implements Builder<Receipt>{
 
     private BillBuilder delegate;
     
     protected LocalDateTime printTime;
-    private Customer customer;
-
-    public InvoiceBuilder() {
-        this.delegate = new BillBuilder();
-    }
-
-    public InvoiceBuilder progressive(int progressive){
-        delegate.progressive(progressive);
-        return this;
+    
+    public ReceiptBuilder() {
+        delegate = new BillBuilder();
     }
     
-    public InvoiceBuilder printTime(LocalDateTime time){
+    public ReceiptBuilder printTime(LocalDateTime time){
         this.printTime = time;
         return this;
     }
     
-    public InvoiceBuilder table(DiningTable table){
-        delegate.table(table);
+    public ReceiptBuilder progressive(int progressive){
+        delegate.progressive(progressive);
         return this;
     }
     
-    public InvoiceBuilder order(Order order){
+    public ReceiptBuilder order(Order order){
         delegate.order(order);
         return this;
     }
     
-    public InvoiceBuilder orders(List<Order> orders){
+    public ReceiptBuilder orders(List<Order> orders){
         delegate.orders(orders);
         return this;
     }
     
-    public InvoiceBuilder total(float total){
+    public ReceiptBuilder total(float total){
         delegate.total(total);
         return this;
     }
     
-    public InvoiceBuilder coverCharges(int ccs){
+    public ReceiptBuilder coverCharges(int ccs){
         delegate.coverCharges(ccs);
         return this;
     }
     
-    public InvoiceBuilder customer(Customer value){
-        this.customer = value;
+    public ReceiptBuilder table(DiningTable dt){
+        delegate.table(dt);
         return this;
     }
     
     @Override
-    public Invoice getContent() {
+    public Receipt getContent() {
         Bill bill = delegate.getContent();
-        Invoice result = new Invoice();
+        Receipt result = new Receipt();
         result.setPrintTime(printTime);
-        result.setCustomer(customer);
         
         result.setProgressive(bill.getProgressive());
         result.setCoverCharges(bill.getCoverCharges());

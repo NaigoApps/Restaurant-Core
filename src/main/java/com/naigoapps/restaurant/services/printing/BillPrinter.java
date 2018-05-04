@@ -5,8 +5,8 @@
  */
 package com.naigoapps.restaurant.services.printing;
 
-import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.Receipt;
 import com.naigoapps.restaurant.services.PrinterService;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -16,14 +16,14 @@ import java.time.format.DateTimeFormatter;
  *
  * @author naigo
  */
-public class PartialBillPrinter implements ObjectPrinter<Bill>{
+public class BillPrinter implements ObjectPrinter<Receipt>{
 
     @Override
-    public PrinterService apply(PrinterService ps, Bill obj) throws IOException {
+    public PrinterService apply(PrinterService ps, Receipt obj) throws IOException {
         
         ps.size(PrinterService.Size.STANDARD)
                 .lf(3)
-                .printCenter("Tavolo " + obj.getTable().getTable().getName())
+//                .printCenter("Tavolo " + obj.getTable().getName())
                 .printCenter(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")))
                 .lf()
                 .printLine(obj.getCoverCharges() + " COPERTI",

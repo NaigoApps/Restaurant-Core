@@ -12,27 +12,18 @@ import java.util.List;
  *
  * @author naigo
  */
-public class InvoiceDTO extends BillDTO {
-
+public class ReceiptDTO extends BillDTO{
     private int progressive;
 
-    private final String customer;
-
     private LocalDateTime printTime;
-
-    public InvoiceDTO() {
-        this.customer = null;
+    
+    public ReceiptDTO() {
     }
 
-    public InvoiceDTO(int progressive, String customer, LocalDateTime printTime, String uuid, String table, List<String> orders, int coverCharges, float total) {
+    public ReceiptDTO(int progressive, LocalDateTime printTime, String uuid, String table, List<String> orders, int coverCharges, float total) {
         super(uuid, table, orders, coverCharges, total);
         this.progressive = progressive;
-        this.customer = customer;
         this.printTime = printTime;
-    }
-
-    public String getCustomer() {
-        return customer;
     }
 
     public int getProgressive() {
@@ -42,5 +33,7 @@ public class InvoiceDTO extends BillDTO {
     public LocalDateTime getPrintTime() {
         return printTime;
     }
-
+    
+    
+    
 }

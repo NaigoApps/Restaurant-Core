@@ -41,7 +41,7 @@ public class PrinterService {
 
     private final ByteArrayOutputStream text;
 
-    private boolean debugMode = true;
+    private boolean debugMode = false;
 
     public PrinterService(Printer printer) {
         this.printer = printer;

@@ -8,36 +8,24 @@ package com.naigoapps.restaurant.model;
 import java.time.LocalDateTime;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
 
 /**
  *
  * @author naigo
  */
 @Entity
-@DiscriminatorValue("invoice")
-public class Invoice extends Bill {
+@DiscriminatorValue("receipt")
+public class Receipt extends Bill {
 
-    @ManyToOne
-    private Customer customer;
-    
     private LocalDateTime printTime;
-    
-    public Customer getCustomer() {
-        return customer;
-    }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public LocalDateTime getPrintTime() {
+        return printTime;
     }
 
     public void setPrintTime(LocalDateTime printTime) {
         this.printTime = printTime;
     }
 
-    public LocalDateTime getPrintTime() {
-        return printTime;
-    }
-    
     
 }

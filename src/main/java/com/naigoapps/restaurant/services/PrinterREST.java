@@ -217,11 +217,13 @@ public class PrinterREST {
                 }
                 if (needToPrint) {
                     service
-                            .lf(3).size(Size.STANDARD)
+                            .lf(5).size(Size.STANDARD)
                             .printCenter("ANNULLAMENTO")
                             .printCenter("Comanda " + ord.getProgressive() + " " + formatTime(ord.getCreationTime()))
                             .printCenter("Tavolo: " + ord.getTable().getTable().getName())
                             .printCenter("Cam. " + ord.getTable().getWaiter().getName())
+                            .lf(5)
+                            .cut()
                             .doPrint();
                 }
             }
@@ -238,6 +240,7 @@ public class PrinterREST {
         //FIXME Usare priority
         usedPhases.sort((p1, p2) -> p1.getName().compareTo(p2.getName()));
         for (Phase p : usedPhases) {
+            service.size(Size.STANDARD);
             service.printLeft(p.getName() + "...............");
             printPhaseOrders(service, phasesMap.get(p));
         }

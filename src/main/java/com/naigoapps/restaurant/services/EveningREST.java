@@ -7,22 +7,28 @@ package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.main.EveningManager;
 import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
+import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.RestaurantTable;
+import com.naigoapps.restaurant.model.Settings;
 import com.naigoapps.restaurant.model.Waiter;
 import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import com.naigoapps.restaurant.model.builders.EveningBuilder;
 import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.EveningDao;
 import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
+import com.naigoapps.restaurant.model.dao.SettingsDao;
 import com.naigoapps.restaurant.model.dao.WaiterDao;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -42,19 +48,22 @@ import javax.ws.rs.core.Response;
 public class EveningREST {
 
     @Inject
-    EveningManager eveningManager;
+    private EveningManager eveningManager;
 
     @Inject
-    EveningDao eveningDao;
+    private EveningDao eveningDao;
 
     @Inject
-    WaiterDao wDao;
-    
+    private WaiterDao wDao;
+
     @Inject
-    RestaurantTableDao rtDao;
-    
+    private RestaurantTableDao rtDao;
+
     @Inject
-    DiningTableDao dtDao;
+    private DiningTableDao dtDao;
+
+    @Inject
+    private SettingsDao sDao;
 
     @GET
     @Transactional
@@ -66,10 +75,10 @@ public class EveningREST {
         if (d != null) {
             Evening chosen = eveningDao.findByDate(d);
             if (chosen == null) {
-                //FIXME Cover charge
+                Settings settings = sDao.find();
                 chosen = new EveningBuilder()
                         .day(d)
-                        .coverCharge(1)
+                        .coverCharge(settings.getDefaultCoverCharge())
                         .getContent();
                 eveningDao.persist(chosen);
             }
@@ -93,7 +102,7 @@ public class EveningREST {
                     .status(Response.Status.OK)
                     .entity(DTOAssembler.fromEvening(e))
                     .build();
-        }else{
+        } else {
             return Response
                     .status(Response.Status.NOT_FOUND)
                     .build();
@@ -105,7 +114,9 @@ public class EveningREST {
     @Transactional
     public Response updateCoverCharge(@PathParam("uuid") String uuid, float coverCharge) {
         Evening e = eveningManager.getSelectedEvening();
+        Settings settings = sDao.find();
         if (e.getUuid().equals(uuid)) {
+            settings.setDefaultCoverCharge(coverCharge);
             e.setCoverCharge(coverCharge);
             return Response
                     .status(200)
@@ -118,7 +129,6 @@ public class EveningREST {
                     .build();
         }
     }
-
 
     @POST
     @Path("tables")
@@ -142,7 +152,7 @@ public class EveningREST {
 
                 return Response
                         .status(Response.Status.CREATED)
-                        .entity(new Object[]{DTOAssembler.fromEvening(currentEvening), diningTable.getUuid()})
+                        .entity(DTOAssembler.fromDiningTable(diningTable))
                         .build();
             }
             return Response
@@ -156,6 +166,49 @@ public class EveningREST {
                     .entity("Serata non selezionata")
                     .build();
         }
+
+    }
+
+    @POST
+    @Path("tables/merge/{uuid}")
+    @Transactional
+    public Response mergeDiningTables(@PathParam("uuid") String uuid1, String uuid2) {
+        Evening currentEvening = eveningManager.getSelectedEvening();
+        DiningTable srcTable = dtDao.findByUuid(uuid1);
+        DiningTable dstTable = dtDao.findByUuid(uuid2);
+        if (currentEvening != null && currentEvening.equals(srcTable.getEvening()) && currentEvening.equals(dstTable.getEvening())) {
+            if (!DiningTableStatus.CLOSED.equals(srcTable.getStatus()) && !DiningTableStatus.CLOSED.equals(dstTable.getStatus())) {
+                srcTable.getOrdinations().forEach(o -> o.setTable(dstTable));
+                srcTable.getBills().forEach(b -> b.setTable(dstTable));
+                dstTable.setCoverCharges(dstTable.getCoverCharges() + srcTable.getCoverCharges());
+                srcTable.setEvening(null);
+                dtDao.getEntityManager().remove(srcTable);
+                return ResponseBuilder.ok(DTOAssembler.fromEvening(currentEvening));
+            } else {
+                return ResponseBuilder.badRequest("Impossibile fondere tavoli chiusi");
+            }
+        }
+        return ResponseBuilder.badRequest("Tavoli non corretti");
+
+    }
+
+    @DELETE
+    @Path("diningTables")
+    @Transactional
+    public Response deleteDiningTable(String uuid) {
+        Evening currentEvening = eveningManager.getSelectedEvening();
+        DiningTable toRemove = dtDao.findByUuid(uuid);
+        if (currentEvening != null && currentEvening.equals(toRemove.getEvening())) {
+            if (toRemove.getBills().size() > 0) {
+                return ResponseBuilder.badRequest("Al tavolo sono collegati degli scontrini");
+            }
+            if (toRemove.getOrdinations().size() > 0) {
+                return ResponseBuilder.badRequest("Il tavolo contiene delle comande");
+            }
+            dtDao.removeByUuid(uuid);
+            return ResponseBuilder.ok(DTOAssembler.fromEvening(currentEvening));
+        }
+        return ResponseBuilder.badRequest("Serata non correttamente selezionata");
 
     }
 }

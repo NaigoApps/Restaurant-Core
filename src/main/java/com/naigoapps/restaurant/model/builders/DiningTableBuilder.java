@@ -7,13 +7,13 @@ package com.naigoapps.restaurant.model.builders;
 
 import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.RestaurantTable;
 import com.naigoapps.restaurant.model.Waiter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class DiningTableBuilder implements Builder<DiningTable>{
 
-    private boolean closed;
+    private DiningTableStatus status;
     private Evening evening;
     private LocalDateTime date;
     private Waiter waiter;
@@ -63,8 +63,8 @@ public class DiningTableBuilder implements Builder<DiningTable>{
         return this;
     }
     
-    public DiningTableBuilder closed(boolean value){
-        this.closed = value;
+    public DiningTableBuilder status(DiningTableStatus value){
+        this.status = value;
         return this;
     }
     
@@ -81,7 +81,7 @@ public class DiningTableBuilder implements Builder<DiningTable>{
     @Override
     public DiningTable getContent() {
         DiningTable result = new DiningTable();
-        result.setClosed(closed);
+        result.setStatus(status != null ? status : DiningTableStatus.OPEN);
         result.setDate(date);
         result.setEvening(evening);
         result.setWaiter(waiter);

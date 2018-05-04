@@ -27,4 +27,39 @@ public class CustomerBuilderTest {
         assertEquals("name", builder.name("name").getContent().getName());
     }
 
+    @Test
+    public void testSurname() {
+        assertEquals("surname", builder.surname("surname").getContent().getSurname());
+    }
+
+    @Test
+    public void testCity() {
+        assertEquals("city", builder.city("city").getContent().getCity());
+    }
+
+    @Test
+    public void testCap() {
+        assertEquals("cap", builder.cap("cap").getContent().getCap());
+    }
+
+    @Test
+    public void testDistrict() {
+        assertEquals("dis", builder.district("dis").getContent().getDistrict());
+    }
+
+    @Test
+    public void testPiva() {
+        assertEquals("pi", builder.piva("pi").getContent().getPiva());
+    }
+
+    @Test
+    public void testCf() {
+        assertEquals("cf", builder.cf("cf").getContent().getCf());
+    }
+
+    @Test
+    public void testAddress() {
+        assertEquals("a", builder.address("a").getContent().getAddress());
+    }
+
 }

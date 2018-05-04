@@ -6,14 +6,15 @@
 package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.model.Category;
-import com.naigoapps.restaurant.model.DishStatus;
 import com.naigoapps.restaurant.model.Location;
 import com.naigoapps.restaurant.model.builders.CategoryBuilder;
+import com.naigoapps.restaurant.model.dao.AdditionDao;
 import com.naigoapps.restaurant.model.dao.CategoryDao;
 import com.naigoapps.restaurant.model.dao.LocationDao;
 import com.naigoapps.restaurant.services.dto.CategoryDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -36,65 +37,79 @@ import javax.ws.rs.core.Response;
 @Path("/categories")
 @Produces(MediaType.APPLICATION_JSON)
 public class CategoryREST {
-    
+
     @Inject
     CategoryDao categoryDao;
-    
+
     @Inject
     LocationDao lDao;
-    
+
+    @Inject
+    private AdditionDao aDao;
+
     @GET
     @Transactional
     public Response findAll() {
         List<CategoryDTO> categories = categoryDao.findAll().stream()
                 .map(category -> DTOAssembler.fromCategory(category))
                 .collect(Collectors.toList());
-        
+
         return Response
                 .status(200)
                 .entity(categories)
                 .build();
     }
-    
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response createCategory(CategoryDTO newCategory){
+    public Response createCategory(CategoryDTO newCategory) {
         Category category = new CategoryBuilder().
                 name(newCategory.getName()).
                 location(lDao.findByUuid(newCategory.getLocation(), Location.class))
                 .getContent();
-        
+
         categoryDao.persist(category);
-        
+
         return Response
                 .status(Response.Status.CREATED)
                 .entity(DTOAssembler.fromCategory(category))
                 .build();
     }
-    
+
     @PUT
     @Path("{uuid}/name")
     @Transactional
-    public Response updateCategoryName(@PathParam("uuid") String uuid, String name){
+    public Response updateCategoryName(@PathParam("uuid") String uuid, String name) {
         Category c = categoryDao.findByUuid(uuid);
         c.setName(name);
         return Response.status(200).entity(DTOAssembler.fromCategory(c)).build();
     }
-    
+
     @PUT
     @Path("{uuid}/location")
     @Transactional
-    public Response updateCategoryLocation(@PathParam("uuid") String uuid, String location){
+    public Response updateCategoryLocation(@PathParam("uuid") String uuid, String location) {
         Category c = categoryDao.findByUuid(uuid);
         c.setLocation(lDao.findByUuid(location, Location.class));
         return Response.status(200).entity(DTOAssembler.fromCategory(c)).build();
     }
-        
+
+    @PUT
+    @Path("{uuid}/additions")
+    @Transactional
+    public Response updateCategoryAdditions(@PathParam("uuid") String uuid, String[] additions) {
+        Category c = categoryDao.findByUuid(uuid);
+        c.setAdditions(Arrays.stream(additions)
+                .map(addition -> aDao.findByUuid(addition))
+                .collect(Collectors.toList()));
+        return Response.status(200).entity(DTOAssembler.fromCategory(c)).build();
+    }
+
     @DELETE
     @Transactional
     @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteCategory(String uuid){
+    public Response deleteCategory(String uuid) {
         categoryDao.removeByUuid(uuid);
         return ResponseBuilder.ok(uuid);
     }

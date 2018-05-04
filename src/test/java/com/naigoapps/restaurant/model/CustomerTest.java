@@ -27,5 +27,47 @@ public class CustomerTest {
         customer.setName("name");
         assertEquals("name", customer.getName());
     }
+
+    @Test
+    public void testSetSurname() {
+        customer.setSurname("surname");
+        assertEquals("surname", customer.getSurname());
+    }
+
+    @Test
+    public void testSetPiva() {
+        customer.setPiva("piva");
+        assertEquals("piva", customer.getPiva());
+    }
+
+    @Test
+    public void testSetCf() {
+        customer.setCf("cf");
+        assertEquals("cf", customer.getCf());
+    }
+
+    @Test
+    public void testSetAddress() {
+        customer.setAddress("addr");
+        assertEquals("addr", customer.getAddress());
+    }
+
+    @Test
+    public void testSetCity() {
+        customer.setCity("city");
+        assertEquals("city", customer.getCity());
+    }
+
+    @Test
+    public void testSetCap() {
+        customer.setCap("cap");
+        assertEquals("cap", customer.getCap());
+    }
+
+    @Test
+    public void testSetDistrict() {
+        customer.setDistrict("dis");
+        assertEquals("dis", customer.getDistrict());
+    }
     
 }

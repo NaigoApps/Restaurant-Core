@@ -30,7 +30,7 @@ public class OrderTest {
 
     @Test
     public void testSetBill() {
-        Bill b = new Bill();
+        Receipt b = new Receipt();
         order.setBill(b);
         assertEquals(b, order.getBill());
         assertTrue(b.getOrders().contains(order));

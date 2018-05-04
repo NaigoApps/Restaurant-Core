@@ -11,6 +11,7 @@ import com.naigoapps.restaurant.model.DishStatus;
 import com.naigoapps.restaurant.model.builders.DishBuilder;
 import com.naigoapps.restaurant.model.dao.CategoryDao;
 import com.naigoapps.restaurant.model.dao.DishDao;
+import com.naigoapps.restaurant.model.dao.OrderDao;
 import com.naigoapps.restaurant.services.dto.DishDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
@@ -38,14 +39,18 @@ import javax.ws.rs.core.Response;
 public class DishREST {
 
     @Inject
-    DishDao dishDao;
+    private DishDao dishDao;
 
     @Inject
-    CategoryDao categoryDao;
+    private OrderDao oDao;
+
+    @Inject
+    private CategoryDao categoryDao;
 
     @GET
     public Response findByCategory(@QueryParam("category") String catUuid) {
         List<DishDTO> dishes = dishDao.findByCategory(catUuid).stream()
+                .filter(d -> DishStatus.REMOVED != d.getStatus())
                 .map(DTOAssembler::fromDish)
                 .collect(Collectors.toList());
 
@@ -54,11 +59,12 @@ public class DishREST {
                 .entity(dishes)
                 .build();
     }
-    
+
     @GET
     @Path("all")
     public Response findAll() {
         List<DishDTO> dishes = dishDao.findAll().stream()
+                .filter(d -> DishStatus.REMOVED != d.getStatus())
                 .map(DTOAssembler::fromDish)
                 .collect(Collectors.toList());
 
@@ -131,17 +137,20 @@ public class DishREST {
     public Response updateStatus(@PathParam("uuid") String uuid, String status) {
         Dish d = dishDao.findByUuid(uuid);
         if (d != null) {
-            d.setStatus(DishStatus.fromName(status));
+            if (!DishStatus.REMOVED.equals(DishStatus.fromName(status)) || !hasOrders(d)) {
 
-            return Response
-                    .status(Response.Status.OK)
-                    .entity(DTOAssembler.fromDish(d))
-                    .build();
+                d.setStatus(DishStatus.fromName(status));
+
+                return ResponseBuilder.ok(DTOAssembler.fromDish(d));
+            }
+            return ResponseBuilder.badRequest("Il piatto è usato in alcuni ordini");
         } else {
-            return Response
-                    .status(Response.Status.NOT_FOUND)
-                    .build();
+            return ResponseBuilder.notFound("Piatto non trovato");
         }
+    }
+
+    private boolean hasOrders(Dish d) {
+        return oDao.countByDish(d.getUuid()) > 0;
     }
 
     @PUT
@@ -175,7 +184,7 @@ public class DishREST {
                     .category(cat)
                     .name(newDish.getName())
                     .description(newDish.getDescription())
-                    .price(newDish.getPrice())  
+                    .price(newDish.getPrice())
                     .getContent();
             dishDao.persist(dish);
             return Response
@@ -191,7 +200,7 @@ public class DishREST {
     @DELETE
     @Transactional
     @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteDish(String uuid){
+    public Response deleteDish(String uuid) {
         dishDao.removeByUuid(uuid);
         return ResponseBuilder.ok(uuid);
     }

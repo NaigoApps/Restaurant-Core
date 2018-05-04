@@ -3,18 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.naigoapps.restaurant.model;
-
-import javax.persistence.Entity;
-import javax.persistence.Table;
+package com.naigoapps.restaurant.services.dto;
 
 /**
  *
  * @author naigo
  */
-@Entity
-@Table(name = "customers")
-public class Customer extends BaseEntity{
+public class CustomerDTO extends DTO{
     private String name;
     private String surname;
     private String piva;
@@ -24,6 +19,23 @@ public class Customer extends BaseEntity{
     private String cap;
     private String district;
 
+    public CustomerDTO() {
+    }
+
+    public CustomerDTO(String uuid, String name, String surname, String piva, String cf, String address, String city, String cap, String district) {
+        super(uuid);
+        this.name = name;
+        this.surname = surname;
+        this.piva = piva;
+        this.cf = cf;
+        this.address = address;
+        this.city = city;
+        this.cap = cap;
+        this.district = district;
+    }
+
+    
+    
     public String getName() {
         return name;
     }

@@ -5,6 +5,7 @@
  */
 package com.naigoapps.restaurant.model;
 
+import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import org.junit.Before;
@@ -16,12 +17,12 @@ import static org.junit.Assert.*;
  * @author naigo
  */
 public class DiningTableTest {
-    
+
     private DiningTable table;
-    
+
     @Before
     public void setUp() {
-        table = new DiningTable();
+        table = new DiningTableBuilder().getContent();
     }
 
     @Test
@@ -41,7 +42,7 @@ public class DiningTableTest {
         Ordination or2 = new Ordination();
         or2.setOrders(Arrays.asList(o3));
         table.setOrdinations(Arrays.asList(or1, or2));
-        
+
         assertEquals(3, table.listOrders().size());
         assertTrue(table.listOrders().contains(o1));
         assertTrue(table.listOrders().contains(o2));
@@ -51,10 +52,10 @@ public class DiningTableTest {
     @Test
     public void testSetOrdinations() {
         assertNotNull(table.getOrdinations());
-        
+
         Ordination or1 = new Ordination();
         table.setOrdinations(Arrays.asList(or1));
-        
+
         assertEquals(1, table.getOrdinations().size());
         assertTrue(table.getOrdinations().contains(or1));
         assertEquals(table, or1.getTable());
@@ -64,10 +65,19 @@ public class DiningTableTest {
     public void testAddOrdinations() {
         Ordination or1 = new Ordination();
         table.addOrdination(or1);
-        
+
         assertEquals(1, table.getOrdinations().size());
         assertTrue(table.getOrdinations().contains(or1));
         assertEquals(table, or1.getTable());
+    }
+
+    @Test
+    public void testRemoveOrdination() {
+        Ordination or1 = new Ordination();
+        table.addOrdination(or1);
+        table.removeOrdination(or1);
+        assertFalse(table.getOrdinations().contains(or1));
+        assertNull(or1.getTable());
     }
 
     @Test
@@ -99,10 +109,19 @@ public class DiningTableTest {
     }
 
     @Test
-    public void testSetClosed() {
-        assertFalse(table.isClosed());
-        table.setClosed(true);
-        assertTrue(table.isClosed());
+    public void testSetEveningNull() {
+        Evening e = new Evening();
+        table.setEvening(e);
+        table.setEvening(null);
+        assertNull(table.getEvening());
+        assertFalse(e.getDiningTables().contains(table));
+    }
+
+    @Test
+    public void testSetStatus() {
+        assertEquals(DiningTableStatus.OPEN, table.getStatus());
+        table.setStatus(DiningTableStatus.CLOSED);
+        assertEquals(DiningTableStatus.CLOSED, table.getStatus());
     }
 
     @Test
@@ -127,7 +146,7 @@ public class DiningTableTest {
         or1.setOrders(Arrays.asList(o1, o2));
         Ordination or2 = new Ordination();
         or2.setOrders(Arrays.asList(o3));
-        
+
         table.setOrdinations(Arrays.asList(or1, or2));
         assertEquals(6.0f, table.getTotalPrice(), 0.0f);
     }
@@ -135,17 +154,17 @@ public class DiningTableTest {
     @Test
     public void testSetBills() {
         assertNotNull(table.getBills());
-        Bill b = new Bill();
+        Receipt b = new Receipt();
         table.setBills(Arrays.asList(b));
         assertEquals(1, table.getBills().size());
         assertTrue(table.getBills().contains(b));
         assertEquals(table, b.getTable());
-        
+
     }
-    
+
     @Test
-    public void testAddBill(){
-        Bill b = new Bill();
+    public void testAddBill() {
+        Receipt b = new Receipt();
         table.addBill(b);
         assertEquals(1, table.getBills().size());
         assertTrue(table.getBills().contains(b));

@@ -5,8 +5,9 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
-import com.naigoapps.restaurant.model.Bill;
+import com.naigoapps.restaurant.model.Receipt;
 import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.RestaurantTable;
@@ -61,13 +62,13 @@ public class DiningTableBuilderTest {
     }
 
     @Test
-    public void testClosed() {
-        assertTrue(builder.closed(true).getContent().isClosed());
+    public void testStatus() {
+        assertEquals(DiningTableStatus.CLOSED, builder.status(DiningTableStatus.CLOSED).getContent().getStatus());
     }
 
     @Test
     public void testBill() {
-        Bill bill = new BillBuilder().getContent();
+        Receipt bill = new ReceiptBuilder().getContent();
         DiningTable result = builder.bill(bill).getContent();
         assertEquals(result, bill.getTable());
         assertTrue(result.getBills().contains(bill));

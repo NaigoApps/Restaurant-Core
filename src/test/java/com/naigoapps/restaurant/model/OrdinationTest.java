@@ -5,6 +5,7 @@
  */
 package com.naigoapps.restaurant.model;
 
+import com.naigoapps.restaurant.model.builders.OrderBuilder;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import org.junit.Before;
@@ -54,6 +55,16 @@ public class OrdinationTest {
         assertTrue(ordination.getOrders().contains(o));
         assertEquals(ordination, o.getOrdination());
     }
+    
+    @Test
+    public void testClearOrders() {
+        Order o = new OrderBuilder().getContent();
+        ordination.addOrder(o);
+        assertEquals(1, ordination.getOrders().size());
+        ordination.clearOrders();
+        assertEquals(0, ordination.getOrders().size());
+        assertNull(o.getOrdination());
+    }
 
     @Test
     public void testSetCreationTime() {
@@ -68,6 +79,15 @@ public class OrdinationTest {
         ordination.setTable(table);
         assertEquals(table, ordination.getTable());
         assertTrue(table.getOrdinations().contains(ordination));
+    }
+    
+    @Test
+    public void testSetTableNull() {
+        DiningTable table = new DiningTable();
+        ordination.setTable(table);
+        ordination.setTable(null);
+        assertNull(ordination.getTable());
+        assertFalse(table.getOrdinations().contains(ordination));
     }
     
 }

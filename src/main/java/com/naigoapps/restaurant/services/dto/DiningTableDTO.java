@@ -5,6 +5,7 @@
  */
 package com.naigoapps.restaurant.services.dto;
 
+import com.naigoapps.restaurant.model.DiningTableStatus;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +28,7 @@ public class DiningTableDTO extends DTO{
     
     private final String table;
     
-    private final boolean closed;
+    private final DiningTableStatus status;
 
     public DiningTableDTO() {
         this.coverCharges = 0;
@@ -36,10 +37,10 @@ public class DiningTableDTO extends DTO{
         this.bills = null;
         this.openingTime = null;
         this.table = null;
-        this.closed = false;
+        this.status = null;
     }
 
-    public DiningTableDTO(int coverCharges, String waiter, List<OrdinationDTO> ordinations, List<BillDTO> bills, LocalDateTime openingTime, String table, boolean closed, String uuid) {
+    public DiningTableDTO(int coverCharges, String waiter, List<OrdinationDTO> ordinations, List<BillDTO> bills, LocalDateTime openingTime, String table, DiningTableStatus status, String uuid) {
         super(uuid);
         this.coverCharges = coverCharges;
         this.waiter = waiter;
@@ -47,7 +48,7 @@ public class DiningTableDTO extends DTO{
         this.bills = bills;
         this.openingTime = openingTime;
         this.table = table;
-        this.closed = closed;
+        this.status = status;
     }
 
     public int getCoverCharges() {
@@ -74,8 +75,10 @@ public class DiningTableDTO extends DTO{
         return table;
     }
 
-    public boolean isClosed() {
-        return closed;
+    public DiningTableStatus getStatus() {
+        return status;
     }
+
+    
 
 }

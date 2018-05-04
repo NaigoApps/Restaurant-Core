@@ -17,6 +17,16 @@ import javax.persistence.Table;
 public class Settings extends BaseEntity {
 
     private float defaultCoverCharge;
+    
+    private String clientSettings;
+
+    public String getClientSettings() {
+        return clientSettings;
+    }
+
+    public void setClientSettings(String clientSettings) {
+        this.clientSettings = clientSettings;
+    }
 
     public float getDefaultCoverCharge() {
         return defaultCoverCharge;

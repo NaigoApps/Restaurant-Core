@@ -14,9 +14,51 @@ import com.naigoapps.restaurant.model.Customer;
 public class CustomerBuilder implements Builder<Customer>{
 
     private String name;
+    private String surname;
+    private String piva;
+    private String cf;
+    private String address;
+    private String city;
+    private String cap;
+    private String district;
     
-    public CustomerBuilder name(String name){
-        this.name = name;
+    public CustomerBuilder name(String value){
+        this.name = value;
+        return this;
+    }
+    
+    public CustomerBuilder surname(String value){
+        this.surname = value;
+        return this;
+    }
+    
+    public CustomerBuilder cf(String value){
+        this.cf = value;
+        return this;
+    }
+    
+    public CustomerBuilder piva(String value){
+        this.piva = value;
+        return this;
+    }
+    
+    public CustomerBuilder address(String value){
+        this.address = value;
+        return this;
+    }
+    
+    public CustomerBuilder city(String value){
+        this.city = value;
+        return this;
+    }
+    
+    public CustomerBuilder cap(String value){
+        this.cap = value;
+        return this;
+    }
+    
+    public CustomerBuilder district(String value){
+        this.district = value;
         return this;
     }
     
@@ -24,6 +66,13 @@ public class CustomerBuilder implements Builder<Customer>{
     public Customer getContent() {
         Customer result = new Customer();
         result.setName(name);
+        result.setSurname(surname);
+        result.setAddress(address);
+        result.setCap(cap);
+        result.setCity(city);
+        result.setDistrict(district);
+        result.setCf(cf);
+        result.setPiva(piva);
         return result;
     }
     

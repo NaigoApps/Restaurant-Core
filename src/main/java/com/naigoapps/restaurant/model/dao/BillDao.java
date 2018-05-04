@@ -15,10 +15,21 @@ import javax.persistence.Query;
  */
 public class BillDao extends Dao {
 
-    public int nextProgressive(LocalDate day) {
+    public int nextReceiptProgressive(LocalDate day) {
         EntityManager em = getEntityManager();
-        Query q = em.createQuery("SELECT max(b.progressive) FROM Bill b WHERE b.table.evening.day = :day");
+        Query q = em.createQuery("SELECT max(r.progressive) FROM Receipt r WHERE r.table.evening.day = :day");
         q.setParameter("day", day);
+        Integer progressive = (Integer) q.getSingleResult();
+        if (progressive != null) {
+            return progressive + 1;
+        }
+        return 1;
+    }
+    
+    public int nextInvoiceProgressive(LocalDate day) {
+        EntityManager em = getEntityManager();
+        Query q = em.createQuery("SELECT max(i.progressive) FROM Invoice i WHERE YEAR(i.table.evening.day) = :year");
+        q.setParameter("year", day.getYear());
         Integer progressive = (Integer) q.getSingleResult();
         if (progressive != null) {
             return progressive + 1;

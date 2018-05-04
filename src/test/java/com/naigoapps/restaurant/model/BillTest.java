@@ -17,11 +17,11 @@ import static org.junit.Assert.*;
  */
 public class BillTest {
 
-    private Bill bill;
+    private Receipt bill;
     
     @Before
     public void setUp() {
-        bill = new Bill();
+        bill = new Receipt();
     }
 
     @Test

@@ -7,6 +7,8 @@ package com.naigoapps.restaurant.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -20,29 +22,27 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "bills")
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "bill_type")
+@DiscriminatorValue("bill")
 public class Bill extends BaseEntity {
 
-    private int progressive;
-    
     @ManyToOne
     private DiningTable table;
 
     @OneToMany(mappedBy = "bill")
     private List<Order> orders;
 
+    private int coverCharges;
+
+    private float total;
+    
+    private Integer progressive;
+
     public Bill() {
         orders = new ArrayList<>();
     }
 
-    public int getProgressive() {
-        return progressive;
-    }
-
-    public void setProgressive(int progressive) {
-        this.progressive = progressive;
-    }
-    
     public List<Order> getOrders() {
         return orders;
     }
@@ -53,8 +53,8 @@ public class Bill extends BaseEntity {
             order.setBill(this);
         });
     }
-    
-    public void clearOrders(){
+
+    public void clearOrders() {
         this.orders.forEach(order -> {
             order.setBill(null);
         });
@@ -69,15 +69,41 @@ public class Bill extends BaseEntity {
     }
 
     public void setTable(DiningTable table) {
+        if (table == null && this.table != null) {
+            this.table.getBills().remove(this);
+        }
         this.table = table;
         if (table != null) {
             table.addBill(this);
         }
     }
-    
 
     public DiningTable getTable() {
         return table;
+    }
+
+    public float getTotal() {
+        return total;
+    }
+
+    public void setTotal(float total) {
+        this.total = total;
+    }
+
+    public int getCoverCharges() {
+        return coverCharges;
+    }
+
+    public void setCoverCharges(int coverCharges) {
+        this.coverCharges = coverCharges;
+    }
+
+    public Integer getProgressive() {
+        return progressive;
+    }
+
+    public void setProgressive(Integer progressive) {
+        this.progressive = progressive;
     }
 
 }

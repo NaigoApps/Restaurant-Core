@@ -117,14 +117,26 @@ public class Order extends BaseEntity {
     }
 
     public boolean isTheSame(Order other) {
-        if (notes != null || other.notes != null) {
+        if (notes != null && other.notes == null ||
+                notes == null && other.notes != null) {
             return false;
         }
+        if(notes != null && other.notes != null && !notes.equals(other.notes)){
+            return false;
+        }
+        
         if (dish != null && other.dish == null
                 || dish == null && other.dish != null) {
             return false;
         }
         if (dish != null && other.dish != null && !dish.equals(other.dish)) {
+            return false;
+        }
+        if (phase != null && other.phase == null
+                || phase == null && other.phase != null) {
+            return false;
+        }
+        if (phase != null && other.phase != null && !phase.equals(other.phase)) {
             return false;
         }
         if (!additions.stream()
@@ -133,6 +145,9 @@ public class Order extends BaseEntity {
         }
         if (!other.additions.stream()
                 .noneMatch(a -> !additions.contains(a))) {
+            return false;
+        }
+        if(price != other.price){
             return false;
         }
         return true;

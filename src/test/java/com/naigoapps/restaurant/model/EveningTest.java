@@ -52,6 +52,16 @@ public class EveningTest {
         assertTrue(evening.getDiningTables().contains(table));
         assertEquals(evening, table.getEvening());
     }
+
+    @Test
+    public void testRemoveDiningTable(){
+        DiningTable table = new DiningTable();
+        evening.addDiningTable(table);
+        evening.removeDiningTable(table);
+        assertEquals(0, evening.getDiningTables().size());
+        assertFalse(evening.getDiningTables().contains(table));
+        assertNull(table.getEvening());
+    }
     
     @Test
     public void testSetCoverCharge() {

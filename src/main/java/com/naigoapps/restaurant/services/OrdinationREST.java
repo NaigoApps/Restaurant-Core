@@ -22,13 +22,10 @@ import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.print.PrintException;
 import javax.transaction.Transactional;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -103,55 +100,4 @@ public class OrdinationREST {
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    @PUT
-    @Path("{uuid}/orders")
-    @Transactional
-    public Response editOrders(@PathParam("uuid") String ordinationUuid, OrderDTO[] orders) {
-        if (orders != null) {
-            Evening e = eveningManager.getSelectedEvening();
-            Ordination ordination = oDao.findByUuid(ordinationUuid, Ordination.class);
-            if (ordination != null) {
-                ordination.getOrders().forEach(o -> {
-                    o.setOrdination(null);
-                    o.clearAdditions();
-                    oDao.delete(o);
-                });
-                ordination.getOrders().clear();
-                OrderBuilder oBuilder = new OrderBuilder();
-                List<Order> rd = new ArrayList<>();
-                for (OrderDTO order : orders) {
-                    Order o = oBuilder
-                            .dish(dDao.findByUuid(order.getDish()))
-                            .ordination(ordination)
-                            .price(order.getPrice())
-                            .phase(pDao.findByUuid(order.getPhase()))
-                            .getContent();
-                    List<Addition> additions = new ArrayList<>();
-                    order.getAdditions().stream().forEach(additionUuid -> {
-                        Addition addition = aDao.findByUuid(additionUuid);
-                        additions.add(addition);
-                    });
-                    o.setAdditions(additions);
-                    oDao.persist(o);
-                    rd.add(o);
-                }
-                ordination.setOrders(rd);
-                ordination.setDirty(true);
-                return Response.status(Response.Status.OK).entity(DTOAssembler.fromOrdination(ordination)).build();
-            }
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        return Response.status(Response.Status.BAD_REQUEST).build();
-    }
-
-    @DELETE
-    @Transactional
-    public Response deleteOrdination(String uuid) {
-
-        oDao.removeByUuid(uuid);
-
-        return Response
-                .status(Response.Status.OK)
-                .build();
-    }
 }

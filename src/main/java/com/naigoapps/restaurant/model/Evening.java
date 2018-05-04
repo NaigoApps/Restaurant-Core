@@ -58,6 +58,13 @@ public class Evening extends BaseEntity {
             table.setEvening(this);
         }
     }
+    
+    public void removeDiningTable(DiningTable table){
+        if(this.diningTables.contains(table)){
+            this.diningTables.remove(table);
+            table.setEvening(null);
+        }
+    }
 
     public float getCoverCharge() {
         return coverCharge;

@@ -62,6 +62,7 @@ public class WaiterREST {
     @GET
     public Response getAllWaiters() {
         List<WaiterDTO> waiters = waiterDao.findAll().stream()
+                .filter(w -> WaiterStatus.REMOVED != w.getStatus())
                 .map(DTOAssembler::fromWaiter)
                 .collect(Collectors.toList());
 
@@ -122,7 +123,7 @@ public class WaiterREST {
     @Transactional
     public Response updateWaiterStatus(@PathParam("uuid") String uuid, String status) {
         Waiter w = waiterDao.findByUuid(uuid);
-        if (WaiterStatus.ACTIVE.equals(WaiterStatus.fromName(status)) || !hasTables(w)) {
+        if (!WaiterStatus.REMOVED.equals(WaiterStatus.fromName(status)) || !hasTables(w)) {
             w.setStatus(WaiterStatus.fromName(status));
             return Response.status(200).entity(DTOAssembler.fromWaiter(w)).build();
         } else {

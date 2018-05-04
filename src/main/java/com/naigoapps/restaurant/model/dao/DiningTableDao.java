@@ -51,4 +51,5 @@ public class DiningTableDao extends Dao {
         List<DiningTable> tables = q.getResultList();
         return tables;
     }
+    
 }

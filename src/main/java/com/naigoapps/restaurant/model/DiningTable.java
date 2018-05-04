@@ -40,7 +40,7 @@ public class DiningTable extends BaseEntity {
     @ManyToOne
     private RestaurantTable table;
 
-    private boolean closed;
+    private DiningTableStatus status;
 
     public DiningTable() {
         ordinations = new ArrayList<>();
@@ -83,6 +83,13 @@ public class DiningTable extends BaseEntity {
         }
     }
 
+    public void removeOrdination(Ordination ordination) {
+        if (this.ordinations.contains(ordination)) {
+            this.ordinations.remove(ordination);
+            ordination.setTable(null);
+        }
+    }
+
     public void setCoverCharges(int coverCharges) {
         this.coverCharges = coverCharges;
     }
@@ -112,18 +119,13 @@ public class DiningTable extends BaseEntity {
     }
 
     public void setEvening(Evening evening) {
+        if(this.evening != null && evening == null){
+            this.evening.removeDiningTable(this);
+        }
         this.evening = evening;
         if (evening != null) {
             evening.addDiningTable(this);
         }
-    }
-
-    public void setClosed(boolean closed) {
-        this.closed = closed;
-    }
-
-    public boolean isClosed() {
-        return closed;
     }
 
     public float getTotalPrice() {
@@ -149,6 +151,14 @@ public class DiningTable extends BaseEntity {
             this.bills.add(bill);
             bill.setTable(this);
         }
+    }
+
+    public DiningTableStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(DiningTableStatus status) {
+        this.status = status;
     }
 
 }

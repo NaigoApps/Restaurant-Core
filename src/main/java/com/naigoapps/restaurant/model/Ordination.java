@@ -7,6 +7,7 @@ package com.naigoapps.restaurant.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -68,7 +69,12 @@ public class Ordination extends BaseEntity {
     }
 
     public List<Order> getOrders() {
-        return orders;
+        return Collections.unmodifiableList(orders);
+    }
+    
+    public void clearOrders(){
+        this.orders.forEach(order -> order.setOrdination(null));
+        this.orders.clear();
     }
 
     public void setCreationTime(LocalDateTime creationTime) {
@@ -84,6 +90,9 @@ public class Ordination extends BaseEntity {
     }
 
     public void setTable(DiningTable table) {
+        if(table == null && this.table != null){
+            this.table.removeOrdination(this);
+        }
         this.table = table;
         if (table != null) {
             table.addOrdination(this);

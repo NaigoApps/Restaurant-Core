@@ -13,22 +13,20 @@ import java.util.List;
  * @author naigo
  */
 public class BillDTO extends DTO{
-    private int progressive;
     private String table;
     private List<String> orders;
+    private int coverCharges;
+    private float total;
 
     public BillDTO() {
     }
 
-    public BillDTO(String uuid, int progressive, String table, List<String> orders) {
+    public BillDTO(String uuid, String table, List<String> orders, int coverCharges, float total) {
         super(uuid);
-        this.progressive = progressive;
         this.table = table;
         this.orders = orders;
-    }
-
-    public int getProgressive() {
-        return progressive;
+        this.coverCharges = coverCharges;
+        this.total = total;
     }
     
     public String getTable() {
@@ -37,6 +35,14 @@ public class BillDTO extends DTO{
 
     public List<String> getOrders() {
         return Collections.unmodifiableList(orders);
+    }
+
+    public float getTotal() {
+        return total;
+    }
+
+    public int getCoverCharges() {
+        return coverCharges;
     }
 
 }

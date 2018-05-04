@@ -6,7 +6,7 @@
 package com.naigoapps.restaurant.model.builders;
 
 import com.naigoapps.restaurant.model.Addition;
-import com.naigoapps.restaurant.model.Bill;
+import com.naigoapps.restaurant.model.Receipt;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Phase;
@@ -26,7 +26,7 @@ public class OrderBuilder implements Builder<Order>{
     private float price;
     private String notes;
     private Phase phase;
-    private Bill bill;
+    private Receipt bill;
     private List<Addition> additions;
 
     public OrderBuilder() {

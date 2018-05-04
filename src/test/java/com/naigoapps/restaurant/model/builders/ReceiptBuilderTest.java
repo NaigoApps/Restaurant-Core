@@ -5,9 +5,10 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
-import com.naigoapps.restaurant.model.Bill;
+import com.naigoapps.restaurant.model.Receipt;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Order;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,26 +18,19 @@ import static org.junit.Assert.*;
  *
  * @author naigo
  */
-public class BillBuilderTest {
+public class ReceiptBuilderTest {
 
-    private BillBuilder builder;
+    private ReceiptBuilder builder;
 
     @Before
     public void setUp() {
-        builder = new BillBuilder();
-    }
-    
-    @Test
-    public void testProgressive() {
-        Integer progressive = 4;
-        Bill result = builder.progressive(progressive).getContent();
-        assertEquals(progressive, result.getProgressive());
+        builder = new ReceiptBuilder();
     }
 
     @Test
     public void testTable() {
         DiningTable table = new DiningTableBuilder().getContent();
-        Bill result = builder.table(table).getContent();
+        Receipt result = builder.table(table).getContent();
         assertEquals(table, result.getTable());
         assertTrue(table.getBills().contains(result));
     }
@@ -44,7 +38,7 @@ public class BillBuilderTest {
     @Test
     public void testOrder() {
         Order order = new OrderBuilder().getContent();
-        Bill bill = builder.order(order).getContent();
+        Receipt bill = builder.order(order).getContent();
         assertEquals(bill, order.getBill());
         assertTrue(bill.getOrders().contains(order));
     }
@@ -52,7 +46,7 @@ public class BillBuilderTest {
     @Test
     public void testOrders() {
         Order order1 = new OrderBuilder().getContent();
-        Bill bill = builder.orders(Arrays.asList(order1)).getContent();
+        Receipt bill = builder.orders(Arrays.asList(order1)).getContent();
         
         assertEquals(bill, order1.getBill());
         assertTrue(bill.getOrders().contains(order1));
@@ -63,7 +57,7 @@ public class BillBuilderTest {
         Order order1 = new OrderBuilder().getContent();
         Order order2 = new OrderBuilder().getContent();
         Order order3 = new OrderBuilder().getContent();
-        Bill bill = builder
+        Receipt bill = builder
                 .orders(Arrays.asList(order1))
                 .orders(Arrays.asList(order2, order3)).getContent();
         
@@ -73,6 +67,14 @@ public class BillBuilderTest {
         assertTrue(bill.getOrders().contains(order1));
         assertTrue(bill.getOrders().contains(order2));
         assertTrue(bill.getOrders().contains(order3));
+    }
+
+    @Test
+    public void testTime(){
+        LocalDateTime now = LocalDateTime.now();
+        Receipt bill = builder.printTime(now).getContent();
+        
+        assertEquals(now, bill.getPrintTime());
     }
 
 }

@@ -14,14 +14,28 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class Locks {
     private final Object ORDINATION_PROGRESSIVE;
+    private final Object RECEIPT_PROGRESSIVE;
+    private final Object INVOICE_PROGRESSIVE;
 
     public Locks() {
         ORDINATION_PROGRESSIVE = new Object();
+        RECEIPT_PROGRESSIVE = new Object();
+        INVOICE_PROGRESSIVE = new Object();
     }
 
     public Object ORDINATION_PROGRESSIVE() {
         return ORDINATION_PROGRESSIVE;
     }
+
+    public Object INVOICE_PROGRESSIVE() {
+        return INVOICE_PROGRESSIVE;
+    }
+
+    public Object RECEIPT_PROGRESSIVE() {
+        return RECEIPT_PROGRESSIVE;
+    }
+    
+    
     
     
 }
