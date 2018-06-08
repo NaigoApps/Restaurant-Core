@@ -8,19 +8,18 @@ package com.naigoapps.restaurant.services.dto.utils;
 import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.model.BaseEntity;
 import com.naigoapps.restaurant.model.Bill;
-import com.naigoapps.restaurant.model.Receipt;
 import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.model.Customer;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Evening;
-import com.naigoapps.restaurant.model.Invoice;
 import com.naigoapps.restaurant.model.Location;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.Phase;
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.RestaurantTable;
+import com.naigoapps.restaurant.model.Settings;
 import com.naigoapps.restaurant.model.Waiter;
 import com.naigoapps.restaurant.services.dto.AdditionDTO;
 import com.naigoapps.restaurant.services.dto.BillDTO;
@@ -29,14 +28,13 @@ import com.naigoapps.restaurant.services.dto.CustomerDTO;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.DishDTO;
 import com.naigoapps.restaurant.services.dto.EveningDTO;
-import com.naigoapps.restaurant.services.dto.InvoiceDTO;
 import com.naigoapps.restaurant.services.dto.LocationDTO;
 import com.naigoapps.restaurant.services.dto.OrdinationDTO;
 import com.naigoapps.restaurant.services.dto.OrderDTO;
 import com.naigoapps.restaurant.services.dto.PhaseDTO;
 import com.naigoapps.restaurant.services.dto.PrinterDTO;
-import com.naigoapps.restaurant.services.dto.ReceiptDTO;
 import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
+import com.naigoapps.restaurant.services.dto.SettingsDTO;
 import com.naigoapps.restaurant.services.dto.WaiterDTO;
 import java.util.stream.Collectors;
 
@@ -175,42 +173,16 @@ public class DTOAssembler {
 
     public static BillDTO fromBill(Bill bill) {
         return new BillDTO(
-                bill.getUuid(),
-                uuid(bill.getTable()),
-                bill.getOrders().stream()
-                        .map(order -> uuid(order))
-                        .collect(Collectors.toList()),
-                bill.getCoverCharges(),
-                bill.getTotal()
-        );
-    }
-
-    public static ReceiptDTO fromReceipt(Receipt bill) {
-        return new ReceiptDTO(
                 bill.getProgressive(),
+                uuid(bill.getCustomer()),
                 bill.getPrintTime(),
-                bill.getUuid(),
                 uuid(bill.getTable()),
                 bill.getOrders().stream()
                         .map(order -> uuid(order))
                         .collect(Collectors.toList()),
                 bill.getCoverCharges(),
-                bill.getTotal()
-        );
-    }
-
-    public static InvoiceDTO fromInvoice(Invoice invoice) {
-        return new InvoiceDTO(
-                invoice.getProgressive(),
-                uuid(invoice.getCustomer()),
-                invoice.getPrintTime(),
-                invoice.getUuid(),
-                uuid(invoice.getTable()),
-                invoice.getOrders().stream()
-                        .map(order -> uuid(order))
-                        .collect(Collectors.toList()),
-                invoice.getCoverCharges(),
-                invoice.getTotal()
+                bill.getTotal(),
+                bill.getUuid()
         );
     }
 
@@ -225,6 +197,15 @@ public class DTOAssembler {
                 customer.getCity(),
                 customer.getCap(),
                 customer.getDistrict());
+    }
+
+    public static SettingsDTO fromSettings(Settings settings) {
+        return new SettingsDTO(
+                settings.getUuid(),
+                settings.getDefaultCoverCharge(),
+                uuid(settings.getMainPrinter()),
+                uuid(settings.getFiscalPrinter()),
+                settings.getClientSettings());
     }
 
     private static String uuid(BaseEntity entity) {

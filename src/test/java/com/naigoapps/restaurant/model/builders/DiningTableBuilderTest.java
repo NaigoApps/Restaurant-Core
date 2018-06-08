@@ -5,7 +5,7 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
-import com.naigoapps.restaurant.model.Receipt;
+import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
@@ -68,7 +68,7 @@ public class DiningTableBuilderTest {
 
     @Test
     public void testBill() {
-        Receipt bill = new ReceiptBuilder().getContent();
+        Bill bill = new BillBuilder().getContent();
         DiningTable result = builder.bill(bill).getContent();
         assertEquals(result, bill.getTable());
         assertTrue(result.getBills().contains(bill));

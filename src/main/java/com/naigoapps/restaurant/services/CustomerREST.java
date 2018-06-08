@@ -6,14 +6,16 @@
 package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.model.Customer;
-import com.naigoapps.restaurant.model.Location;
 import com.naigoapps.restaurant.model.Printer;
+import com.naigoapps.restaurant.model.Settings;
 import com.naigoapps.restaurant.model.builders.CustomerBuilder;
 import com.naigoapps.restaurant.model.dao.CustomerDao;
 import com.naigoapps.restaurant.services.dto.CustomerDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -41,7 +43,6 @@ public class CustomerREST {
 
     @GET
     public Response getCustomers() {
-
         List<CustomerDTO> data = cDao.findAll().stream()
                 .map(DTOAssembler::fromCustomer)
                 .collect(Collectors.toList());
@@ -72,100 +73,62 @@ public class CustomerREST {
     @Path("{uuid}/name")
     @Transactional
     public Response updateCustomerName(@PathParam("uuid") String uuid, String value) {
-        Customer c = cDao.findByUuid(uuid, Customer.class);
-        if (c != null) {
-            c.setName(value);
-            return ResponseBuilder.ok(DTOAssembler.fromCustomer(c));
-        } else {
-            return ResponseBuilder.notFound("Cliente non trovato");
-        }
+        return updateCustomerProperty((customer) -> customer.setName(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/surname")
     @Transactional
     public Response updateCustomerSurname(@PathParam("uuid") String uuid, String value) {
-        Customer c = cDao.findByUuid(uuid, Customer.class);
-        if (c != null) {
-            c.setSurname(value);
-            return ResponseBuilder.ok(DTOAssembler.fromCustomer(c));
-        } else {
-            return ResponseBuilder.notFound("Cliente non trovato");
-        }
+        return updateCustomerProperty((customer) -> customer.setSurname(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/cf")
     @Transactional
     public Response updateCustomerCf(@PathParam("uuid") String uuid, String value) {
-        Customer c = cDao.findByUuid(uuid, Customer.class);
-        if (c != null) {
-            c.setCf(value);
-            return ResponseBuilder.ok(DTOAssembler.fromCustomer(c));
-        } else {
-            return ResponseBuilder.notFound("Cliente non trovato");
-        }
+        return updateCustomerProperty((customer) -> customer.setCf(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/piva")
     @Transactional
     public Response updateCustomerPiva(@PathParam("uuid") String uuid, String value) {
-        Customer c = cDao.findByUuid(uuid, Customer.class);
-        if (c != null) {
-            c.setPiva(value);
-            return ResponseBuilder.ok(DTOAssembler.fromCustomer(c));
-        } else {
-            return ResponseBuilder.notFound("Cliente non trovato");
-        }
+        return updateCustomerProperty((customer) -> customer.setPiva(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/city")
     @Transactional
     public Response updateCustomerCity(@PathParam("uuid") String uuid, String value) {
-        Customer c = cDao.findByUuid(uuid, Customer.class);
-        if (c != null) {
-            c.setCity(value);
-            return ResponseBuilder.ok(DTOAssembler.fromCustomer(c));
-        } else {
-            return ResponseBuilder.notFound("Cliente non trovato");
-        }
+        return updateCustomerProperty((customer) -> customer.setCity(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/cap")
     @Transactional
     public Response updateCustomerCap(@PathParam("uuid") String uuid, String value) {
-        Customer c = cDao.findByUuid(uuid, Customer.class);
-        if (c != null) {
-            c.setCap(value);
-            return ResponseBuilder.ok(DTOAssembler.fromCustomer(c));
-        } else {
-            return ResponseBuilder.notFound("Cliente non trovato");
-        }
+        return updateCustomerProperty((customer) -> customer.setCap(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/address")
     @Transactional
     public Response updateCustomerAddress(@PathParam("uuid") String uuid, String value) {
-        Customer c = cDao.findByUuid(uuid, Customer.class);
-        if (c != null) {
-            c.setAddress(value);
-            return ResponseBuilder.ok(DTOAssembler.fromCustomer(c));
-        } else {
-            return ResponseBuilder.notFound("Cliente non trovato");
-        }
+        return updateCustomerProperty((customer) -> customer.setAddress(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/district")
     @Transactional
     public Response updateCustomerDistrict(@PathParam("uuid") String uuid, String value) {
+        return updateCustomerProperty((customer) -> customer.setDistrict(value), uuid);
+    }
+    
+    public Response updateCustomerProperty(Consumer<Customer> setter, String uuid){
         Customer c = cDao.findByUuid(uuid, Customer.class);
         if (c != null) {
-            c.setDistrict(value);
+            setter.accept(c);
             return ResponseBuilder.ok(DTOAssembler.fromCustomer(c));
         } else {
             return ResponseBuilder.notFound("Cliente non trovato");
@@ -179,5 +142,4 @@ public class CustomerREST {
         cDao.getEntityManager().remove(cDao.findByUuid(uuid, Customer.class));
         return ResponseBuilder.ok(uuid);
     }
-
 }

@@ -67,6 +67,13 @@ public class Ordination extends BaseEntity {
             order.setOrdination(this);
         }
     }
+    
+    public void removeOrder(Order o){
+        if(this.orders.contains(o)){
+            this.orders.remove(o);
+            o.setOrdination(null);
+        }
+    }
 
     public List<Order> getOrders() {
         return Collections.unmodifiableList(orders);

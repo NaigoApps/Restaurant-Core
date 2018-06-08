@@ -5,6 +5,7 @@
  */
 package com.naigoapps.restaurant.services.dto;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,6 +14,9 @@ import java.util.List;
  * @author naigo
  */
 public class BillDTO extends DTO{
+    private Integer progressive;
+    private String customer;
+    private LocalDateTime printTime;
     private String table;
     private List<String> orders;
     private int coverCharges;
@@ -21,13 +25,18 @@ public class BillDTO extends DTO{
     public BillDTO() {
     }
 
-    public BillDTO(String uuid, String table, List<String> orders, int coverCharges, float total) {
+    public BillDTO(Integer progressive, String customer, LocalDateTime printTime, String table, List<String> orders, int coverCharges, float total, String uuid) {
         super(uuid);
+        this.progressive = progressive;
+        this.customer = customer;
+        this.printTime = printTime;
         this.table = table;
         this.orders = orders;
         this.coverCharges = coverCharges;
         this.total = total;
     }
+
+    
     
     public String getTable() {
         return table;
@@ -44,5 +53,19 @@ public class BillDTO extends DTO{
     public int getCoverCharges() {
         return coverCharges;
     }
+
+    public String getCustomer() {
+        return customer;
+    }
+
+    public LocalDateTime getPrintTime() {
+        return printTime;
+    }
+
+    public Integer getProgressive() {
+        return progressive;
+    }
+    
+    
 
 }

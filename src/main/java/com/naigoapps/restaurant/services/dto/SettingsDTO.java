@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.naigoapps.restaurant.model;
+package com.naigoapps.restaurant.services.dto;
 
+import com.naigoapps.restaurant.model.*;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -14,21 +15,21 @@ import javax.persistence.Table;
  *
  * @author naigo
  */
-@Entity
-@Table(name = "settings")
-public class Settings extends BaseEntity {
+public class SettingsDTO extends DTO{
 
     private float defaultCoverCharge;
-    
-    @ManyToOne
-    private Printer mainPrinter;
-    
-    @ManyToOne
-    private Printer fiscalPrinter;
-    
-    @Column(length = 4096)
+    private String mainPrinter;
+    private String fiscalPrinter;
     private String clientSettings;
 
+    public SettingsDTO(String uuid, float defaultCoverCharge, String mainPrinter, String fiscalPrinter, String clientSettings) {
+        super(uuid);
+        this.defaultCoverCharge = defaultCoverCharge;
+        this.mainPrinter = mainPrinter;
+        this.fiscalPrinter = fiscalPrinter;
+        this.clientSettings = clientSettings;
+    }
+    
     public String getClientSettings() {
         return clientSettings;
     }
@@ -45,21 +46,22 @@ public class Settings extends BaseEntity {
         this.defaultCoverCharge = defaultCoverCharge;
     }
 
-    public Printer getFiscalPrinter() {
-        return fiscalPrinter;
-    }
-
-    public Printer getMainPrinter() {
-        return mainPrinter;
-    }
-
-    public void setFiscalPrinter(Printer fiscalPrinter) {
+    public void setFiscalPrinter(String fiscalPrinter) {
         this.fiscalPrinter = fiscalPrinter;
     }
 
-    public void setMainPrinter(Printer mainPrinter) {
+    public void setMainPrinter(String mainPrinter) {
         this.mainPrinter = mainPrinter;
     }
+
+    public String getFiscalPrinter() {
+        return fiscalPrinter;
+    }
+
+    public String getMainPrinter() {
+        return mainPrinter;
+    }
+
     
     
 

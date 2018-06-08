@@ -6,13 +6,12 @@
 package com.naigoapps.restaurant.model.builders;
 
 import com.naigoapps.restaurant.model.Addition;
-import com.naigoapps.restaurant.model.Receipt;
+import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Phase;
 import com.naigoapps.restaurant.model.Order;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,7 +25,6 @@ public class OrderBuilder implements Builder<Order>{
     private float price;
     private String notes;
     private Phase phase;
-    private Receipt bill;
     private List<Addition> additions;
 
     public OrderBuilder() {

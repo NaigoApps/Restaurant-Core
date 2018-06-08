@@ -24,6 +24,7 @@ public class SettingsBuilder implements Builder<Settings>{
     public Settings getContent() {
         Settings result = new Settings();
         result.setDefaultCoverCharge(defaultCC);
+        result.setClientSettings("{}");
         return result;
     }
     

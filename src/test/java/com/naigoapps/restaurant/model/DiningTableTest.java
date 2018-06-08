@@ -5,6 +5,7 @@
  */
 package com.naigoapps.restaurant.model;
 
+import com.naigoapps.restaurant.model.builders.BillBuilder;
 import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -154,7 +155,7 @@ public class DiningTableTest {
     @Test
     public void testSetBills() {
         assertNotNull(table.getBills());
-        Receipt b = new Receipt();
+        Bill b = new BillBuilder().getContent();
         table.setBills(Arrays.asList(b));
         assertEquals(1, table.getBills().size());
         assertTrue(table.getBills().contains(b));
@@ -164,7 +165,7 @@ public class DiningTableTest {
 
     @Test
     public void testAddBill() {
-        Receipt b = new Receipt();
+        Bill b = new BillBuilder().getContent();
         table.addBill(b);
         assertEquals(1, table.getBills().size());
         assertTrue(table.getBills().contains(b));

@@ -6,9 +6,10 @@
 package com.naigoapps.restaurant.model.builders;
 
 import com.naigoapps.restaurant.model.Bill;
-import com.naigoapps.restaurant.model.Receipt;
+import com.naigoapps.restaurant.model.Customer;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Order;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,11 +20,13 @@ import java.util.List;
  */
 public class BillBuilder implements Builder<Bill>{
 
-    protected DiningTable table;
-    protected List<Order> orders;
-    protected int coverCharges;
-    protected float total;
-    protected Integer progressive;
+    private DiningTable table;
+    private List<Order> orders;
+    private int coverCharges;
+    private float total;
+    private Integer progressive;
+    private Customer customer;
+    private LocalDateTime printTime;
 
     public BillBuilder() {
         orders = new ArrayList<>();
@@ -59,6 +62,16 @@ public class BillBuilder implements Builder<Bill>{
         return this;
     }
     
+    public BillBuilder customer(Customer value){
+        this.customer = value;
+        return this;
+    }
+    
+    public BillBuilder printTime(LocalDateTime time){
+        this.printTime = time;
+        return this;
+    }
+    
     @Override
     public Bill getContent() {
         Bill result = new Bill();
@@ -67,6 +80,8 @@ public class BillBuilder implements Builder<Bill>{
         result.setTotal(total);
         result.setCoverCharges(coverCharges);
         result.setProgressive(progressive);
+        result.setCustomer(customer);
+        result.setPrintTime(printTime);
         return result;
     }
     

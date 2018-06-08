@@ -6,7 +6,6 @@
 package com.naigoapps.restaurant.services.printing;
 
 import com.naigoapps.restaurant.model.Category;
-import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.utils.mappers.OrderCategoryMapper;
 import com.naigoapps.restaurant.services.PrinterService;

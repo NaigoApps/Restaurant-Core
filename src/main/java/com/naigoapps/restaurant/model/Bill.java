@@ -5,13 +5,10 @@
  */
 package com.naigoapps.restaurant.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -22,11 +19,13 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "bills")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "bill_type")
-@DiscriminatorValue("bill")
 public class Bill extends BaseEntity {
 
+    @ManyToOne
+    private Customer customer;
+    
+    private LocalDateTime printTime;
+    
     @ManyToOne
     private DiningTable table;
 
@@ -52,6 +51,13 @@ public class Bill extends BaseEntity {
         orders.forEach(order -> {
             order.setBill(this);
         });
+    }
+    
+    public void removeOrder(Order o){
+        if(this.orders.contains(o)){
+            this.orders.remove(o);
+            o.setBill(null);
+        }
     }
 
     public void clearOrders() {
@@ -82,6 +88,13 @@ public class Bill extends BaseEntity {
         return table;
     }
 
+    public float getEstimatedTotal() {
+        Float tot = orders.stream()
+                .map(o -> o.getPrice())
+                .reduce(0.0f, (p1, p2) -> p1 + p2);
+        return tot + table.getEvening().getCoverCharge() * table.getCoverCharges();
+    }
+    
     public float getTotal() {
         return total;
     }
@@ -104,6 +117,22 @@ public class Bill extends BaseEntity {
 
     public void setProgressive(Integer progressive) {
         this.progressive = progressive;
+    }
+    
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public void setPrintTime(LocalDateTime printTime) {
+        this.printTime = printTime;
+    }
+
+    public LocalDateTime getPrintTime() {
+        return printTime;
     }
 
 }

@@ -153,4 +153,10 @@ public class Order extends BaseEntity {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "1 x " + dish.getName();
+    }
+
+    
 }

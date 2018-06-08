@@ -5,6 +5,7 @@
  */
 package com.naigoapps.restaurant.model;
 
+import com.naigoapps.restaurant.model.builders.BillBuilder;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class OrderTest {
 
     @Test
     public void testSetBill() {
-        Receipt b = new Receipt();
+        Bill b = new BillBuilder().getContent();
         order.setBill(b);
         assertEquals(b, order.getBill());
         assertTrue(b.getOrders().contains(order));

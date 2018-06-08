@@ -8,18 +8,14 @@ package com.naigoapps.restaurant.services;
 import com.naigoapps.restaurant.main.EveningManager;
 import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.model.Bill;
-import com.naigoapps.restaurant.model.Receipt;
 import com.naigoapps.restaurant.model.Customer;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
-import com.naigoapps.restaurant.model.Invoice;
 import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.builders.BillBuilder;
-import com.naigoapps.restaurant.model.builders.InvoiceBuilder;
-import com.naigoapps.restaurant.model.builders.ReceiptBuilder;
 import com.naigoapps.restaurant.model.builders.OrderBuilder;
 import com.naigoapps.restaurant.model.builders.OrdinationBuilder;
 import com.naigoapps.restaurant.model.dao.AdditionDao;
@@ -38,13 +34,11 @@ import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.OrderDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.printing.BillPrinter;
-import com.naigoapps.restaurant.services.printing.PartialBillPrinter;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -192,8 +186,9 @@ public class DiningTableREST {
                 }
 
                 ordination.getOrders().forEach(o -> {
-                    o.setOrdination(null);
-                    o.setBill(null);
+                    if (o.getBill() != null) {
+                        o.getBill().removeOrder(o);
+                    }
                     o.clearAdditions();
                     oDao.delete(o);
                 });
@@ -340,6 +335,9 @@ public class DiningTableREST {
                 bill.clearOrders();
                 bill.setTable(null);
                 bDao.getEntityManager().remove(bill);
+                if (toUpdate.getBills().isEmpty()) {
+                    toUpdate.setStatus(DiningTableStatus.OPEN);
+                }
                 return Response.ok(DTOAssembler.fromDiningTable(toUpdate)).build();
             } else {
                 return ResponseBuilder.notFound("Tavolo o scontrino non trovato");
@@ -365,6 +363,7 @@ public class DiningTableREST {
                         .collect(Collectors.toList());
                 if (orders.stream().allMatch(order -> toUpdate.equals(order.getOrdination().getTable()))) {
                     if (orders.stream().allMatch(order -> order.getBill() == null)) {
+                        toUpdate.setStatus(DiningTableStatus.CLOSING);
                         return createBill(toUpdate, orders, bill.getCoverCharges(), bill.getTotal());
                     } else {
                         return ResponseBuilder.badRequest("Vi sono ordini già chiusi");
@@ -382,6 +381,7 @@ public class DiningTableREST {
 
     private Response createBill(DiningTable table, List<Order> orders, int coverCharges, float total) {
         Bill bill = new BillBuilder()
+                .progressive(bDao.nextBillProgressive(table.getDate().toLocalDate()))
                 .table(table)
                 .orders(orders)
                 .coverCharges(coverCharges)
@@ -390,7 +390,7 @@ public class DiningTableREST {
         dtDao.persist(bill);
         return Response.ok(DTOAssembler.fromDiningTable(table)).build();
     }
-    
+
     @PUT
     @Path("{t-uuid}/bills/{b-uuid}")
     @Transactional
@@ -408,11 +408,10 @@ public class DiningTableREST {
                 List<Order> orders = billDto.getOrders().stream()
                         .map(uuid -> oDao.findByUuid(uuid, Order.class))
                         .collect(Collectors.toList());
-                
-                //FIXME
-                orders.forEach(order -> System.out.println(order.getOrdination() != null ? "OK" : "Ordination null!!"));
-                
-                if (orders.stream().allMatch(order -> toUpdate.equals(order.getOrdination().getTable()))) {
+
+                if (orders.stream().allMatch(order -> {
+                    return toUpdate.equals(order.getOrdination().getTable());
+                })) {
                     if (orders.stream().allMatch(order -> order.getBill() == null)) {
                         bill.setOrders(orders);
                         bill.setTotal(billDto.getTotal());
@@ -435,47 +434,17 @@ public class DiningTableREST {
     @POST
     @Path("print-partial-bill")
     @Transactional
-    public Response printPartialBill(String billUuid) {
+    public Response printPartialBill(String billUuid, @QueryParam("generic") Boolean generic) {
         Bill bill = bDao.findByUuid(billUuid, Bill.class);
         if (bill != null) {
             Printer mainPrinter = prDao.findMainPrinter();
             if (mainPrinter != null) {
                 try {
                     PrinterService service = new PrinterService(mainPrinter);
-                    service.accept(new PartialBillPrinter(), bill);
-                    service.lf(3);
-                    service.cut();
-                    service.doPrint();
-                    bill.getTable().setStatus(DiningTableStatus.CLOSING);
-                    return ResponseBuilder.ok(DTOAssembler.fromDiningTable(bill.getTable()));
-                } catch (IOException ex) {
-                    return ResponseBuilder.badRequest("Problema di stampa inaspettato");
-                } catch (PrintException ex) {
-                    return ResponseBuilder.badRequest("Problema di stampa");
-                }
-            } else {
-                return ResponseBuilder.notFound("Stampante principale non trovata");
-            }
-        }
-        return ResponseBuilder.notFound("Tavolo non trovato");
-    }
-    
-    @POST
-    @Path("print-bill")
-    @Transactional
-    public Response printBill(String billUuid) {
-        Bill bill = bDao.findByUuid(billUuid, Bill.class);
-        if (bill != null) {
-            Printer mainPrinter = prDao.findMainPrinter();
-            if (mainPrinter != null) {
-                try {
-                    PrinterService service = new PrinterService(mainPrinter);
-                    service.accept(new PartialBillPrinter(), bill);
-                    service.lf(3);
-                    service.cut();
-                    service.doPrint();
-                    bill.getTable().setStatus(DiningTableStatus.CLOSING);
-                    bill.setProgressive(bDao.nextInvoiceProgressive(LocalDate.now()));
+                    service.accept(new BillPrinter(Boolean.TRUE.equals(generic)), bill)
+                            .lf(3)
+                            .cut()
+                            .doPrint();
                     return ResponseBuilder.ok(DTOAssembler.fromDiningTable(bill.getTable()));
                 } catch (IOException ex) {
                     return ResponseBuilder.badRequest("Problema di stampa inaspettato");
@@ -489,33 +458,65 @@ public class DiningTableREST {
         return ResponseBuilder.notFound("Tavolo non trovato");
     }
 
-//    @POST
-//    @Path("print-bill")
-//    @Transactional
-//    public Response printBill(String billUuid) {
-//        Receipt bill = bDao.findByUuid(billUuid, Receipt.class);
-//        if (bill != null) {
-//            Printer mainPrinter = prDao.findMainPrinter();
-//            if (mainPrinter != null) {
-//                try {
-//                    PrinterService service = new PrinterService(mainPrinter);
-//                    service.accept(new BillPrinter(), bill);
-//                    service.lf(3);
-//                    service.cut();
-//                    service.doPrint();
-//                    if(bill instanceof Invoice){
-//                        return ResponseBuilder.ok(DTOAssembler.fromInvoice((Invoice) bill));
-//                    }
-//                    return ResponseBuilder.ok(DTOAssembler.fromBill(bill));
-//                } catch (IOException ex) {
-//                    return ResponseBuilder.badRequest("Problema di stampa inaspettato");
-//                } catch (PrintException ex) {
-//                    return ResponseBuilder.badRequest("Problema di stampa");
-//                }
-//            } else {
-//                return ResponseBuilder.notFound("Stampante principale non trovata");
-//            }
-//        }
-//        return ResponseBuilder.notFound("Tavolo non trovato");
-//    }
+    @POST
+    @Path("bills/{b-uuid}/print-bill")
+    @Transactional
+    public Response printBill(@PathParam("b-uuid") String billUuid, String customerId, @QueryParam("generic") Boolean generic) {
+        Bill bill = bDao.findByUuid(billUuid, Bill.class);
+        Customer customer = null;
+        if (customerId != null && !customerId.isEmpty()) {
+            customer = cDao.findByUuid(customerId, Customer.class);
+        }
+        if (bill != null && (customer != null || customerId == null || customerId.isEmpty())) {
+            Printer fiscalPrinter = prDao.findFiscalPrinter();
+            if (fiscalPrinter != null) {
+                try {
+                    bill.getTable().setStatus(DiningTableStatus.CLOSING);
+                    if (customer != null) {
+                        bill.setCustomer(customer);
+                        bill.setProgressive(bDao.nextInvoiceProgressive(bill.getTable().getDate().toLocalDate()));
+                    } else {
+                        bill.setProgressive(bDao.nextReceiptProgressive(bill.getTable().getDate().toLocalDate()));
+                    }
+                    bill.setPrintTime(LocalDateTime.now());
+
+                    PrinterService service = new PrinterService(fiscalPrinter);
+                    service.accept(new BillPrinter(Boolean.TRUE.equals(generic), customer), bill)
+                            .lf(3)
+                            .cut()
+                            .doPrint();
+                    return ResponseBuilder.ok(DTOAssembler.fromDiningTable(bill.getTable()));
+                } catch (IOException ex) {
+                    return ResponseBuilder.badRequest("Problema di stampa inaspettato");
+                } catch (PrintException ex) {
+                    return ResponseBuilder.badRequest("Problema di stampa");
+                }
+            } else {
+                return ResponseBuilder.notFound("Stampante fiscale non trovata");
+            }
+        }
+        return ResponseBuilder.notFound("Conto o cliente non trovato");
+    }
+
+    @POST
+    @Path("{uuid}/lock")
+    @Transactional
+    public Response lockTable(@PathParam("uuid") String tableUuid) {
+        Evening currentEvening = eveningManager.getSelectedEvening();
+        if (currentEvening != null) {
+            DiningTable toUpdate = findTableInEvening(currentEvening, tableUuid);
+            if (toUpdate != null) {
+                boolean ordersOk = toUpdate.listOrders().stream().allMatch(order -> order.getBill() != null);
+                if (ordersOk) {
+                    toUpdate.setStatus(DiningTableStatus.CLOSED);
+                    return Response.ok(DTOAssembler.fromDiningTable(toUpdate)).build();
+                }
+                return ResponseBuilder.badRequest("Il tavolo contiene ordini non chiusi");
+            } else {
+                return ResponseBuilder.notFound("Tavolo non trovato");
+            }
+        } else {
+            return ResponseBuilder.badRequest("Serata non selezionata");
+        }
+    }
 }
