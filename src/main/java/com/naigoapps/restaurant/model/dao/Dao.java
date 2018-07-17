@@ -6,53 +6,23 @@
 package com.naigoapps.restaurant.model.dao;
 
 import com.naigoapps.restaurant.model.BaseEntity;
-import com.naigoapps.restaurant.model.Printer;
-import java.util.Arrays;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
+import java.util.List;
 
 /**
  *
  * @author naigo
+ * @param <E>
  */
-@Generic
-public class Dao {
+public interface Dao<E extends BaseEntity> {
 
-    @PersistenceContext(name = "restaurant-pu")
-    private EntityManager em;
+    public E findByUuid(String uuid);
 
-    @Transactional
-    public void persist(BaseEntity... entities) {
-        Arrays.stream(entities).forEach(entity -> em.persist(entity));
-    }
+    public List<E> findAll();
 
-    public EntityManager getEntityManager() {
-        return em;
-    }
+    public void deleteByUuid(String uuid);
 
-    public <E> E findByUuid(String uuid, Class<E> type) {
-        try {
-            TypedQuery<E> q = getEntityManager().createQuery("FROM " + type.getName() + " e where e.uuid = :uuid", type);
-            q.setParameter("uuid", uuid);
-            E entity = q.getSingleResult();
-            return entity;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
+    public void delete(BaseEntity entity);
     
-    public void deleteByUuid(String uuid, Class c){
-        Query q = getEntityManager().createQuery("DELETE FROM " + c.getName() + " e where e.uuid = :uuid");
-        q.setParameter("uuid", uuid);
-        q.executeUpdate();
-    }
+    public Class<E> getEntityClass();
 
-    public void delete(BaseEntity entity){
-        em.remove(entity);
-    }
-    
 }

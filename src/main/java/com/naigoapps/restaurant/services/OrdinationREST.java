@@ -6,18 +6,14 @@
 package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.main.EveningManager;
-import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Ordination;
-import com.naigoapps.restaurant.model.Order;
-import com.naigoapps.restaurant.model.builders.OrderBuilder;
 import com.naigoapps.restaurant.model.dao.AdditionDao;
 import com.naigoapps.restaurant.model.dao.DishDao;
 import com.naigoapps.restaurant.model.dao.OrdinationDao;
 import com.naigoapps.restaurant.model.dao.OrderDao;
 import com.naigoapps.restaurant.model.dao.PhaseDao;
 import com.naigoapps.restaurant.services.dto.OrdinationDTO;
-import com.naigoapps.restaurant.services.dto.OrderDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.ArrayList;
@@ -49,10 +45,10 @@ public class OrdinationREST {
     EveningManager eveningManager;
 
     @Inject
-    OrdinationDao oDao;
+    OrdinationDao ordDao;
 
     @Inject
-    OrderDao doDao;
+    OrderDao oDao;
 
     @Inject
     DishDao dDao;
@@ -88,8 +84,8 @@ public class OrdinationREST {
     @Transactional
     public Response sendOrdinationAbort(@PathParam("uuid") String ordinationUuid) {
         Evening e = eveningManager.getSelectedEvening();
-        Ordination ordination = oDao.findByUuid(ordinationUuid, Ordination.class);
-        if (ordination != null) {
+        Ordination ordination = ordDao.findByUuid(ordinationUuid);
+        if (e != null && ordination != null && e.equals(ordination.getTable().getEvening())) {
             try {
                 printService.printOrdinationAbort(ordinationUuid);
                 return Response.status(Response.Status.OK).entity(ordinationUuid).build();

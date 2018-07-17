@@ -136,7 +136,7 @@ public class WaiterREST {
     @Produces(MediaType.TEXT_PLAIN)
     public Response deleteWaiter(String uuid) {
 
-        waiterDao.removeByUuid(uuid);
+        waiterDao.deleteByUuid(uuid);
 
         return ResponseBuilder.ok(uuid);
     }

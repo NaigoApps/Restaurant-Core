@@ -21,22 +21,6 @@ public class BillDTO extends DTO{
     private List<String> orders;
     private int coverCharges;
     private float total;
-
-    public BillDTO() {
-    }
-
-    public BillDTO(Integer progressive, String customer, LocalDateTime printTime, String table, List<String> orders, int coverCharges, float total, String uuid) {
-        super(uuid);
-        this.progressive = progressive;
-        this.customer = customer;
-        this.printTime = printTime;
-        this.table = table;
-        this.orders = orders;
-        this.coverCharges = coverCharges;
-        this.total = total;
-    }
-
-    
     
     public String getTable() {
         return table;
@@ -64,6 +48,34 @@ public class BillDTO extends DTO{
 
     public Integer getProgressive() {
         return progressive;
+    }
+
+    public void setProgressive(Integer progressive) {
+        this.progressive = progressive;
+    }
+
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
+
+    public void setPrintTime(LocalDateTime printTime) {
+        this.printTime = printTime;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
+    }
+
+    public void setOrders(List<String> orders) {
+        this.orders = orders;
+    }
+
+    public void setCoverCharges(int coverCharges) {
+        this.coverCharges = coverCharges;
+    }
+
+    public void setTotal(float total) {
+        this.total = total;
     }
     
     

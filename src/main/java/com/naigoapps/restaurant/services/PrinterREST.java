@@ -15,7 +15,6 @@ import com.naigoapps.restaurant.model.dao.LocationDao;
 import com.naigoapps.restaurant.model.dao.OrdinationDao;
 import com.naigoapps.restaurant.model.dao.PrinterDao;
 import com.naigoapps.restaurant.model.extra.QuantifiedOrders;
-import com.naigoapps.restaurant.services.PrinterService.Align;
 import com.naigoapps.restaurant.services.PrinterService.Size;
 import com.naigoapps.restaurant.services.dto.PrinterDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
@@ -57,7 +56,7 @@ import javax.ws.rs.core.Response;
 public class PrinterREST {
 
     @Inject
-    OrdinationDao oDao;
+    OrdinationDao ordDao;
 
     @Inject
     PrinterDao pDao;
@@ -81,7 +80,7 @@ public class PrinterREST {
     @Path("{uuid}/name")
     @Transactional
     public Response updatePrinterName(@PathParam("uuid") String uuid, String name) {
-        Printer p = pDao.findByUuid(uuid, Printer.class);
+        Printer p = pDao.findByUuid(uuid);
         if (p != null) {
             p.setName(name);
             return ResponseBuilder.ok(DTOAssembler.fromPrinter(p));
@@ -93,7 +92,7 @@ public class PrinterREST {
     @Path("{uuid}/main")
     @Transactional
     public Response updateMainPrinter(@PathParam("uuid") String uuid, boolean main) {
-        Printer target = pDao.findByUuid(uuid, Printer.class);
+        Printer target = pDao.findByUuid(uuid);
         if (target != null) {
             target.setMain(main);
         }
@@ -105,7 +104,7 @@ public class PrinterREST {
     @Path("{uuid}/lineCharacters")
     @Transactional
     public Response updatePrinterLineCharacters(@PathParam("uuid") String uuid, int chars) {
-        Printer target = pDao.findByUuid(uuid, Printer.class);
+        Printer target = pDao.findByUuid(uuid);
         if (target != null) {
             target.setLineCharacters(chars);
         }
@@ -139,11 +138,11 @@ public class PrinterREST {
     @Transactional
     @Produces(MediaType.TEXT_PLAIN)
     public Response deletePrinter(String uuid) {
-        Printer p = pDao.findByUuid(uuid, Printer.class);
+        Printer p = pDao.findByUuid(uuid);
         if (p != null) {
             List<Location> locations = lDao.findByPrinter(p);
             if (locations.isEmpty()) {
-                pDao.deleteByUuid(uuid, Printer.class);
+                pDao.deleteByUuid(uuid);
                 return ResponseBuilder.ok(uuid);
             } else if (locations.size() > 1) {
                 return ResponseBuilder.badRequest("Stampante utilizzata nelle postazioni "
@@ -159,7 +158,7 @@ public class PrinterREST {
     @Path("print")
     @Transactional
     public Response printOrdination(String ordinationUuid) throws PrintException {
-        Ordination ord = oDao.findByUuid(ordinationUuid, Ordination.class);
+        Ordination ord = ordDao.findByUuid(ordinationUuid);
         List<Printer> printers = pDao.findAll();
         Map<Phase, QuantifiedOrders> phasesMap = new HashMap<>();
         try {
@@ -204,7 +203,7 @@ public class PrinterREST {
     @Path("abort")
     @Transactional
     public Response printOrdinationAbort(String ordinationUuid) throws PrintException {
-        Ordination ord = oDao.findByUuid(ordinationUuid, Ordination.class);
+        Ordination ord = ordDao.findByUuid(ordinationUuid);
         List<Printer> printers = pDao.findAll();
         try {
             for (Printer p : printers) {
@@ -237,8 +236,7 @@ public class PrinterREST {
 
     private PrinterService printPhases(PrinterService service, Map<Phase, QuantifiedOrders> phasesMap) throws IOException {
         List<Phase> usedPhases = new ArrayList<>(phasesMap.keySet());
-        //FIXME Usare priority
-        usedPhases.sort((p1, p2) -> p1.getName().compareTo(p2.getName()));
+        usedPhases.sort((p1, p2) -> Integer.compare(p1.getPriority(), p2.getPriority()));
         for (Phase p : usedPhases) {
             service.size(Size.STANDARD);
             service.printLeft(p.getName() + "...............");

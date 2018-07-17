@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+    <persistence-unit name="restaurant-test-pu" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <class>com.naigoapps.restaurant.model.Addition</class>
+        <class>com.naigoapps.restaurant.model.Bill</class>
+        <class>com.naigoapps.restaurant.model.Category</class>
+        <class>com.naigoapps.restaurant.model.Customer</class>
+        <class>com.naigoapps.restaurant.model.DiningTable</class>
+        <class>com.naigoapps.restaurant.model.Dish</class>
+        <class>com.naigoapps.restaurant.model.Evening</class>
+        <class>com.naigoapps.restaurant.model.Location</class>
+        <class>com.naigoapps.restaurant.model.Order</class>
+        <class>com.naigoapps.restaurant.model.Ordination</class>
+        <class>com.naigoapps.restaurant.model.Phase</class>
+        <class>com.naigoapps.restaurant.model.Printer</class>
+        <class>com.naigoapps.restaurant.model.RestaurantTable</class>
+        <class>com.naigoapps.restaurant.model.Settings</class>
+        <class>com.naigoapps.restaurant.model.Waiter</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <properties>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test"/>
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
+            <property name="hibernate.format_sql" value="false"/>
+            <property name="hibernate.show_sql" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>

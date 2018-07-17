@@ -6,7 +6,6 @@
 package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.model.Category;
-import com.naigoapps.restaurant.model.Location;
 import com.naigoapps.restaurant.model.builders.CategoryBuilder;
 import com.naigoapps.restaurant.model.dao.AdditionDao;
 import com.naigoapps.restaurant.model.dao.CategoryDao;
@@ -66,7 +65,7 @@ public class CategoryREST {
     public Response createCategory(CategoryDTO newCategory) {
         Category category = new CategoryBuilder().
                 name(newCategory.getName()).
-                location(lDao.findByUuid(newCategory.getLocation(), Location.class))
+                location(lDao.findByUuid(newCategory.getLocation()))
                 .getContent();
 
         categoryDao.persist(category);
@@ -91,7 +90,7 @@ public class CategoryREST {
     @Transactional
     public Response updateCategoryLocation(@PathParam("uuid") String uuid, String location) {
         Category c = categoryDao.findByUuid(uuid);
-        c.setLocation(lDao.findByUuid(location, Location.class));
+        c.setLocation(lDao.findByUuid(location));
         return Response.status(200).entity(DTOAssembler.fromCategory(c)).build();
     }
 
@@ -110,7 +109,7 @@ public class CategoryREST {
     @Transactional
     @Produces(MediaType.TEXT_PLAIN)
     public Response deleteCategory(String uuid) {
-        categoryDao.removeByUuid(uuid);
+        categoryDao.deleteByUuid(uuid);
         return ResponseBuilder.ok(uuid);
     }
 

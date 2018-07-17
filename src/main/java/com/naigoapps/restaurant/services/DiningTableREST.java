@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.main.EveningManager;
@@ -36,7 +31,6 @@ import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.printing.BillPrinter;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +56,9 @@ import javax.ws.rs.core.Response;
 @Path("/dining-tables")
 @Produces(MediaType.APPLICATION_JSON)
 public class DiningTableREST {
+
+    private static final String EVENING_NOT_FOUND = "Serata non selezionata";
+    private static final String TABLE_NOT_FOUND = "Tavolo non trovato";
 
     @Inject
     Locks locks;
@@ -142,7 +139,7 @@ public class DiningTableREST {
                                 .dish(dDao.findByUuid(order.getDish()))
                                 .ordination(ordination)
                                 .price(order.getPrice())
-                                .phase(pDao.findByUuid(order.getPhase()))
+                                .phase(order.getPhase() != null ? pDao.findByUuid(order.getPhase()) : pDao.findAll().get(0))
                                 .notes(order.getNotes())
                                 .getContent();
                         List<Addition> additions = new ArrayList<>();
@@ -156,9 +153,9 @@ public class DiningTableREST {
                 }
                 return Response.status(Response.Status.CREATED).entity(DTOAssembler.fromOrdination(ordination)).build();
             }
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return ResponseBuilder.notFound(TABLE_NOT_FOUND);
         }
-        return Response.status(Response.Status.BAD_REQUEST).build();
+        return ResponseBuilder.badRequest("tavolo o ordini non validi");
     }
 
     @PUT
@@ -166,8 +163,7 @@ public class DiningTableREST {
     @Transactional
     public Response editOrders(@PathParam("uuid") String ordinationUuid, OrderDTO[] orders) {
         if (orders != null) {
-            Evening e = eveningManager.getSelectedEvening();
-            Ordination ordination = oDao.findByUuid(ordinationUuid, Ordination.class);
+            Ordination ordination = ordDao.findByUuid(ordinationUuid);
             if (ordination != null) {
                 List<Order> oldOrders = new ArrayList<>(ordination.getOrders());
                 List<Order> newOrders = buildOrders(orders);
@@ -241,8 +237,8 @@ public class DiningTableREST {
     @Transactional
     public Response deleteOrdination(@PathParam("uuid") String tableUuid, String ordUuid) {
         Evening currentEvening = eveningManager.getSelectedEvening();
-        DiningTable table = dtDao.findByUuid(tableUuid, DiningTable.class);
-        Ordination ordination = ordDao.findByUuid(ordUuid, Ordination.class);
+        DiningTable table = dtDao.findByUuid(tableUuid);
+        Ordination ordination = ordDao.findByUuid(ordUuid);
         if (currentEvening != null && table != null && currentEvening.equals(table.getEvening())) {
             if (ordination != null && table.equals(ordination.getTable())) {
                 List<Order> orders = ordination.getOrders();
@@ -330,7 +326,7 @@ public class DiningTableREST {
         Evening currentEvening = eveningManager.getSelectedEvening();
         if (currentEvening != null) {
             DiningTable toUpdate = findTableInEvening(currentEvening, tableUuid);
-            Bill bill = bDao.findByUuid(billUuid, Bill.class);
+            Bill bill = bDao.findByUuid(billUuid);
             if (toUpdate != null && bill != null && toUpdate.equals(bill.getTable())) {
                 bill.clearOrders();
                 bill.setTable(null);
@@ -343,7 +339,7 @@ public class DiningTableREST {
                 return ResponseBuilder.notFound("Tavolo o scontrino non trovato");
             }
         } else {
-            return ResponseBuilder.notFound("Serata non selezionata");
+            return ResponseBuilder.notFound(EVENING_NOT_FOUND);
         }
     }
 
@@ -359,7 +355,7 @@ public class DiningTableREST {
             DiningTable toUpdate = findTableInEvening(currentEvening, tableUuid);
             if (toUpdate != null) {
                 List<Order> orders = bill.getOrders().stream()
-                        .map(uuid -> oDao.findByUuid(uuid, Order.class))
+                        .map(uuid -> oDao.findByUuid(uuid))
                         .collect(Collectors.toList());
                 if (orders.stream().allMatch(order -> toUpdate.equals(order.getOrdination().getTable()))) {
                     if (orders.stream().allMatch(order -> order.getBill() == null)) {
@@ -372,10 +368,10 @@ public class DiningTableREST {
                     return ResponseBuilder.badRequest("Vi sono ordini non appartenenti al tavolo");
                 }
             } else {
-                return ResponseBuilder.notFound("Tavolo non trovato");
+                return ResponseBuilder.notFound(TABLE_NOT_FOUND);
             }
         } else {
-            return ResponseBuilder.notFound("Serata non selezionata");
+            return ResponseBuilder.notFound(EVENING_NOT_FOUND);
         }
     }
 
@@ -402,16 +398,14 @@ public class DiningTableREST {
         Evening currentEvening = eveningManager.getSelectedEvening();
         if (currentEvening != null) {
             DiningTable toUpdate = findTableInEvening(currentEvening, tableUuid);
-            Bill bill = bDao.findByUuid(billUuid, Bill.class);
+            Bill bill = bDao.findByUuid(billUuid);
             if (toUpdate != null && bill != null && toUpdate.equals(bill.getTable())) {
                 bill.clearOrders();
                 List<Order> orders = billDto.getOrders().stream()
-                        .map(uuid -> oDao.findByUuid(uuid, Order.class))
+                        .map(uuid -> oDao.findByUuid(uuid))
                         .collect(Collectors.toList());
 
-                if (orders.stream().allMatch(order -> {
-                    return toUpdate.equals(order.getOrdination().getTable());
-                })) {
+                if (orders.stream().allMatch(order -> toUpdate.equals(order.getOrdination().getTable()))) {
                     if (orders.stream().allMatch(order -> order.getBill() == null)) {
                         bill.setOrders(orders);
                         bill.setTotal(billDto.getTotal());
@@ -427,7 +421,7 @@ public class DiningTableREST {
                 return ResponseBuilder.notFound("Tavolo o fattura non trovati");
             }
         } else {
-            return ResponseBuilder.notFound("Serata non selezionata");
+            return ResponseBuilder.notFound(EVENING_NOT_FOUND);
         }
     }
 
@@ -435,13 +429,13 @@ public class DiningTableREST {
     @Path("print-partial-bill")
     @Transactional
     public Response printPartialBill(String billUuid, @QueryParam("generic") Boolean generic) {
-        Bill bill = bDao.findByUuid(billUuid, Bill.class);
+        Bill bill = bDao.findByUuid(billUuid);
         if (bill != null) {
             Printer mainPrinter = prDao.findMainPrinter();
             if (mainPrinter != null) {
                 try {
                     PrinterService service = new PrinterService(mainPrinter);
-                    service.accept(new BillPrinter(Boolean.TRUE.equals(generic)), bill)
+                    service.accept(new BillPrinter(Boolean.TRUE.equals(generic)), bill, LocalDateTime.now())
                             .lf(3)
                             .cut()
                             .doPrint();
@@ -462,10 +456,10 @@ public class DiningTableREST {
     @Path("bills/{b-uuid}/print-bill")
     @Transactional
     public Response printBill(@PathParam("b-uuid") String billUuid, String customerId, @QueryParam("generic") Boolean generic) {
-        Bill bill = bDao.findByUuid(billUuid, Bill.class);
+        Bill bill = bDao.findByUuid(billUuid);
         Customer customer = null;
         if (customerId != null && !customerId.isEmpty()) {
-            customer = cDao.findByUuid(customerId, Customer.class);
+            customer = cDao.findByUuid(customerId);
         }
         if (bill != null && (customer != null || customerId == null || customerId.isEmpty())) {
             Printer fiscalPrinter = prDao.findFiscalPrinter();
@@ -481,10 +475,20 @@ public class DiningTableREST {
                     bill.setPrintTime(LocalDateTime.now());
 
                     PrinterService service = new PrinterService(fiscalPrinter);
-                    service.accept(new BillPrinter(Boolean.TRUE.equals(generic), customer), bill)
+                    service.accept(new BillPrinter(Boolean.TRUE.equals(generic), customer), bill, LocalDateTime.now())
                             .lf(3)
                             .cut()
                             .doPrint();
+                    
+                    boolean closed = bill.getTable().getOrdinations().stream()
+                            .allMatch(ordination -> {
+                                return ordination.getOrders().stream()
+                                        .noneMatch(order -> order.getBill() == null || order.getBill().getPrintDate() == null);
+                            });
+                    if(closed){
+                        bill.getTable().setStatus(DiningTableStatus.CLOSED);
+                    }
+                    
                     return ResponseBuilder.ok(DTOAssembler.fromDiningTable(bill.getTable()));
                 } catch (IOException ex) {
                     return ResponseBuilder.badRequest("Problema di stampa inaspettato");
@@ -516,7 +520,7 @@ public class DiningTableREST {
                 return ResponseBuilder.notFound("Tavolo non trovato");
             }
         } else {
-            return ResponseBuilder.badRequest("Serata non selezionata");
+            return ResponseBuilder.badRequest(EVENING_NOT_FOUND);
         }
     }
 }

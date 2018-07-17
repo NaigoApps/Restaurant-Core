@@ -5,6 +5,7 @@
  */
 package com.naigoapps.restaurant.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  *
@@ -23,9 +25,11 @@ public class Bill extends BaseEntity {
 
     @ManyToOne
     private Customer customer;
-    
+
     private LocalDateTime printTime;
     
+    private LocalDate printDate;
+
     @ManyToOne
     private DiningTable table;
 
@@ -35,7 +39,7 @@ public class Bill extends BaseEntity {
     private int coverCharges;
 
     private float total;
-    
+
     private Integer progressive;
 
     public Bill() {
@@ -52,9 +56,9 @@ public class Bill extends BaseEntity {
             order.setBill(this);
         });
     }
-    
-    public void removeOrder(Order o){
-        if(this.orders.contains(o)){
+
+    public void removeOrder(Order o) {
+        if (this.orders.contains(o)) {
             this.orders.remove(o);
             o.setBill(null);
         }
@@ -90,11 +94,11 @@ public class Bill extends BaseEntity {
 
     public float getEstimatedTotal() {
         Float tot = orders.stream()
-                .map(o -> o.getPrice())
+                .map(Order::getPrice)
                 .reduce(0.0f, (p1, p2) -> p1 + p2);
         return tot + table.getEvening().getCoverCharge() * table.getCoverCharges();
     }
-    
+
     public float getTotal() {
         return total;
     }
@@ -118,7 +122,7 @@ public class Bill extends BaseEntity {
     public void setProgressive(Integer progressive) {
         this.progressive = progressive;
     }
-    
+
     public Customer getCustomer() {
         return customer;
     }
@@ -129,10 +133,19 @@ public class Bill extends BaseEntity {
 
     public void setPrintTime(LocalDateTime printTime) {
         this.printTime = printTime;
+        if(this.printTime != null){
+            this.printDate = this.printTime.toLocalDate();
+        }else{
+            this.printDate = null;
+        }
     }
 
     public LocalDateTime getPrintTime() {
         return printTime;
+    }
+
+    public LocalDate getPrintDate() {
+        return printDate;
     }
 
 }

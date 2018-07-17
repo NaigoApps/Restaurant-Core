@@ -52,7 +52,7 @@ public class Order extends BaseEntity {
 
     public void setBill(Bill bill) {
         this.bill = bill;
-        if(bill != null){
+        if (bill != null) {
             bill.addOrder(this);
         }
     }
@@ -96,8 +96,8 @@ public class Order extends BaseEntity {
     public List<Addition> getAdditions() {
         return additions;
     }
-    
-    public void clearAdditions(){
+
+    public void clearAdditions() {
         this.additions = new ArrayList<>();
     }
 
@@ -117,40 +117,43 @@ public class Order extends BaseEntity {
     }
 
     public boolean isTheSame(Order other) {
-        if (notes != null && other.notes == null ||
-                notes == null && other.notes != null) {
+        boolean ok = true;
+        ok &= checkNotes(other);
+        ok &= checkDish(other);
+        ok &= checkPhase(other);
+        ok &= checkAdditions(other);
+        ok &= checkPrice(other);
+        return ok;
+    }
+
+    private boolean checkNotes(Order other) {
+        return checkObject(notes, other.notes);
+    }
+
+    private boolean checkDish(Order other) {
+        return checkObject(dish, other.dish);
+    }
+
+    private boolean checkPhase(Order other) {
+        return checkObject(phase, other.phase);
+    }
+
+    private boolean checkAdditions(Order other) {
+        return additions.stream()
+                .allMatch(a -> other.additions.contains(a))
+                && other.additions.stream()
+                        .allMatch(a -> additions.contains(a));
+    }
+
+    private static boolean checkObject(Object a, Object b) {
+        if (a != null && b == null || a == null && b != null) {
             return false;
         }
-        if(notes != null && other.notes != null && !notes.equals(other.notes)){
-            return false;
-        }
-        
-        if (dish != null && other.dish == null
-                || dish == null && other.dish != null) {
-            return false;
-        }
-        if (dish != null && other.dish != null && !dish.equals(other.dish)) {
-            return false;
-        }
-        if (phase != null && other.phase == null
-                || phase == null && other.phase != null) {
-            return false;
-        }
-        if (phase != null && other.phase != null && !phase.equals(other.phase)) {
-            return false;
-        }
-        if (!additions.stream()
-                .noneMatch(a -> !other.additions.contains(a))) {
-            return false;
-        }
-        if (!other.additions.stream()
-                .noneMatch(a -> !additions.contains(a))) {
-            return false;
-        }
-        if(price != other.price){
-            return false;
-        }
-        return true;
+        return !(a != null && b != null && !a.equals(b));
+    }
+
+    private boolean checkPrice(Order other) {
+        return price == other.price;
     }
 
     @Override
@@ -158,5 +161,4 @@ public class Order extends BaseEntity {
         return "1 x " + dish.getName();
     }
 
-    
 }

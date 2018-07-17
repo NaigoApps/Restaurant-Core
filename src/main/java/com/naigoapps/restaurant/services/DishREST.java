@@ -150,7 +150,7 @@ public class DishREST {
     }
 
     private boolean hasOrders(Dish d) {
-        return oDao.countByDish(d.getUuid()) > 0;
+        return oDao.countByDish(d) > 0;
     }
 
     @PUT
@@ -201,7 +201,7 @@ public class DishREST {
     @Transactional
     @Produces(MediaType.TEXT_PLAIN)
     public Response deleteDish(String uuid) {
-        dishDao.removeByUuid(uuid);
+        dishDao.deleteByUuid(uuid);
         return ResponseBuilder.ok(uuid);
     }
 }

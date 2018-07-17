@@ -7,6 +7,22 @@
                 <goal>sonar:sonar</goal>
             </goals>
         </action>
+        <action>
+            <actionName>CUSTOM-Sonar Build</actionName>
+            <displayName>Sonar Build</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>org.jacoco:jacoco-maven-plugin:prepare-agent</goal>
+                <goal>install</goal>
+                <goal>-Dmaven.test.failure.ignore=false</goal>
+                <goal>sonar:sonar</goal>
+                
+            </goals>
+            <activatedProfiles>
+                <activatedProfile>Sonar</activatedProfile>
+                <activatedProfile>Build</activatedProfile>
+            </activatedProfiles>
+        </action>
         
         
     </actions>

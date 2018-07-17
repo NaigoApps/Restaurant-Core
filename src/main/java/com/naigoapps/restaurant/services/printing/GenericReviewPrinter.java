@@ -5,13 +5,11 @@
  */
 package com.naigoapps.restaurant.services.printing;
 
-import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.model.Order;
-import com.naigoapps.restaurant.model.utils.mappers.OrderCategoryMapper;
 import com.naigoapps.restaurant.services.PrinterService;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -20,7 +18,7 @@ import java.util.Map;
 public class GenericReviewPrinter implements ObjectPrinter<List<Order>> {
 
     @Override
-    public PrinterService apply(PrinterService ps, List<Order> orders) throws IOException {
+    public PrinterService apply(PrinterService ps, List<Order> orders, LocalDateTime time) throws IOException {
         return ps.printLine("GENERICO", PrinterService.formatPrice(
                 orders.stream()
                         .map(order -> order.getPrice())

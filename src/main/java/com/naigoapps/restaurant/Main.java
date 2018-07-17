@@ -10,8 +10,9 @@ import com.naigoapps.restaurant.model.builders.CategoryBuilder;
 import com.naigoapps.restaurant.model.builders.DishBuilder;
 import com.naigoapps.restaurant.model.builders.RestaurantTableBuilder;
 import com.naigoapps.restaurant.model.builders.WaiterBuilder;
-import com.naigoapps.restaurant.model.dao.Dao;
+import com.naigoapps.restaurant.model.dao.AbstractDao;
 import com.naigoapps.restaurant.model.dao.Generic;
+import com.naigoapps.restaurant.model.dao.GenericDao;
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -25,9 +26,8 @@ import javax.inject.Inject;
 @Singleton
 public class Main {
 
-    @Inject
-    @Generic
-    private Dao dao;
+    @Inject @Generic
+    private GenericDao dao;
 
     @PostConstruct
     public void init() {

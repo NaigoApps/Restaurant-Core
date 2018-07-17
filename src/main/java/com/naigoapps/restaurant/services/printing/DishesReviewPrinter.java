@@ -10,6 +10,7 @@ import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.utils.mappers.OrdersDishMapper;
 import com.naigoapps.restaurant.services.PrinterService;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ import java.util.Map;
 public class DishesReviewPrinter implements ObjectPrinter<List<Order>> {
 
     @Override
-    public PrinterService apply(PrinterService ps, List<Order> obj) throws IOException {
+    public PrinterService apply(PrinterService ps, List<Order> obj, LocalDateTime time) throws IOException {
         
         Map<Dish, List<Order>> map = obj.stream().collect(OrdersDishMapper.toDishMap());
         for(Map.Entry<Dish, List<Order>> entry : map.entrySet()){

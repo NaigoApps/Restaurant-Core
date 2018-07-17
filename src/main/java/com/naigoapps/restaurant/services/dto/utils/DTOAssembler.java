@@ -172,31 +172,33 @@ public class DTOAssembler {
     }
 
     public static BillDTO fromBill(Bill bill) {
-        return new BillDTO(
-                bill.getProgressive(),
-                uuid(bill.getCustomer()),
-                bill.getPrintTime(),
-                uuid(bill.getTable()),
-                bill.getOrders().stream()
-                        .map(order -> uuid(order))
-                        .collect(Collectors.toList()),
-                bill.getCoverCharges(),
-                bill.getTotal(),
-                bill.getUuid()
-        );
+        BillDTO result = new BillDTO();
+        result.setProgressive(bill.getProgressive());
+        result.setCustomer(uuid(bill.getCustomer()));
+        result.setPrintTime(bill.getPrintTime());
+        result.setTable(uuid(bill.getTable()));
+        result.setOrders(bill.getOrders()
+                .stream()
+                .map(order -> uuid(order))
+                .collect(Collectors.toList()));
+        result.setCoverCharges(bill.getCoverCharges());
+        result.setTotal(bill.getTotal());
+        result.setUuid(bill.getUuid());
+        return result;
     }
 
     public static CustomerDTO fromCustomer(Customer customer) {
-        return new CustomerDTO(
-                customer.getUuid(),
-                customer.getName(),
-                customer.getSurname(),
-                customer.getPiva(),
-                customer.getCf(),
-                customer.getAddress(),
-                customer.getCity(),
-                customer.getCap(),
-                customer.getDistrict());
+        CustomerDTO result = new CustomerDTO();
+        result.setUuid(customer.getUuid());
+        result.setName(customer.getName());
+        result.setSurname(customer.getSurname());
+        result.setPiva(customer.getPiva());
+        result.setCf(customer.getCf());
+        result.setAddress(customer.getAddress());
+        result.setCity(customer.getCity());
+        result.setCap(customer.getCap());
+        result.setDistrict(customer.getDistrict());
+        return result;
     }
 
     public static SettingsDTO fromSettings(Settings settings) {

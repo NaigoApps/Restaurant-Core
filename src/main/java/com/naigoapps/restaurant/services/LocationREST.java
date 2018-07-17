@@ -62,7 +62,7 @@ public class LocationREST {
     @Consumes(MediaType.APPLICATION_JSON)
     @Transactional
     public Response createLocation(LocationDTO l) {
-        Printer printer = pDao.findByUuid(l.getPrinter(), Printer.class);
+        Printer printer = pDao.findByUuid(l.getPrinter());
         if (printer != null) {
             Location location = new Location();
             location.setName(l.getName());
@@ -79,7 +79,7 @@ public class LocationREST {
     @Path("{uuid}/name")
     @Transactional
     public Response updateLocationName(@PathParam("uuid") String uuid, String name) {
-        Location l = lDao.findByUuid(uuid, Location.class);
+        Location l = lDao.findByUuid(uuid);
         if (l != null) {
             l.setName(name);
             return ResponseBuilder.ok(DTOAssembler.fromLocation(l));
@@ -92,8 +92,8 @@ public class LocationREST {
     @Path("{uuid}/printer")
     @Transactional
     public Response updateLocationPrinter(@PathParam("uuid") String uuid, String printer) {
-        Location l = lDao.findByUuid(uuid, Location.class);
-        Printer p = pDao.findByUuid(printer, Printer.class);
+        Location l = lDao.findByUuid(uuid);
+        Printer p = pDao.findByUuid(printer);
         if (l != null) {
             if (p != null) {
                 l.setPrinter(p);
@@ -110,7 +110,7 @@ public class LocationREST {
     @Transactional
     @Produces(MediaType.TEXT_PLAIN)
     public Response deleteTable(String uuid){
-        lDao.removeByUuid(uuid);   
+        lDao.deleteByUuid(uuid);   
         return ResponseBuilder.ok(uuid);
     }
 

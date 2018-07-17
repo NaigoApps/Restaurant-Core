@@ -12,8 +12,6 @@ import com.naigoapps.restaurant.model.dao.SettingsDao;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.GET;
@@ -75,7 +73,7 @@ public class SettingsREST {
     public Response setPrinter(BiConsumer<Settings, Printer> setter, String value){
         Settings settings = settingsDao.find();
         
-        Printer printer = pDao.findByUuid(value, Printer.class);
+        Printer printer = pDao.findByUuid(value);
         if(printer != null){
             setter.accept(settings, printer);
             return ResponseBuilder.ok(DTOAssembler.fromSettings(settings));

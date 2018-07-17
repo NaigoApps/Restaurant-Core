@@ -31,7 +31,7 @@ public class BillPrinter implements ObjectPrinter<Bill> {
     }
 
     @Override
-    public PrinterService apply(PrinterService ps, Bill obj) throws IOException {
+    public PrinterService apply(PrinterService ps, Bill obj, LocalDateTime time) throws IOException {
 
         ps.size(PrinterService.Size.STANDARD)
                 .lf(3);
@@ -46,15 +46,15 @@ public class BillPrinter implements ObjectPrinter<Bill> {
             }
         }
         ps.printCenter("Tavolo " + obj.getTable().getTable().getName())
-                .printCenter(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")))
+                .printCenter(time.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")))
                 .lf()
                 .printLine(obj.getCoverCharges() + " COPERTI",
                         PrinterService.formatPrice(obj.getTable().getEvening().getCoverCharge() * obj.getCoverCharges()));
 
         if(generic){
-            ps.accept(new GenericReviewPrinter(), obj.getOrders());
+            ps.accept(new GenericReviewPrinter(), obj.getOrders(), time);
         }else{
-            ps.accept(new CategoriesReviewPrinter(), obj.getOrders());
+            ps.accept(new CategoriesReviewPrinter(), obj.getOrders(), time);
         }
 
         float estimatedTotal = obj.getEstimatedTotal();
@@ -70,4 +70,14 @@ public class BillPrinter implements ObjectPrinter<Bill> {
 
         return ps;
     }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public boolean isGeneric() {
+        return generic;
+    }
+    
+    
 }

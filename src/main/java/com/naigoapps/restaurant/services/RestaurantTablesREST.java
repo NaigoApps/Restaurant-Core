@@ -102,7 +102,7 @@ public class RestaurantTablesREST {
     @Transactional
     @Produces(MediaType.TEXT_PLAIN)
     public Response deleteTable(String uuid){
-        tablesDao.removeByUuid(uuid);   
+        tablesDao.deleteByUuid(uuid);   
         return ResponseBuilder.ok(uuid);
     }
 }

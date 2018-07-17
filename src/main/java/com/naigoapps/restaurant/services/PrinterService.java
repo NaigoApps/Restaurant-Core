@@ -9,10 +9,8 @@ import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.services.printing.ObjectPrinter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 import javax.print.Doc;
 import javax.print.DocFlavor;
 import javax.print.DocPrintJob;
@@ -90,6 +88,10 @@ public class PrinterService {
         return this;
     }
 
+    public String getText(){
+        return this.text.toString();
+    }
+    
     public PrinterService print(int s) throws IOException {
         return this.printString(String.valueOf(s));
     }
@@ -140,8 +142,8 @@ public class PrinterService {
         return this;
     }
 
-    public <T> PrinterService accept(ObjectPrinter printer, T obj) throws IOException {
-        return printer.apply(this, obj);
+    public <T> PrinterService accept(ObjectPrinter printer, T obj, LocalDateTime time) throws IOException {
+        return printer.apply(this, obj, time);
     }
 
     public enum Underline {

@@ -9,7 +9,6 @@ import com.naigoapps.restaurant.main.EveningManager;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
-import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.RestaurantTable;
 import com.naigoapps.restaurant.model.Settings;
 import com.naigoapps.restaurant.model.Waiter;
@@ -205,7 +204,7 @@ public class EveningREST {
             if (toRemove.getOrdinations().size() > 0) {
                 return ResponseBuilder.badRequest("Il tavolo contiene delle comande");
             }
-            dtDao.removeByUuid(uuid);
+            dtDao.deleteByUuid(uuid);
             return ResponseBuilder.ok(DTOAssembler.fromEvening(currentEvening));
         }
         return ResponseBuilder.badRequest("Serata non correttamente selezionata");

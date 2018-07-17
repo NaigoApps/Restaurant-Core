@@ -7,40 +7,41 @@ package com.naigoapps.restaurant.model.dao;
 
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.Settings;
-import java.util.List;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
 /**
  *
  * @author naigo
  */
-public class PrinterDao extends Dao{
-    
+public class PrinterDao extends AbstractDao<Printer> {
+
     @Inject
     private SettingsDao sDao;
 
-    public List<Printer> findAll(){
-        EntityManager em = getEntityManager();
-        Query q = em.createQuery("FROM Printer p ORDER BY p.name", Printer.class);
-        List<Printer> printers = q.getResultList();
-        return printers;
-    }
-    
-    public Printer findMainPrinter(){
+    public Printer findMainPrinter() {
         Settings s = sDao.find();
-        if(s != null){
+        if (s != null) {
             return s.getMainPrinter();
         }
         return null;
     }
-    
-    public Printer findFiscalPrinter(){
+
+    public Printer findFiscalPrinter() {
         Settings s = sDao.find();
-        if(s != null){
+        if (s != null) {
             return s.getFiscalPrinter();
         }
         return null;
     }
+
+    @Override
+    protected String getOrderByClause() {
+        return "name";
+    }
+
+    @Override
+    public Class<Printer> getEntityClass() {
+        return Printer.class;
+    }
+
 }

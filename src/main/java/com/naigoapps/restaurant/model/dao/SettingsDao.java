@@ -14,17 +14,22 @@ import javax.persistence.Query;
  *
  * @author naigo
  */
-public class SettingsDao extends Dao{
+public class SettingsDao extends AbstractDao<Settings> {
 
-    public Settings find(){
+    public Settings find() {
         Query q = getEntityManager().createQuery("FROM Settings s", Settings.class);
         List<Settings> settings = q.getResultList();
-        if(settings.isEmpty()){
+        if (settings.isEmpty()) {
             Settings s = new SettingsBuilder().getContent();
             getEntityManager().persist(s);
             return s;
         }
         return settings.get(0);
     }
-    
+
+    @Override
+    public Class<Settings> getEntityClass() {
+        return Settings.class;
+    }
+
 }

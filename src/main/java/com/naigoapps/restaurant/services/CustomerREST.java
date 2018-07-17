@@ -6,15 +6,12 @@
 package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.model.Customer;
-import com.naigoapps.restaurant.model.Printer;
-import com.naigoapps.restaurant.model.Settings;
 import com.naigoapps.restaurant.model.builders.CustomerBuilder;
 import com.naigoapps.restaurant.model.dao.CustomerDao;
 import com.naigoapps.restaurant.services.dto.CustomerDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -73,60 +70,60 @@ public class CustomerREST {
     @Path("{uuid}/name")
     @Transactional
     public Response updateCustomerName(@PathParam("uuid") String uuid, String value) {
-        return updateCustomerProperty((customer) -> customer.setName(value), uuid);
+        return updateCustomerProperty(customer -> customer.setName(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/surname")
     @Transactional
     public Response updateCustomerSurname(@PathParam("uuid") String uuid, String value) {
-        return updateCustomerProperty((customer) -> customer.setSurname(value), uuid);
+        return updateCustomerProperty(customer -> customer.setSurname(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/cf")
     @Transactional
     public Response updateCustomerCf(@PathParam("uuid") String uuid, String value) {
-        return updateCustomerProperty((customer) -> customer.setCf(value), uuid);
+        return updateCustomerProperty(customer -> customer.setCf(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/piva")
     @Transactional
     public Response updateCustomerPiva(@PathParam("uuid") String uuid, String value) {
-        return updateCustomerProperty((customer) -> customer.setPiva(value), uuid);
+        return updateCustomerProperty(customer -> customer.setPiva(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/city")
     @Transactional
     public Response updateCustomerCity(@PathParam("uuid") String uuid, String value) {
-        return updateCustomerProperty((customer) -> customer.setCity(value), uuid);
+        return updateCustomerProperty(customer -> customer.setCity(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/cap")
     @Transactional
     public Response updateCustomerCap(@PathParam("uuid") String uuid, String value) {
-        return updateCustomerProperty((customer) -> customer.setCap(value), uuid);
+        return updateCustomerProperty(customer -> customer.setCap(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/address")
     @Transactional
     public Response updateCustomerAddress(@PathParam("uuid") String uuid, String value) {
-        return updateCustomerProperty((customer) -> customer.setAddress(value), uuid);
+        return updateCustomerProperty(customer -> customer.setAddress(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/district")
     @Transactional
     public Response updateCustomerDistrict(@PathParam("uuid") String uuid, String value) {
-        return updateCustomerProperty((customer) -> customer.setDistrict(value), uuid);
+        return updateCustomerProperty(customer -> customer.setDistrict(value), uuid);
     }
     
     public Response updateCustomerProperty(Consumer<Customer> setter, String uuid){
-        Customer c = cDao.findByUuid(uuid, Customer.class);
+        Customer c = cDao.findByUuid(uuid);
         if (c != null) {
             setter.accept(c);
             return ResponseBuilder.ok(DTOAssembler.fromCustomer(c));
@@ -139,7 +136,7 @@ public class CustomerREST {
     @Transactional
     @Produces(MediaType.TEXT_PLAIN)
     public Response deleteCustomer(String uuid) {
-        cDao.getEntityManager().remove(cDao.findByUuid(uuid, Customer.class));
+        cDao.getEntityManager().remove(cDao.findByUuid(uuid));
         return ResponseBuilder.ok(uuid);
     }
 }

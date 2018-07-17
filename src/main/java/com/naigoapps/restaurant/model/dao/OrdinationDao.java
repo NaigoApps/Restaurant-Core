@@ -8,38 +8,36 @@ package com.naigoapps.restaurant.model.dao;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Ordination;
 import java.util.List;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**
  *
  * @author naigo
  */
-public class OrdinationDao extends Dao{
+public class OrdinationDao extends AbstractDao<Ordination> {
 
-    
-    public void removeByUuid(String uuid){
-        Query q = getEntityManager().createQuery("DELETE FROM Ordination o where o.uuid = :uuid");
-        q.setParameter("uuid", uuid);
-        q.executeUpdate();
-    }
-    
-    public List<Ordination> findByDiningTable(String uuid){
+    public List<Ordination> findByDiningTable(String uuid) {
         TypedQuery<Ordination> q = getEntityManager().createQuery("FROM Ordination o where o.table.uuid = :uuid", Ordination.class);
         q.setParameter("uuid", uuid);
         List<Ordination> o = q.getResultList();
         return o;
     }
-    
-    public int nextProgressive(Evening e){
+
+    public int nextProgressive(Evening e) {
         TypedQuery<Integer> q = getEntityManager().createQuery(
                 "SELECT max(o.progressive) FROM Ordination o WHERE o.table.evening = :evening", Integer.class);
         q.setParameter("evening", e);
         Integer progressive = q.getSingleResult();
-        if(progressive != null){
+        if (progressive != null) {
             return progressive + 1;
-        }else{
+        } else {
             return 1;
         }
     }
+
+    @Override
+    public Class<Ordination> getEntityClass() {
+        return Ordination.class;
+    }
+
 }

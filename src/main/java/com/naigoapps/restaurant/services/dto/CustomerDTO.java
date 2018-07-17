@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.naigoapps.restaurant.services.dto;
 
 /**
@@ -18,23 +13,6 @@ public class CustomerDTO extends DTO{
     private String city;
     private String cap;
     private String district;
-
-    public CustomerDTO() {
-    }
-
-    public CustomerDTO(String uuid, String name, String surname, String piva, String cf, String address, String city, String cap, String district) {
-        super(uuid);
-        this.name = name;
-        this.surname = surname;
-        this.piva = piva;
-        this.cf = cf;
-        this.address = address;
-        this.city = city;
-        this.cap = cap;
-        this.district = district;
-    }
-
-    
     
     public String getName() {
         return name;
