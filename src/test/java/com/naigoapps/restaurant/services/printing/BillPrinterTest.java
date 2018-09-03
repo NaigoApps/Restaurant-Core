@@ -24,7 +24,6 @@ import com.naigoapps.restaurant.model.builders.RestaurantTableBuilder;
 import com.naigoapps.restaurant.services.PrinterService;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,7 +46,6 @@ public class BillPrinterTest {
     public void setUp() {
         printer = new PrinterBuilder()
                 .line(20)
-                .main(true)
                 .name("printer")
                 .getContent();
         service = new PrinterService(printer);

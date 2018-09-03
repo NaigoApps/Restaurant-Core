@@ -5,19 +5,20 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
+import com.naigoapps.restaurant.utils.WeldTestRunner;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.runner.RunWith;
 
 /**
  *
  * @author naigo
  */
+@RunWith(WeldTestRunner.class)
 public abstract class AbstractPersistenceTest {
 
     private EntityManagerFactory emf;

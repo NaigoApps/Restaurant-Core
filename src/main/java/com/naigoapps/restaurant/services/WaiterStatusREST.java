@@ -5,7 +5,6 @@
  */
 package com.naigoapps.restaurant.services;
 
-import com.naigoapps.restaurant.model.DishStatus;
 import com.naigoapps.restaurant.model.WaiterStatus;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

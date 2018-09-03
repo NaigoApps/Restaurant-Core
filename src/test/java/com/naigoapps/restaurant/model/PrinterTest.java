@@ -29,13 +29,6 @@ public class PrinterTest {
     }
 
     @Test
-    public void testSetMain() {
-        assertFalse(printer.isMain());
-        printer.setMain(true);
-        assertTrue(printer.isMain());
-    }
-
-    @Test
     public void testSetLineCharacters() {
         printer.setLineCharacters(10);
         assertEquals(10, printer.getLineCharacters());

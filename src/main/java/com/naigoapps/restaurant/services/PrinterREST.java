@@ -69,7 +69,6 @@ public class PrinterREST {
     public Response createPrinter(PrinterDTO p) {
         Printer printer = new Printer();
         printer.setName(p.getName());
-        printer.setMain(p.isMain());
         printer.setLineCharacters(p.getLineCharacters());
         pDao.persist(printer);
 
@@ -86,18 +85,6 @@ public class PrinterREST {
             return ResponseBuilder.ok(DTOAssembler.fromPrinter(p));
         }
         return ResponseBuilder.notFound("Stampante non trovata");
-    }
-
-    @PUT
-    @Path("{uuid}/main")
-    @Transactional
-    public Response updateMainPrinter(@PathParam("uuid") String uuid, boolean main) {
-        Printer target = pDao.findByUuid(uuid);
-        if (target != null) {
-            target.setMain(main);
-        }
-
-        return ResponseBuilder.ok(DTOAssembler.fromPrinter(target));
     }
 
     @PUT

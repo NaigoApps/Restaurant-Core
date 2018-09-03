@@ -16,23 +16,11 @@ public class CategoryDTO extends DTO{
     
     private String location;
 
+    private Integer color;
+    
     private List<String> dishes;
     
     private List<String> additions;
-
-    public CategoryDTO() {
-    }
-    
-    
-    public CategoryDTO(String uuid, String name, String location, List<String> dishes, List<String> additions) {
-        super(uuid);
-        this.name = name;
-        this.location = location;
-        this.dishes = dishes;
-        this.additions = additions;
-    }
-
-    
     
     public String getName() {
         return name;
@@ -65,8 +53,13 @@ public class CategoryDTO extends DTO{
     public List<String> getAdditions() {
         return additions;
     }
-    
-    
-    
+
+    public void setColor(Integer color) {
+        this.color = color;
+    }
+
+    public Integer getColor() {
+        return color;
+    }
 
 }

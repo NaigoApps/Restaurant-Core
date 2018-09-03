@@ -28,11 +28,6 @@ public class PrinterBuilderTest {
     }
 
     @Test
-    public void testMain() {
-        assertTrue(builder.main(true).getContent().isMain());
-    }
-
-    @Test
     public void testLine() {
         assertEquals(10, builder.line(10).getContent().getLineCharacters());
     }

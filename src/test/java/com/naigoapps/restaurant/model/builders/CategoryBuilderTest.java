@@ -9,6 +9,7 @@ import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Location;
+import java.awt.Color;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -49,6 +50,24 @@ public class CategoryBuilderTest {
     public void testAddition() {
         Addition addition = new AdditionBuilder().getContent();
         assertTrue(builder.addition(addition).getContent().getAdditions().contains(addition));
+    }
+    
+    @Test
+    public void testColor(){
+        Category cat = builder.color(new Color(123)).getContent();
+        assertEquals(new Color(123), cat.getColor());
+    }
+
+    @Test
+    public void testQuick() {
+        Location loc = new LocationBuilder().getContent();
+        Category cat = builder.quick("A", loc).getContent();
+        assertEquals("A", cat.getName());
+        assertEquals(loc, cat.getLocation());
+    }
+
+    @Test
+    public void testGetContent() {
     }
 
 }

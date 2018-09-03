@@ -13,27 +13,16 @@ public class PrinterDTO  extends DTO{
 
     private String name;
     
-    private boolean main;
-    
     private int lineCharacters;
 
     public PrinterDTO() {
         super();
     }
 
-    public PrinterDTO(String uuid, String name, boolean main, int lineCharacters) {
+    public PrinterDTO(String uuid, String name, int lineCharacters) {
         super(uuid);
         this.name = name;
-        this.main = main;
         this.lineCharacters = lineCharacters;
-    }
-
-    public void setMain(boolean main) {
-        this.main = main;
-    }
-
-    public boolean isMain() {
-        return main;
     }
 
     public String getName() {

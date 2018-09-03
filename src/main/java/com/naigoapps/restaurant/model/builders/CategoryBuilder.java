@@ -9,6 +9,7 @@ import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Location;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import java.util.List;
 public class CategoryBuilder implements Builder<Category>{
 
     private String name;
+    private Color color;
     private Location location;
     private List<Dish> dishes;
     private List<Addition> additions;
@@ -28,8 +30,19 @@ public class CategoryBuilder implements Builder<Category>{
         this.additions = new ArrayList<>();
     }
     
+    public CategoryBuilder quick(String name, Location location){
+        this.name = name;
+        this.location = location;
+        return this;
+    }
+    
     public CategoryBuilder name(String name){
         this.name = name;
+        return this;
+    }
+    
+    public CategoryBuilder color(Color c){
+        this.color = c;
         return this;
     }
     
@@ -55,6 +68,7 @@ public class CategoryBuilder implements Builder<Category>{
         result.setLocation(location);
         result.setDishes(dishes);
         result.setAdditions(additions);
+        result.setColor(color);
         return result;
     }
     

@@ -14,16 +14,10 @@ import com.naigoapps.restaurant.model.Printer;
 public class PrinterBuilder implements Builder<Printer>{
 
     private String name;
-    private boolean main;
     private int lineCharacters;
     
     public PrinterBuilder name(String value){
         this.name = value;
-        return this;
-    }
-    
-    public PrinterBuilder main(boolean value){
-        this.main = value;
         return this;
     }
     
@@ -36,7 +30,6 @@ public class PrinterBuilder implements Builder<Printer>{
     public Printer getContent() {
         Printer result = new Printer();
         result.setLineCharacters(lineCharacters);
-        result.setMain(main);
         result.setName(name);
         return result;
     }

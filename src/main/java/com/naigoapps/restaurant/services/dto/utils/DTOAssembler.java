@@ -81,7 +81,7 @@ public class DTOAssembler {
     }
 
     public static PrinterDTO fromPrinter(Printer printer) {
-        return new PrinterDTO(printer.getUuid(), printer.getName(), printer.isMain(), printer.getLineCharacters());
+        return new PrinterDTO(printer.getUuid(), printer.getName(), printer.getLineCharacters());
     }
 
     public static LocationDTO fromLocation(Location location) {
@@ -96,17 +96,20 @@ public class DTOAssembler {
     }
 
     public static CategoryDTO fromCategory(Category category) {
-        return new CategoryDTO(
-                category.getUuid(),
-                category.getName(),
-                category.getLocation() != null ? category.getLocation().getUuid() : null,
-                category.getDishes().stream()
-                        .map(dish -> dish.getUuid())
-                        .collect(Collectors.toList()),
-                category.getAdditions().stream()
-                        .map(addition -> addition.getUuid())
-                        .collect(Collectors.toList())
-        );
+        CategoryDTO result = new CategoryDTO();
+        result.setUuid(category.getUuid());
+        result.setName(category.getName());
+        result.setLocation(uuid(category.getLocation()));
+        if (category.getColor() != null) {
+            result.setColor(category.getColor().getRGB() & 0x00FFFFFF);
+        }
+        result.setDishes(category.getDishes().stream()
+                .map(dish -> dish.getUuid())
+                .collect(Collectors.toList()));
+        result.setAdditions(category.getAdditions().stream()
+                .map(add -> add.getUuid())
+                .collect(Collectors.toList()));
+        return result;
     }
 
     public static DishDTO fromDish(Dish dish) {
