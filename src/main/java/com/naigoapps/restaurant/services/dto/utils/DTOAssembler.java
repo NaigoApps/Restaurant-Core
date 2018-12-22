@@ -36,6 +36,7 @@ import com.naigoapps.restaurant.services.dto.PrinterDTO;
 import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
 import com.naigoapps.restaurant.services.dto.SettingsDTO;
 import com.naigoapps.restaurant.services.dto.WaiterDTO;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -56,9 +57,7 @@ public class DTOAssembler {
                 evening.getUuid(),
                 evening.getDay(),
                 evening.getCoverCharge(),
-                evening.getDiningTables().stream()
-                        .map(DTOAssembler::fromDiningTable)
-                        .collect(Collectors.toList()));
+                uuids(evening.getDiningTables()));
     }
 
     public static WaiterDTO fromWaiter(Waiter waiter) {
@@ -103,12 +102,8 @@ public class DTOAssembler {
         if (category.getColor() != null) {
             result.setColor(category.getColor().getRGB() & 0x00FFFFFF);
         }
-        result.setDishes(category.getDishes().stream()
-                .map(dish -> dish.getUuid())
-                .collect(Collectors.toList()));
-        result.setAdditions(category.getAdditions().stream()
-                .map(add -> add.getUuid())
-                .collect(Collectors.toList()));
+        result.setDishes(uuids(category.getDishes()));
+        result.setAdditions(uuids(category.getAdditions()));
         return result;
     }
 
@@ -116,7 +111,7 @@ public class DTOAssembler {
         if (dish != null) {
             return new DishDTO(
                     dish.getUuid(),
-                    dish.getCategory().getUuid(),
+                    uuid(dish.getCategory()),
                     dish.getName(),
                     dish.getPrice(),
                     dish.getDescription(),
@@ -139,18 +134,17 @@ public class DTOAssembler {
                 o.getCreationTime(),
                 o.getProgressive(),
                 o.getOrders().stream()
-                        .map(DTOAssembler::fromOrder)
-                        .collect(Collectors.toList()),
+                    .map(DTOAssembler::fromOrder)
+                    .collect(Collectors.toList()),
                 o.isDirty(),
                 o.getUuid());
     }
 
     public static OrderDTO fromOrder(Order order) {
         return new OrderDTO(
+                uuid(order.getOrdination()),
                 order.getDish().getUuid(),
-                order.getAdditions().stream()
-                        .map(a -> a.getUuid())
-                        .collect(Collectors.toList()),
+                uuids(order.getAdditions()),
                 order.getPrice(),
                 order.getNotes(),
                 uuid(order.getPhase()),
@@ -160,14 +154,11 @@ public class DTOAssembler {
 
     public static DiningTableDTO fromDiningTable(DiningTable diningTable) {
         return new DiningTableDTO(
+                uuid(diningTable.getEvening()),
                 diningTable.getCoverCharges(),
                 uuid(diningTable.getWaiter()),
-                diningTable.getOrdinations().stream()
-                        .map(DTOAssembler::fromOrdination)
-                        .collect(Collectors.toList()),
-                diningTable.getBills().stream()
-                        .map(DTOAssembler::fromBill)
-                        .collect(Collectors.toList()),
+                uuids(diningTable.getOrdinations()),
+                uuids(diningTable.getBills()),
                 diningTable.getDate(),
                 diningTable.getTable().getUuid(),
                 diningTable.getStatus(),
@@ -180,10 +171,7 @@ public class DTOAssembler {
         result.setCustomer(uuid(bill.getCustomer()));
         result.setPrintTime(bill.getPrintTime());
         result.setTable(uuid(bill.getTable()));
-        result.setOrders(bill.getOrders()
-                .stream()
-                .map(order -> uuid(order))
-                .collect(Collectors.toList()));
+        result.setOrders(uuids(bill.getOrders()));
         result.setCoverCharges(bill.getCoverCharges());
         result.setTotal(bill.getTotal());
         result.setUuid(bill.getUuid());
@@ -210,10 +198,18 @@ public class DTOAssembler {
                 settings.getDefaultCoverCharge(),
                 uuid(settings.getMainPrinter()),
                 uuid(settings.getFiscalPrinter()),
+                settings.getUseCoverCharges(),
+                settings.getShrinkOrdinations(),
                 settings.getClientSettings());
     }
 
     private static String uuid(BaseEntity entity) {
         return entity != null ? entity.getUuid() : null;
+    }
+    
+    private static List<String> uuids(List<? extends BaseEntity> entities){
+        return entities.stream()
+                .map(entity -> entity.getUuid())
+                .collect(Collectors.toList());
     }
 }

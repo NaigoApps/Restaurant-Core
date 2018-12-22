@@ -7,7 +7,7 @@ package com.naigoapps.restaurant.services.printing;
 
 import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.Customer;
-import com.naigoapps.restaurant.services.PrinterService;
+import com.naigoapps.restaurant.services.printing.services.PrintingService;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,9 +31,9 @@ public class BillPrinter implements ObjectPrinter<Bill> {
     }
 
     @Override
-    public PrinterService apply(PrinterService ps, Bill obj, LocalDateTime time) throws IOException {
+    public PrintingService apply(PrintingService ps, Bill obj, LocalDateTime time) throws IOException {
 
-        ps.size(PrinterService.Size.STANDARD)
+        ps.size(PrintingService.Size.STANDARD)
                 .lf(3);
         if (obj.getPrintTime() != null) {
             if (customer != null) {
@@ -49,7 +49,7 @@ public class BillPrinter implements ObjectPrinter<Bill> {
                 .printCenter(time.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")))
                 .lf()
                 .printLine(obj.getCoverCharges() + " COPERTI",
-                        PrinterService.formatPrice(obj.getTable().getEvening().getCoverCharge() * obj.getCoverCharges()));
+                        PrintingService.formatPrice(obj.getTable().getEvening().getCoverCharge() * obj.getCoverCharges()));
 
         if(generic){
             ps.accept(new GenericReviewPrinter(), obj.getOrders(), time);
@@ -60,13 +60,13 @@ public class BillPrinter implements ObjectPrinter<Bill> {
         float estimatedTotal = obj.getEstimatedTotal();
         float finalTotal = obj.getTotal();
         if (finalTotal > estimatedTotal) {
-            ps.printLine("MAGGIORAZIONE", PrinterService.formatPrice(finalTotal - estimatedTotal));
+            ps.printLine("MAGGIORAZIONE", PrintingService.formatPrice(finalTotal - estimatedTotal));
         } else if (finalTotal < estimatedTotal) {
-            ps.printLine("SCONTO", PrinterService.formatPrice(estimatedTotal - finalTotal));
+            ps.printLine("SCONTO", PrintingService.formatPrice(estimatedTotal - finalTotal));
         }
 
         ps.separator('-')
-                .printLine("TOT: ", PrinterService.formatPrice(obj.getTotal()));
+                .printLine("TOT: ", PrintingService.formatPrice(obj.getTotal()));
 
         return ps;
     }

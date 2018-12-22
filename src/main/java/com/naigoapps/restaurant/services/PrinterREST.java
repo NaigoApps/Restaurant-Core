@@ -11,13 +11,17 @@ import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.Phase;
+import com.naigoapps.restaurant.model.Settings;
 import com.naigoapps.restaurant.model.dao.LocationDao;
 import com.naigoapps.restaurant.model.dao.OrdinationDao;
 import com.naigoapps.restaurant.model.dao.PrinterDao;
+import com.naigoapps.restaurant.model.dao.SettingsDao;
 import com.naigoapps.restaurant.model.extra.QuantifiedOrders;
-import com.naigoapps.restaurant.services.PrinterService.Size;
+import com.naigoapps.restaurant.services.printing.services.PrintingService.Size;
 import com.naigoapps.restaurant.services.dto.PrinterDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.printing.services.PrintingService;
+import com.naigoapps.restaurant.services.printing.services.PrintingServiceProvider;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -27,6 +31,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.print.DocFlavor;
@@ -46,6 +52,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import jpos.FiscalPrinter;
+import jpos.JposException;
 
 /**
  *
@@ -56,13 +64,16 @@ import javax.ws.rs.core.Response;
 public class PrinterREST {
 
     @Inject
-    OrdinationDao ordDao;
+    private SettingsDao sDao;
 
     @Inject
-    PrinterDao pDao;
+    private OrdinationDao ordDao;
 
     @Inject
-    LocationDao lDao;
+    private PrinterDao pDao;
+
+    @Inject
+    private LocationDao lDao;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -148,23 +159,27 @@ public class PrinterREST {
         Ordination ord = ordDao.findByUuid(ordinationUuid);
         List<Printer> printers = pDao.findAll();
         Map<Phase, QuantifiedOrders> phasesMap = new HashMap<>();
+        Settings s = sDao.find();
         try {
             for (Printer p : printers) {
-                PrinterService service = new PrinterService(p);
+                PrintingService service = PrintingServiceProvider.get(p);
                 phasesMap.clear();
                 boolean needToPrint = false;
                 for (Order order : ord.getOrders()) {
                     if (p.equals(order.getDish().getCategory().getLocation().getPrinter())) {
                         needToPrint = true;
                     }
-                };
+                }
                 if (needToPrint) {
                     for (Order order : ord.getOrders()) {
-                        if (!phasesMap.containsKey(order.getPhase())) {
-                            phasesMap.put(order.getPhase(), new QuantifiedOrders());
+                        if (p.equals(order.getDish().getCategory().getLocation().getPrinter())
+                                || !s.getShrinkOrdinations()) {
+                            if (!phasesMap.containsKey(order.getPhase())) {
+                                phasesMap.put(order.getPhase(), new QuantifiedOrders());
+                            }
+                            QuantifiedOrders phaseOrders = phasesMap.get(order.getPhase());
+                            phaseOrders.addOrder(order);
                         }
-                        QuantifiedOrders phaseOrders = phasesMap.get(order.getPhase());
-                        phaseOrders.addOrder(order);
                     }
                     service
                             .lf(3).size(Size.STANDARD)
@@ -194,7 +209,7 @@ public class PrinterREST {
         List<Printer> printers = pDao.findAll();
         try {
             for (Printer p : printers) {
-                PrinterService service = new PrinterService(p);
+                PrintingService service = PrintingServiceProvider.get(p);
                 boolean needToPrint = false;
                 for (Order order : ord.getOrders()) {
                     if (p.equals(order.getDish().getCategory().getLocation().getPrinter())) {
@@ -221,7 +236,7 @@ public class PrinterREST {
 
     }
 
-    private PrinterService printPhases(PrinterService service, Map<Phase, QuantifiedOrders> phasesMap) throws IOException {
+    private PrintingService printPhases(PrintingService service, Map<Phase, QuantifiedOrders> phasesMap) throws IOException {
         List<Phase> usedPhases = new ArrayList<>(phasesMap.keySet());
         usedPhases.sort((p1, p2) -> Integer.compare(p1.getPriority(), p2.getPriority()));
         for (Phase p : usedPhases) {
@@ -232,14 +247,14 @@ public class PrinterREST {
         return service;
     }
 
-    private PrinterService printPhaseOrders(PrinterService service, QuantifiedOrders orders) throws IOException {
+    private PrintingService printPhaseOrders(PrintingService service, QuantifiedOrders orders) throws IOException {
         for (Order o : orders.getOrders().keySet()) {
             printOrder(service, o, orders.getOrders().get(o));
         }
         return service;
     }
 
-    private PrinterService printOrder(PrinterService service, Order o, Integer quantity) throws IOException {
+    private PrintingService printOrder(PrintingService service, Order o, Integer quantity) throws IOException {
         if (service.getPrinter().equals(o.getDish().getCategory().getLocation().getPrinter())) {
             service.size(Size.STANDARD);
         } else {
@@ -260,5 +275,44 @@ public class PrinterREST {
     private String formatTime(LocalDateTime date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         return date.format(formatter);
+    }
+
+    public void print() {
+        FiscalPrinter p = new FiscalPrinter();
+        try {
+            p.open("printerName");
+        } catch (JposException ex) {
+            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            p.claim(100);
+        } catch (JposException ex) {
+            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            p.setDeviceEnabled(true);
+        } catch (JposException ex) {
+            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            p.beginFiscalDocument(1);
+        } catch (JposException ex) {
+            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            p.printFiscalDocumentLine("XXX");
+        } catch (JposException ex) {
+            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            p.endFiscalDocument();
+        } catch (JposException ex) {
+            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            p.close();
+        } catch (JposException ex) {
+            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

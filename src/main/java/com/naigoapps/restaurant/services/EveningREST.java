@@ -9,25 +9,19 @@ import com.naigoapps.restaurant.main.EveningManager;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
-import com.naigoapps.restaurant.model.RestaurantTable;
 import com.naigoapps.restaurant.model.Settings;
-import com.naigoapps.restaurant.model.Waiter;
-import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import com.naigoapps.restaurant.model.builders.EveningBuilder;
 import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.EveningDao;
 import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
 import com.naigoapps.restaurant.model.dao.SettingsDao;
 import com.naigoapps.restaurant.model.dao.WaiterDao;
-import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -97,14 +91,9 @@ public class EveningREST {
     public Response getSelectedEvening() {
         Evening e = eveningManager.getSelectedEvening();
         if (e != null) {
-            return Response
-                    .status(Response.Status.OK)
-                    .entity(DTOAssembler.fromEvening(e))
-                    .build();
+            return ResponseBuilder.ok(DTOAssembler.fromEvening(e));
         } else {
-            return Response
-                    .status(Response.Status.NOT_FOUND)
-                    .build();
+            return ResponseBuilder.notFound("Nessuna serata selezionata");
         }
     }
 
@@ -127,87 +116,5 @@ public class EveningREST {
                     .entity(DTOAssembler.fromEvening(e))
                     .build();
         }
-    }
-
-    @POST
-    @Path("tables")
-    @Transactional
-    public Response addDiningTable(DiningTableDTO newDiningTable) {
-
-        Evening currentEvening = eveningManager.getSelectedEvening();
-        if (currentEvening != null) {
-            Waiter w = wDao.findByUuid(newDiningTable.getWaiter());
-            RestaurantTable rt = rtDao.findByUuid(newDiningTable.getTable());
-            if (w != null && rt != null) {
-                DiningTable diningTable = new DiningTableBuilder()
-                        .date(LocalDateTime.now())
-                        .evening(currentEvening)
-                        .waiter(w)
-                        .table(rt)
-                        .ccs(newDiningTable.getCoverCharges())
-                        .getContent();
-
-                dtDao.persist(diningTable);
-
-                return Response
-                        .status(Response.Status.CREATED)
-                        .entity(DTOAssembler.fromDiningTable(diningTable))
-                        .build();
-            }
-            return Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("Dati del tavolo non validi")
-                    .build();
-        } else {
-
-            return Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("Serata non selezionata")
-                    .build();
-        }
-
-    }
-
-    @POST
-    @Path("tables/merge/{uuid}")
-    @Transactional
-    public Response mergeDiningTables(@PathParam("uuid") String uuid1, String uuid2) {
-        Evening currentEvening = eveningManager.getSelectedEvening();
-        DiningTable srcTable = dtDao.findByUuid(uuid1);
-        DiningTable dstTable = dtDao.findByUuid(uuid2);
-        if (currentEvening != null && currentEvening.equals(srcTable.getEvening()) && currentEvening.equals(dstTable.getEvening())) {
-            if (!DiningTableStatus.CLOSED.equals(srcTable.getStatus()) && !DiningTableStatus.CLOSED.equals(dstTable.getStatus())) {
-                srcTable.getOrdinations().forEach(o -> o.setTable(dstTable));
-                srcTable.getBills().forEach(b -> b.setTable(dstTable));
-                dstTable.setCoverCharges(dstTable.getCoverCharges() + srcTable.getCoverCharges());
-                srcTable.setEvening(null);
-                dtDao.getEntityManager().remove(srcTable);
-                return ResponseBuilder.ok(DTOAssembler.fromEvening(currentEvening));
-            } else {
-                return ResponseBuilder.badRequest("Impossibile fondere tavoli chiusi");
-            }
-        }
-        return ResponseBuilder.badRequest("Tavoli non corretti");
-
-    }
-
-    @DELETE
-    @Path("diningTables")
-    @Transactional
-    public Response deleteDiningTable(String uuid) {
-        Evening currentEvening = eveningManager.getSelectedEvening();
-        DiningTable toRemove = dtDao.findByUuid(uuid);
-        if (currentEvening != null && currentEvening.equals(toRemove.getEvening())) {
-            if (toRemove.getBills().size() > 0) {
-                return ResponseBuilder.badRequest("Al tavolo sono collegati degli scontrini");
-            }
-            if (toRemove.getOrdinations().size() > 0) {
-                return ResponseBuilder.badRequest("Il tavolo contiene delle comande");
-            }
-            dtDao.deleteByUuid(uuid);
-            return ResponseBuilder.ok(DTOAssembler.fromEvening(currentEvening));
-        }
-        return ResponseBuilder.badRequest("Serata non correttamente selezionata");
-
     }
 }

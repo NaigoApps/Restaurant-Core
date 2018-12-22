@@ -8,7 +8,7 @@ package com.naigoapps.restaurant.services.printing;
 import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.utils.mappers.OrderCategoryMapper;
-import com.naigoapps.restaurant.services.PrinterService;
+import com.naigoapps.restaurant.services.printing.services.PrintingService;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,14 +21,14 @@ import java.util.Map;
 public class CategoriesReviewPrinter implements ObjectPrinter<List<Order>> {
 
     @Override
-    public PrinterService apply(PrinterService ps, List<Order> obj, LocalDateTime time) throws IOException {
+    public PrintingService apply(PrintingService ps, List<Order> obj, LocalDateTime time) throws IOException {
         
         Map<Category, List<Order>> map = obj.stream().collect(OrderCategoryMapper.toCategoryMap());
         for(Map.Entry<Category, List<Order>> entry : map.entrySet()){
             Category c = entry.getKey();
             List<Order> orders = entry.getValue();
             ps.printLine(orders.size() + " " + c.getName(),
-                    PrinterService.formatPrice(orders.stream()
+                    PrintingService.formatPrice(orders.stream()
                             .map(order -> order.getPrice())
                             .reduce(0.0f, (p1, p2) -> p1 + p2)));
         }

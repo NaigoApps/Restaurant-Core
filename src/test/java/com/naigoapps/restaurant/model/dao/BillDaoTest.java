@@ -36,12 +36,13 @@ public class BillDaoTest extends AbstractPersistenceTest {
 
     private final Customer sample = new CustomerBuilder().getContent();
     private final DiningTable table = new DiningTableBuilder().getContent();
-    private final Evening evening = new EveningBuilder().day(date.toLocalDate()).getContent();
+    private final Evening evening1 = new EveningBuilder().day(date.toLocalDate()).getContent();
+    private final Evening evening2 = new EveningBuilder().day(date.toLocalDate().plusDays(1)).getContent();
 
     @Test
     public void testNextBillProgressive() {
-        assertEquals(11, billDao.nextBillProgressive(date.toLocalDate()));
-        assertEquals(1, billDao.nextBillProgressive(date.toLocalDate().plusDays(1)));
+        assertEquals(11, billDao.nextBillProgressive(evening1));
+        assertEquals(1, billDao.nextBillProgressive(evening2));
     }
 
     @Test
@@ -67,14 +68,14 @@ public class BillDaoTest extends AbstractPersistenceTest {
     public void insertData() {
         Bill b1 = new BillBuilder().progressive(10).getContent();
         b1.setTable(table);
-        table.setEvening(evening);
+        table.setEvening(evening1);
         Bill r1 = new BillBuilder().progressive(5).printTime(yearBefore).getContent();
         Bill r2 = new BillBuilder().progressive(6).printTime(dayBefore).getContent();
         Bill r3 = new BillBuilder().progressive(7).printTime(sameDay).getContent();
         Bill i1 = new BillBuilder().progressive(15).printTime(yearBefore).customer(sample).getContent();
         Bill i2 = new BillBuilder().progressive(16).printTime(dayBefore).customer(sample).getContent();
         Bill i3 = new BillBuilder().progressive(17).printTime(sameDay).customer(sample).getContent();
-        billDao.persist(b1, r1, r2, r3, i1, i2, i3, sample, table, evening);
+        billDao.persist(b1, r1, r2, r3, i1, i2, i3, sample, table, evening1);
     }
 
 }

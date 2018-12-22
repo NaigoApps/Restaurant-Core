@@ -161,4 +161,16 @@ public class DiningTable extends BaseEntity {
         this.status = status;
     }
 
+    public void updateStatus(){
+        if(this.bills.isEmpty()){
+            this.status = DiningTableStatus.OPEN;
+        }else{
+            this.status = DiningTableStatus.CLOSING;
+            if (listOrders().stream()
+                    .noneMatch(order -> order.getBill() == null || 
+                            order.getBill().getPrintDate() == null)) {
+                this.status = DiningTableStatus.CLOSED;
+            }
+        }
+    }
 }

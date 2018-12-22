@@ -5,7 +5,7 @@
  */
 package com.naigoapps.restaurant.services.printing;
 
-import com.naigoapps.restaurant.services.PrinterService;
+import com.naigoapps.restaurant.services.printing.services.PrintingService;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
@@ -16,5 +16,5 @@ import java.time.LocalDateTime;
  */
 @FunctionalInterface
 public interface ObjectPrinter<T>{
-    public PrinterService apply(PrinterService ps, T obj, LocalDateTime time) throws IOException;
+    public PrintingService apply(PrintingService ps, T obj, LocalDateTime time) throws IOException;
 }

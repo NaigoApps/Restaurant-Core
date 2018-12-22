@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -94,9 +95,8 @@ public class Bill extends BaseEntity {
 
     public float getEstimatedTotal() {
         Float tot = orders.stream()
-                .map(Order::getPrice)
-                .reduce(0.0f, (p1, p2) -> p1 + p2);
-        return tot + table.getEvening().getCoverCharge() * table.getCoverCharges();
+                .collect(Collectors.summingDouble(Order::getPrice)).floatValue();
+        return tot + table.getEvening().getCoverCharge() * coverCharges;
     }
 
     public float getTotal() {
@@ -146,6 +146,10 @@ public class Bill extends BaseEntity {
 
     public LocalDate getPrintDate() {
         return printDate;
+    }
+    
+    public boolean isGeneric(){
+        return customer == null && printTime == null;
     }
 
 }

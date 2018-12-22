@@ -14,6 +14,8 @@ import java.util.List;
  */
 public class OrderDTO extends DTO{
 
+    private final String ordination;
+    
     private final String dish;
     
     private final List<String> additions;
@@ -27,6 +29,7 @@ public class OrderDTO extends DTO{
     private final String bill;
 
     public OrderDTO() {
+        this.ordination = null;
         this.dish = null;
         this.additions = null;
         this.price = 0;
@@ -36,8 +39,9 @@ public class OrderDTO extends DTO{
     }
 
 
-    public OrderDTO(String dish, List<String> additions, float price, String notes, String phase, String bill, String uuid) {
+    public OrderDTO(String ordination, String dish, List<String> additions, float price, String notes, String phase, String bill, String uuid) {
         super(uuid);
+        this.ordination = ordination;
         this.dish = dish;
         this.additions = additions;
         this.price = price;
@@ -68,6 +72,10 @@ public class OrderDTO extends DTO{
 
     public String getBill() {
         return bill;
+    }
+
+    public String getOrdination() {
+        return ordination;
     }
 
    

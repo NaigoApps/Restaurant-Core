@@ -80,6 +80,17 @@ public class OrdinationTest {
         assertEquals(table, ordination.getTable());
         assertTrue(table.getOrdinations().contains(ordination));
     }
+
+    @Test
+    public void testReplaceTable() {
+        DiningTable t1 = new DiningTable();
+        DiningTable t2 = new DiningTable();
+        ordination.setTable(t1);
+        ordination.setTable(t2);
+        assertEquals(t2, ordination.getTable());
+        assertTrue(t2.getOrdinations().contains(ordination));
+        assertFalse(t1.getOrdinations().contains(ordination));
+    }
     
     @Test
     public void testSetTableNull() {

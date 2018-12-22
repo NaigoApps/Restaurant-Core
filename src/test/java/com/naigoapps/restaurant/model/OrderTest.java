@@ -89,6 +89,26 @@ public class OrderTest {
     }
 
     @Test
+    public void testReplaceOrdination() {
+        Ordination o1 = new Ordination();
+        Ordination o2 = new Ordination();
+        order.setOrdination(o1);
+        order.setOrdination(o2);
+        assertEquals(o2, order.getOrdination());
+        assertTrue(o2.getOrders().contains(order));
+        assertFalse(o1.getOrders().contains(order));
+    }
+
+    @Test
+    public void testRemoveOrdination() {
+        Ordination o = new Ordination();
+        order.setOrdination(o);
+        order.setOrdination(null);
+        assertNull(order.getOrdination());
+        assertFalse(o.getOrders().contains(order));
+    }
+
+    @Test
     public void testIsTheSame() {
         assertTrue(o1.isTheSame(o2));
     }

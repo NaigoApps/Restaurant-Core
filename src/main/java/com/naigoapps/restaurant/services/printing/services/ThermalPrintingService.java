@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.naigoapps.restaurant.services;
+package com.naigoapps.restaurant.services.printing.services;
 
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.services.printing.ObjectPrinter;
@@ -25,7 +25,7 @@ import javax.print.attribute.HashPrintRequestAttributeSet;
  *
  * @author naigo
  */
-public class PrinterService {
+public class ThermalPrintingService implements PrintingService {
 
     public static final DocFlavor.BYTE_ARRAY FLAVOR = DocFlavor.BYTE_ARRAY.AUTOSENSE;
     public static final AttributeSet ATTRIBUTES = new HashPrintRequestAttributeSet();
@@ -39,9 +39,7 @@ public class PrinterService {
 
     private final ByteArrayOutputStream text;
 
-    private boolean debugMode = true;
-
-    public PrinterService(Printer printer) {
+    public ThermalPrintingService(Printer printer) {
         this.printer = printer;
         service = Arrays
                 .stream(PrintServiceLookup.lookupPrintServices(FLAVOR, ATTRIBUTES))
@@ -51,32 +49,34 @@ public class PrinterService {
         text = new ByteArrayOutputStream();
     }
 
+    @Override
     public Printer getPrinter() {
         return printer;
     }
-    
-    public void setDebugMode(boolean debugMode) {
-        this.debugMode = debugMode;
-    }
 
-    public PrinterService reset() {
+    @Override
+    public ThermalPrintingService reset() {
         text.reset();
         return this;
     }
 
-    public PrinterService printLeft(String line) throws IOException {
+    @Override
+    public ThermalPrintingService printLeft(String line) throws IOException {
         return align(Align.LEFT).printString(line).lineFeed();
     }
 
-    public PrinterService printCenter(String line) throws IOException {
+    @Override
+    public ThermalPrintingService printCenter(String line) throws IOException {
         return align(Align.CENTER).printString(line).lineFeed();
     }
 
-    public PrinterService printRight(String line) throws IOException {
+    @Override
+    public ThermalPrintingService printRight(String line) throws IOException {
         return align(Align.RIGHT).printString(line).lineFeed();
     }
 
-    public PrinterService printLine(String left, String right) throws IOException {
+    @Override
+    public ThermalPrintingService printLine(String left, String right) throws IOException {
         int lineChars = printer.getLineCharacters();
         if (left.length() + right.length() > lineChars) {
             align(Align.LEFT).printString(left).lineFeed();
@@ -88,26 +88,31 @@ public class PrinterService {
         return this;
     }
 
-    public String getText(){
+    @Override
+    public String getText() {
         return this.text.toString();
     }
-    
-    public PrinterService print(int s) throws IOException {
+
+    @Override
+    public ThermalPrintingService print(int s) throws IOException {
         return this.printString(String.valueOf(s));
     }
 
-    public PrinterService lf() throws IOException {
+    @Override
+    public ThermalPrintingService lf() throws IOException {
         return lineFeed();
     }
 
-    public PrinterService lf(int lines) throws IOException {
+    @Override
+    public ThermalPrintingService lf(int lines) throws IOException {
         for (int i = 0; i < lines; i++) {
             lineFeed();
         }
         return this;
     }
-    
-    public PrinterService separator(char c) throws IOException{
+
+    @Override
+    public ThermalPrintingService separator(char c) throws IOException {
         int lines = printer.getLineCharacters();
         align(Align.LEFT);
         for (int i = 0; i < lines; i++) {
@@ -116,137 +121,79 @@ public class PrinterService {
         return lineFeed();
     }
 
-    public PrinterService cut() throws IOException {
+    @Override
+    public ThermalPrintingService cut() throws IOException {
         lineFeed();
         align(Align.LEFT);
-        if (!debugMode) {
-            text.write(GS);
-            text.write('V');
-            text.write(0x01);
-        }
+        text.write(GS);
+        text.write('V');
+        text.write(0x01);
         return this;
     }
 
+    @Override
     public void doPrint() throws PrintException {
         DocPrintJob job = service.createPrintJob();
         Doc doc = new SimpleDoc(text.toByteArray(), FLAVOR, null);
         job.print(doc, null);
     }
 
-    public PrinterService underline(Underline u) throws IOException {
-        if (!debugMode) {
-            text.write(ESC);
-            text.write('-');
-            text.write(u.value);
-        }
+    @Override
+    public ThermalPrintingService underline(Underline u) throws IOException {
+        text.write(ESC);
+        text.write('-');
+        text.write(u.value);
         return this;
     }
 
-    public <T> PrinterService accept(ObjectPrinter printer, T obj, LocalDateTime time) throws IOException {
+    @Override
+    public <T> PrintingService accept(ObjectPrinter printer, T obj, LocalDateTime time) throws IOException {
         return printer.apply(this, obj, time);
     }
 
-    public enum Underline {
-        NONE(0), THIN(1), THICK(2);
-
-        private final int value;
-
-        Underline(int val) {
-            this.value = val;
-        }
-    }
-
-    public PrinterService emph(Emph e) throws IOException {
-        if (!debugMode) {
-            text.write(ESC);
-            text.write('E');
-            text.write(e.value);
-        }
+    @Override
+    public ThermalPrintingService emph(Emph e) throws IOException {
+        text.write(ESC);
+        text.write('E');
+        text.write(e.value);
         return this;
     }
 
-    public enum Emph {
-        NO(0), YES(1);
-
-        private final int value;
-
-        Emph(int val) {
-            this.value = val;
-        }
-    }
-
-    public PrinterService font(Font f) throws IOException {
-        if (!debugMode) {
-            text.write(ESC);
-            text.write('M');
-            text.write(f.value);
-        }
+    @Override
+    public ThermalPrintingService font(Font f) throws IOException {
+        text.write(ESC);
+        text.write('M');
+        text.write(f.value);
         return this;
     }
 
-    public enum Font {
-        A(0), B(1);
-
-        private final int value;
-
-        Font(int val) {
-            this.value = val;
-        }
-    }
-
-    public enum Align {
-        LEFT(0), CENTER(1), RIGHT(2);
-
-        private final int value;
-
-        Align(int val) {
-            this.value = val;
-        }
-    }
-
-    public PrinterService size(Size s) throws IOException {
-        if (!debugMode) {
-            text.write(GS);
-            text.write('!');
-            text.write(s.value);
-        }
+    @Override
+    public ThermalPrintingService size(Size s) throws IOException {
+        text.write(GS);
+        text.write('!');
+        text.write(s.value);
         return this;
     }
 
-    public enum Size {
-        SMALL(0x00), NORMAL(0x11), STANDARD(0x01), BIG(0x22), BIGGER(0x33), HUGE(0x44);
-
-        private final int value;
-
-        Size(int val) {
-            this.value = val;
-        }
-    }
-
-    public static String formatPrice(float f) {
-        return String.format("%.2f", f);
-    }
-
-    private PrinterService align(Align a) throws IOException {
-        if (!debugMode) {
-            text.write(ESC);
-            text.write('a');
-            text.write(a.value);
-        }
+    @Override
+    public ThermalPrintingService align(Align a) throws IOException {
+        text.write(ESC);
+        text.write('a');
+        text.write(a.value);
         return this;
     }
 
-    private PrinterService printString(String s) throws IOException {
+    private ThermalPrintingService printString(String s) throws IOException {
         text.write(s.getBytes("CP437"));
         return this;
     }
 
-    private PrinterService lineFeed() throws IOException {
+    private ThermalPrintingService lineFeed() throws IOException {
         text.write(0x0A);
         return this;
     }
 
-    private PrinterService space(int spaces) throws IOException {
+    private ThermalPrintingService space(int spaces) throws IOException {
         for (int i = 0; i < spaces; i++) {
             this.printString(" ");
         }

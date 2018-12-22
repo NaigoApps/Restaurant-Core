@@ -80,7 +80,8 @@ public class Ordination extends BaseEntity {
     }
     
     public void clearOrders(){
-        this.orders.forEach(order -> order.setOrdination(null));
+        List<Order> orders = new ArrayList<>(this.orders);
+        orders.forEach(order -> order.setOrdination(null));
         this.orders.clear();
     }
 
@@ -97,7 +98,10 @@ public class Ordination extends BaseEntity {
     }
 
     public void setTable(DiningTable table) {
-        if(table == null && this.table != null){
+        if(this.table != null && this.table.equals(table)){
+            return;
+        }
+        if(this.table != null){
             this.table.removeOrdination(this);
         }
         this.table = table;

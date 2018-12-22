@@ -106,6 +106,12 @@ public class Order extends BaseEntity {
     }
 
     public void setOrdination(Ordination ordination) {
+        if(this.ordination != null && this.ordination.equals(ordination)){
+            return;
+        }
+        if (this.ordination != null) {
+            this.ordination.removeOrder(this);
+        }
         this.ordination = ordination;
         if (ordination != null) {
             ordination.addOrder(this);

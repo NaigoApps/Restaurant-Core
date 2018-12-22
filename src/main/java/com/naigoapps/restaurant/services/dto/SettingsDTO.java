@@ -5,31 +5,29 @@
  */
 package com.naigoapps.restaurant.services.dto;
 
-import com.naigoapps.restaurant.model.*;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 /**
  *
  * @author naigo
  */
-public class SettingsDTO extends DTO{
+public class SettingsDTO extends DTO {
 
     private float defaultCoverCharge;
     private String mainPrinter;
     private String fiscalPrinter;
     private String clientSettings;
+    private Boolean coverCharges;
+    private Boolean shrinkOrdination;
 
-    public SettingsDTO(String uuid, float defaultCoverCharge, String mainPrinter, String fiscalPrinter, String clientSettings) {
+    public SettingsDTO(String uuid, float defaultCoverCharge, String mainPrinter, String fiscalPrinter, Boolean coverCharges, Boolean shrinkOrdinations, String clientSettings) {
         super(uuid);
         this.defaultCoverCharge = defaultCoverCharge;
         this.mainPrinter = mainPrinter;
         this.fiscalPrinter = fiscalPrinter;
+        this.coverCharges = coverCharges;
+        this.shrinkOrdination = shrinkOrdinations;
         this.clientSettings = clientSettings;
     }
-    
+
     public String getClientSettings() {
         return clientSettings;
     }
@@ -62,7 +60,20 @@ public class SettingsDTO extends DTO{
         return mainPrinter;
     }
 
-    
-    
+    public Boolean getCoverCharges() {
+        return coverCharges;
+    }
+
+    public Boolean getShrinkOrdination() {
+        return shrinkOrdination;
+    }
+
+    public void setCoverCharges(Boolean coverCharges) {
+        this.coverCharges = coverCharges;
+    }
+
+    public void setShrinkOrdination(Boolean shrinkOrdination) {
+        this.shrinkOrdination = shrinkOrdination;
+    }
 
 }

@@ -21,7 +21,9 @@ import com.naigoapps.restaurant.model.builders.EveningBuilder;
 import com.naigoapps.restaurant.model.builders.OrderBuilder;
 import com.naigoapps.restaurant.model.builders.PrinterBuilder;
 import com.naigoapps.restaurant.model.builders.RestaurantTableBuilder;
-import com.naigoapps.restaurant.services.PrinterService;
+import com.naigoapps.restaurant.services.printing.services.PrintingService;
+import com.naigoapps.restaurant.services.printing.services.PrintingServiceProvider;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Arrays;
@@ -40,16 +42,15 @@ public class BillPrinterTest {
     private BillPrinter bPrinter;
 
     private Printer printer;
-    private PrinterService service;
+    private PrintingService service;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         printer = new PrinterBuilder()
                 .line(20)
                 .name("printer")
                 .getContent();
-        service = new PrinterService(printer);
-        service.setDebugMode(true);
+        service = PrintingServiceProvider.get(printer);
     }
 
     @Test

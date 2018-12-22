@@ -19,15 +19,19 @@ import javax.persistence.Table;
 public class Settings extends BaseEntity {
 
     private float defaultCoverCharge;
-    
+
     @ManyToOne
     private Printer mainPrinter;
-    
+
     @ManyToOne
     private Printer fiscalPrinter;
-    
+
     @Column(length = 4096)
     private String clientSettings;
+
+    private Boolean useCoverCharges;
+
+    private Boolean shrinkOrdinations;
 
     public String getClientSettings() {
         return clientSettings;
@@ -60,7 +64,21 @@ public class Settings extends BaseEntity {
     public void setMainPrinter(Printer mainPrinter) {
         this.mainPrinter = mainPrinter;
     }
-    
-    
+
+    public Boolean getShrinkOrdinations() {
+        return shrinkOrdinations;
+    }
+
+    public Boolean getUseCoverCharges() {
+        return useCoverCharges;
+    }
+
+    public void setShrinkOrdinations(Boolean shrinkOrdinations) {
+        this.shrinkOrdinations = shrinkOrdinations;
+    }
+
+    public void setUseCoverCharges(Boolean useCoverCharges) {
+        this.useCoverCharges = useCoverCharges;
+    }
 
 }

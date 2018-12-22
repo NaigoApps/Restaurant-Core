@@ -16,13 +16,15 @@ import java.util.List;
  */
 public class DiningTableDTO extends DTO{
 
+    private final String evening;
+    
     private final int coverCharges;
     
     private final String waiter;
     
-    private final List<OrdinationDTO> ordinations;
+    private final List<String> ordinations;
     
-    private final List<BillDTO> bills;
+    private final List<String> bills;
     
     private final LocalDateTime openingTime;
     
@@ -32,6 +34,7 @@ public class DiningTableDTO extends DTO{
 
     public DiningTableDTO() {
         this.coverCharges = 0;
+        this.evening = null;
         this.waiter = null;
         this.ordinations = null;
         this.bills = null;
@@ -40,8 +43,9 @@ public class DiningTableDTO extends DTO{
         this.status = null;
     }
 
-    public DiningTableDTO(int coverCharges, String waiter, List<OrdinationDTO> ordinations, List<BillDTO> bills, LocalDateTime openingTime, String table, DiningTableStatus status, String uuid) {
+    public DiningTableDTO(String evening, int coverCharges, String waiter, List<String> ordinations, List<String> bills, LocalDateTime openingTime, String table, DiningTableStatus status, String uuid) {
         super(uuid);
+        this.evening = evening;
         this.coverCharges = coverCharges;
         this.waiter = waiter;
         this.ordinations = ordinations;
@@ -49,6 +53,10 @@ public class DiningTableDTO extends DTO{
         this.openingTime = openingTime;
         this.table = table;
         this.status = status;
+    }
+
+    public String getEvening() {
+        return evening;
     }
 
     public int getCoverCharges() {
@@ -59,11 +67,11 @@ public class DiningTableDTO extends DTO{
         return waiter;
     }
 
-    public List<OrdinationDTO> getOrdinations() {
+    public List<String> getOrdinations() {
         return Collections.unmodifiableList(ordinations);
     }
 
-    public List<BillDTO> getBills() {
+    public List<String> getBills() {
         return Collections.unmodifiableList(bills);
     }
 

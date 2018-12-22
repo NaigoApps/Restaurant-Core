@@ -6,7 +6,7 @@
 package com.naigoapps.restaurant.services.printing;
 
 import com.naigoapps.restaurant.model.DiningTable;
-import com.naigoapps.restaurant.services.PrinterService;
+import com.naigoapps.restaurant.services.printing.services.PrintingService;
 import java.io.IOException;
 
 /**
@@ -14,5 +14,5 @@ import java.io.IOException;
  * @author naigo
  */
 public interface PrintingStrategy {
-    public void print(PrinterService service, DiningTable table) throws IOException;
+    public void print(PrintingService service, DiningTable table) throws IOException;
 }

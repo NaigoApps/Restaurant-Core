@@ -70,6 +70,24 @@ public class SettingsREST {
         return setPrinter((settings, printer) -> settings.setFiscalPrinter(printer), value);
     }
     
+    @PUT
+    @Path("cover-charges")
+    @Transactional
+    public Response setUseCoverCharges(Boolean value){
+        Settings s = settingsDao.find();
+        s.setUseCoverCharges(value);;
+        return ResponseBuilder.ok(DTOAssembler.fromSettings(s));
+    }
+    
+    @PUT
+    @Path("shrink-ordination")
+    @Transactional
+    public Response setShrinkOrdinations(Boolean value){
+        Settings s = settingsDao.find();
+        s.setShrinkOrdinations(value);
+        return ResponseBuilder.ok(DTOAssembler.fromSettings(s));
+    }
+    
     public Response setPrinter(BiConsumer<Settings, Printer> setter, String value){
         Settings settings = settingsDao.find();
         

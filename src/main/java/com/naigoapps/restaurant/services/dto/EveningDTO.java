@@ -20,12 +20,12 @@ public class EveningDTO extends DTO{
     
     private float coverCharge;
     
-    private List<DiningTableDTO> diningTables;
+    private List<String> diningTables;
 
     public EveningDTO() {
     }
 
-    public EveningDTO(String uuid, LocalDate day, float coverCharge, List<DiningTableDTO> diningTables) {
+    public EveningDTO(String uuid, LocalDate day, float coverCharge, List<String> diningTables) {
         super(uuid);
         this.day = day;
         this.coverCharge = coverCharge;
@@ -36,7 +36,7 @@ public class EveningDTO extends DTO{
         return day;
     }
 
-    public List<DiningTableDTO> getDiningTables() {
+    public List<String> getDiningTables() {
         return Collections.unmodifiableList(diningTables);
     }
 

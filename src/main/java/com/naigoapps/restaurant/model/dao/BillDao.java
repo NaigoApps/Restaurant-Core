@@ -6,6 +6,7 @@
 package com.naigoapps.restaurant.model.dao;
 
 import com.naigoapps.restaurant.model.Bill;
+import com.naigoapps.restaurant.model.Evening;
 import java.time.LocalDate;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -18,13 +19,13 @@ public class BillDao extends AbstractDao<Bill> {
 
     private static final String PROGRESSIVE_SELECT = "SELECT max(b.progressive) FROM Bill b WHERE ";
 
-    public int nextBillProgressive(LocalDate day) {
+    public int nextBillProgressive(Evening evening) {
         EntityManager em = getEntityManager();
         Query q = em.createQuery(PROGRESSIVE_SELECT
                 + "b.customer IS NULL AND "
                 + "b.printTime IS NULL AND "
-                + "b.table.evening.day = :day");
-        q.setParameter("day", day);
+                + "b.table.evening = :evening");
+        q.setParameter("evening", evening);
         Integer progressive = (Integer) q.getSingleResult();
         if (progressive != null) {
             return progressive + 1;
