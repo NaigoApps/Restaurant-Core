@@ -14,13 +14,11 @@ import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
 import com.naigoapps.restaurant.model.dao.WaiterDao;
-import com.naigoapps.restaurant.services.dto.DTO;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.RemovedContent;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 import com.naigoapps.restaurant.services.exceptions.AlreadyRegisteredCoverChargesException;
 import com.naigoapps.restaurant.services.utils.ResponseBuilder;
-import com.sun.javafx.binding.StringFormatter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -68,6 +66,9 @@ public class DiningTableREST {
     @Inject
     private DiningTableDao dtDao;
 
+    @Inject
+    private DiningTableWS dtWS;
+    
     @POST
     @Transactional
     public Response addDiningTable(DiningTableDTO newDiningTable) {
@@ -79,6 +80,7 @@ public class DiningTableREST {
             if (w != null && rt != null) {
                 DiningTable diningTable = createDiningTable(currentEvening, w, rt, newDiningTable.getCoverCharges());
                 dtDao.persist(diningTable);
+                dtWS.update();
                 return ResponseBuilder.created(DTOAssembler.fromDiningTable(diningTable));
             }
             return ResponseBuilder.badRequest("Dati del tavolo non validi");

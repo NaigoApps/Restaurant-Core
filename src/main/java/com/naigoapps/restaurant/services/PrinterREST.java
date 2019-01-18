@@ -6,12 +6,14 @@
 package com.naigoapps.restaurant.services;
 
 import com.naigoapps.restaurant.model.Addition;
+import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Location;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.Phase;
 import com.naigoapps.restaurant.model.Settings;
+import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.LocationDao;
 import com.naigoapps.restaurant.model.dao.OrdinationDao;
 import com.naigoapps.restaurant.model.dao.PrinterDao;
@@ -50,6 +52,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import jpos.FiscalPrinter;
@@ -68,6 +71,9 @@ public class PrinterREST {
 
     @Inject
     private OrdinationDao ordDao;
+    
+    @Inject
+    private DiningTableDao dtDao;
 
     @Inject
     private PrinterDao pDao;
@@ -233,7 +239,38 @@ public class PrinterREST {
         }
         ord.setDirty(false);
         return ResponseBuilder.ok(DTOAssembler.fromOrdination(ord));
+    }
 
+    @PUT
+    @Path("message")
+    @Transactional
+    public Response printMessage(@QueryParam("table") String tableUuid, @QueryParam("location") String locationUuid, String message) throws PrintException {
+        DiningTable table = dtDao.findByUuid(tableUuid);
+        Location location = lDao.findByUuid(locationUuid);
+        if(location != null && table != null){
+        try {
+            Printer p = location.getPrinter();
+            if(p != null){
+                PrintingService service = PrintingServiceProvider.get(p);
+                    service
+                        .lf(5).size(Size.STANDARD)
+                        .printCenter("MESSAGGIO")
+                        .printCenter("Tavolo: " + table.getTable().getName())
+                        .printCenter("Cam. " + table.getWaiter().getName())
+                        .printCenter(message)
+                        .lf(5)
+                        .cut()
+                        .doPrint();
+                    return ResponseBuilder.ok();
+            }else{
+                return ResponseBuilder.badRequest("Postazione senza stampante");
+            }
+        } catch (IOException ex) {
+            return ResponseBuilder.badRequest(ex.getMessage());
+        }
+        }else{
+            return ResponseBuilder.badRequest("Tavolo o postazione non trovati");
+        }
     }
 
     private PrintingService printPhases(PrintingService service, Map<Phase, QuantifiedOrders> phasesMap) throws IOException {
@@ -266,7 +303,7 @@ public class PrinterREST {
                 service.printLeft(a.getName() + " ");
             }
         }
-        if (o.getNotes() != null) {
+        if (o.getNotes() != null && !o.getNotes().trim().isEmpty()) {
             service.printLeft(o.getNotes());
         }
         return service;

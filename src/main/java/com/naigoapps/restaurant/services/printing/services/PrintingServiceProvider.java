@@ -15,6 +15,6 @@ import java.io.IOException;
 public class PrintingServiceProvider {
     //FIXME Implementare
     public static PrintingService get(Printer p) throws IOException{
-        return new PDFPrintingService(p);
+        return new ThermalPrintingService(p);
     }
 }
