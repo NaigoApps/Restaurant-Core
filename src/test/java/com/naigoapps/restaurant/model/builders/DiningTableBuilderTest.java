@@ -50,7 +50,7 @@ public class DiningTableBuilderTest {
     @Test
     public void testDate() {
         LocalDateTime now = LocalDateTime.now();
-        assertEquals(now, builder.date(now).getContent().getDate());
+        assertEquals(now, builder.date(now).getContent().getOpeningTime());
     }
 
     @Test

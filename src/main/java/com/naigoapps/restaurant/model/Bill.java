@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 /**
  *
@@ -66,9 +66,7 @@ public class Bill extends BaseEntity {
     }
 
     public void clearOrders() {
-        this.orders.forEach(order -> {
-            order.setBill(null);
-        });
+        this.orders.forEach(order -> order.setBill(null));
         this.orders.clear();
     }
 

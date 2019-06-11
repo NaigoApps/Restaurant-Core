@@ -5,6 +5,9 @@
  */
 package com.naigoapps.restaurant.services.dto.utils;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.model.BaseEntity;
 import com.naigoapps.restaurant.model.Bill;
@@ -14,8 +17,8 @@ import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Location;
-import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Order;
+import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Phase;
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.RestaurantTable;
@@ -29,15 +32,13 @@ import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.DishDTO;
 import com.naigoapps.restaurant.services.dto.EveningDTO;
 import com.naigoapps.restaurant.services.dto.LocationDTO;
-import com.naigoapps.restaurant.services.dto.OrdinationDTO;
 import com.naigoapps.restaurant.services.dto.OrderDTO;
+import com.naigoapps.restaurant.services.dto.OrdinationDTO;
 import com.naigoapps.restaurant.services.dto.PhaseDTO;
 import com.naigoapps.restaurant.services.dto.PrinterDTO;
 import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
 import com.naigoapps.restaurant.services.dto.SettingsDTO;
 import com.naigoapps.restaurant.services.dto.WaiterDTO;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -129,40 +130,41 @@ public class DTOAssembler {
     }
 
     public static OrdinationDTO fromOrdination(Ordination o) {
-        return new OrdinationDTO(
-                uuid(o.getTable()),
-                o.getCreationTime(),
-                o.getProgressive(),
-                o.getOrders().stream()
-                    .map(DTOAssembler::fromOrder)
-                    .collect(Collectors.toList()),
-                o.isDirty(),
-                o.getUuid());
+        OrdinationDTO dto = new OrdinationDTO();
+        dto.setUuid(o.getUuid());
+        dto.setTable(uuid(o.getTable()));
+        dto.setCreationTime(o.getCreationTime());
+        dto.setProgressive(o.getProgressive());
+        dto.setOrders(o.getOrders().stream().map(DTOAssembler::fromOrder).collect(Collectors.toList()));
+        dto.setDirty(o.isDirty());
+        return dto;
     }
 
     public static OrderDTO fromOrder(Order order) {
-        return new OrderDTO(
-                uuid(order.getOrdination()),
-                order.getDish().getUuid(),
-                uuids(order.getAdditions()),
-                order.getPrice(),
-                order.getNotes(),
-                uuid(order.getPhase()),
-                uuid(order.getBill()),
-                order.getUuid());
+        OrderDTO dto = new OrderDTO();
+        dto.setUuid(order.getUuid());
+        dto.setOrdination(uuid(order.getOrdination()));
+        dto.setDish(uuid(order.getDish()));
+        dto.setAdditions(uuids(order.getAdditions()));
+        dto.setPrice(order.getPrice());
+        dto.setNotes(order.getNotes());
+        dto.setPhase(uuid(order.getPhase()));
+        dto.setBill(uuid(order.getBill()));
+        return dto;
     }
 
     public static DiningTableDTO fromDiningTable(DiningTable diningTable) {
-        return new DiningTableDTO(
-                uuid(diningTable.getEvening()),
-                diningTable.getCoverCharges(),
-                uuid(diningTable.getWaiter()),
-                uuids(diningTable.getOrdinations()),
-                uuids(diningTable.getBills()),
-                diningTable.getDate(),
-                diningTable.getTable().getUuid(),
-                diningTable.getStatus(),
-                diningTable.getUuid());
+    	DiningTableDTO dto = new DiningTableDTO();
+    	dto.setEvening(uuid(diningTable.getEvening()));
+    	dto.setCoverCharges(diningTable.getCoverCharges());
+    	dto.setWaiter(uuid(diningTable.getWaiter()));
+    	dto.setOrdinations(uuids(diningTable.getOrdinations()));
+    	dto.setBills(uuids(diningTable.getBills()));
+    	dto.setOpeningTime(diningTable.getOpeningTime());
+    	dto.setTable(uuid(diningTable.getTable()));
+    	dto.setStatus(diningTable.getStatus());
+    	dto.setUuid(diningTable.getUuid());
+    	return dto;
     }
 
     public static BillDTO fromBill(Bill bill) {

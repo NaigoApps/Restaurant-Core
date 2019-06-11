@@ -98,11 +98,11 @@ public class DiningTable extends BaseEntity {
         return coverCharges;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setOpeningTime(LocalDateTime date) {
         this.openingTime = date;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDateTime getOpeningTime() {
         return openingTime;
     }
 

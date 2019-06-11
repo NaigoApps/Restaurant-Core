@@ -82,7 +82,7 @@ public class DiningTableBuilder implements Builder<DiningTable>{
     public DiningTable getContent() {
         DiningTable result = new DiningTable();
         result.setStatus(status != null ? status : DiningTableStatus.OPEN);
-        result.setDate(date);
+        result.setOpeningTime(date);
         result.setEvening(evening);
         result.setWaiter(waiter);
         result.setTable(table);

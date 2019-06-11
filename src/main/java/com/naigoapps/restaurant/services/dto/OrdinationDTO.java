@@ -6,7 +6,6 @@
 package com.naigoapps.restaurant.services.dto;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,36 +24,46 @@ public class OrdinationDTO extends DTO{
     
     private boolean dirty;
 
-    public OrdinationDTO() {
-    }
+	public String getTable() {
+		return table;
+	}
 
-    public OrdinationDTO(String table, LocalDateTime creationTime, int progressive, List<OrderDTO> orders, boolean dirty, String uuid) {
-        super(uuid);
-        this.table = table;
-        this.creationTime = creationTime;
-        this.progressive = progressive;
-        this.orders = orders;
-        this.dirty = dirty;
-    }
+	public void setTable(String table) {
+		this.table = table;
+	}
 
-    public LocalDateTime getCreationTime() {
-        return creationTime;
-    }
+	public LocalDateTime getCreationTime() {
+		return creationTime;
+	}
 
-    public int getProgressive() {
-        return progressive;
-    }
+	public void setCreationTime(LocalDateTime creationTime) {
+		this.creationTime = creationTime;
+	}
 
-    public List<OrderDTO> getOrders() {
-        return Collections.unmodifiableList(orders);
-    }
+	public int getProgressive() {
+		return progressive;
+	}
 
-    public boolean isDirty() {
-        return dirty;
-    }
+	public void setProgressive(int progressive) {
+		this.progressive = progressive;
+	}
 
-    public String getTable() {
-        return table;
-    }
+	public List<OrderDTO> getOrders() {
+		return orders;
+	}
+
+	public void setOrders(List<OrderDTO> orders) {
+		this.orders = orders;
+	}
+
+	public boolean isDirty() {
+		return dirty;
+	}
+
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
+	}
+
+    
 
 }

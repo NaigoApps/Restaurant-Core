@@ -33,8 +33,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.print.DocFlavor;
@@ -55,8 +53,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import jpos.FiscalPrinter;
-import jpos.JposException;
 
 /**
  *
@@ -314,42 +310,4 @@ public class PrinterREST {
         return date.format(formatter);
     }
 
-    public void print() {
-        FiscalPrinter p = new FiscalPrinter();
-        try {
-            p.open("printerName");
-        } catch (JposException ex) {
-            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            p.claim(100);
-        } catch (JposException ex) {
-            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            p.setDeviceEnabled(true);
-        } catch (JposException ex) {
-            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            p.beginFiscalDocument(1);
-        } catch (JposException ex) {
-            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            p.printFiscalDocumentLine("XXX");
-        } catch (JposException ex) {
-            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            p.endFiscalDocument();
-        } catch (JposException ex) {
-            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            p.close();
-        } catch (JposException ex) {
-            Logger.getLogger(PrinterREST.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 }

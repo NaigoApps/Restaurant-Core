@@ -81,7 +81,7 @@ public class CategoryREST {
     public Response createCategory(CategoryDTO newCategory) {
         Category category = new CategoryBuilder().
                 name(newCategory.getName()).
-                color(new Color(newCategory.getColor())).
+                color(new Color(newCategory.getColor() != null ? newCategory.getColor() : 0)).
                 location(lDao.findByUuid(newCategory.getLocation()))
                 .getContent();
         

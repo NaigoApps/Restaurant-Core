@@ -5,26 +5,11 @@
  */
 package com.naigoapps.restaurant.services;
 
-import com.naigoapps.restaurant.main.EveningManager;
-import com.naigoapps.restaurant.model.DiningTable;
-import com.naigoapps.restaurant.model.Dish;
-import com.naigoapps.restaurant.model.Evening;
-import com.naigoapps.restaurant.model.Ordination;
-import com.naigoapps.restaurant.model.Phase;
-import com.naigoapps.restaurant.model.Order;
-import com.naigoapps.restaurant.model.dao.AdditionDao;
-import com.naigoapps.restaurant.model.dao.DiningTableDao;
-import com.naigoapps.restaurant.model.dao.DishDao;
-import com.naigoapps.restaurant.model.dao.OrdinationDao;
-import com.naigoapps.restaurant.model.dao.PhaseDao;
-import com.naigoapps.restaurant.model.dao.OrderDao;
-import com.naigoapps.restaurant.services.dto.OrderDTO;
-import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
-import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.DELETE;
@@ -35,6 +20,22 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import com.naigoapps.restaurant.main.EveningManager;
+import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.Dish;
+import com.naigoapps.restaurant.model.Evening;
+import com.naigoapps.restaurant.model.Order;
+import com.naigoapps.restaurant.model.Ordination;
+import com.naigoapps.restaurant.model.Phase;
+import com.naigoapps.restaurant.model.dao.DiningTableDao;
+import com.naigoapps.restaurant.model.dao.DishDao;
+import com.naigoapps.restaurant.model.dao.OrderDao;
+import com.naigoapps.restaurant.model.dao.OrdinationDao;
+import com.naigoapps.restaurant.model.dao.PhaseDao;
+import com.naigoapps.restaurant.services.dto.OrderDTO;
+import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 
 /**
  *
@@ -60,9 +61,6 @@ public class OrderREST {
     private PhaseDao pDao;
 
     @Inject
-    private AdditionDao aDao;
-
-    @Inject
     private DiningTableDao dTDao;
 
     @GET
@@ -71,11 +69,10 @@ public class OrderREST {
         Evening e = eveningManager.getSelectedEvening();
         if (e != null) {
             List<OrderDTO> orders = new ArrayList<>();
-            e.getDiningTables().forEach(table -> {
+            e.getDiningTables().forEach(table -> 
                 orders.addAll(table.listOrders().stream()
                         .map(DTOAssembler::fromOrder)
-                        .collect(Collectors.toList()));
-            });
+                        .collect(Collectors.toList())));
             return Response.status(Response.Status.OK).entity(orders).build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -165,7 +162,7 @@ public class OrderREST {
                 if (orders.stream().allMatch(order -> order.getBill() == null)) {
                     Ordination targetOrdination = orders.get(0).getOrdination();
                     if (!targetOrdination.getOrders().stream()
-                            .allMatch(order -> orders.contains(order))) {
+                            .allMatch(orders::contains)) {
                         orders.forEach(order -> {
                             order.setOrdination(null);
                             rdDao.getEntityManager().remove(order);

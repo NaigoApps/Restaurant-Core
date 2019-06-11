@@ -7,14 +7,26 @@ package com.naigoapps.restaurant.main;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
+import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.EveningDao;
 import com.naigoapps.restaurant.services.DiningTableWS;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
+import com.naigoapps.restaurant.services.dto.OrdinationDTO;
 import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.serializers.DiningTableStatusSerializer;
+import com.naigoapps.restaurant.services.websocket.SessionType;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,15 +44,18 @@ public class EveningManager {
 
     private String selectedEveningUuid;
 
-    private List<Session> dtSessions;
+    private Map<String, Set<Session>> sessions;
 
     @Inject
     EveningDao eveningDao;
+    
+    @Inject
+    DiningTableDao dtDao;
 
     @PostConstruct
     public void init() {
         Logger.getLogger(this.getClass().getName()).info("***** CREATED_EVENING_MANAGER *****");
-        dtSessions = new ArrayList<>();
+        sessions = new HashMap<>();
     }
 
     public Evening getSelectedEvening() {
@@ -55,41 +70,85 @@ public class EveningManager {
         this.selectedEveningUuid = selectedEveningUuid;
     }
 
-    public void addDtSession(Session s) {
-        dtSessions.add(s);
-    }
-
-    public void removeDtSession(Session s) {
-        dtSessions.remove(s);
-    }
-
-    public void updateDtSessions() {
-        List<Session> toRemove = new ArrayList<>();
-
-        List<DiningTableDTO> result = getSelectedEvening().getDiningTables()
-                .stream()
-                .map(DTOAssembler::fromDiningTable)
-                .collect(Collectors.toList());
-
-        ObjectMapper mapper = new ObjectMapper();
-        String tables = null;
-        try {
-            tables = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
-        } catch (JsonProcessingException ex) {
-            Logger.getLogger(EveningManager.class.getName()).log(Level.SEVERE, null, ex);
+    public void addSession(String key, Session s) {
+        Set<Session> set = this.sessions.get(key);
+        if(set == null){
+            set = new HashSet<>();
+            this.sessions.put(key, set);
         }
+        set.add(s);
+    }
 
-        if (tables != null) {
-            final String message = tables;
-            dtSessions.stream().forEach(session -> {
+    public void removeSession(Session s) {
+        this.sessions.entrySet().forEach(entry -> {
+            if(entry.getValue().contains(s)){
+                entry.getValue().remove(s);
+            }
+        });
+    }
+
+    public void updateSessions(String key) {
+        Set<Session> toRemove = new HashSet<>();
+        Set<Session> toSend = sessions.get(key);
+        if(toSend != null){
+            toSend.stream().forEach(session -> {
                 try {
-                    session.getBasicRemote().sendText(message);
+                    session.getBasicRemote().sendText(buildMessage(key));
                 } catch (IOException ex) {
                     Logger.getLogger(DiningTableWS.class.getName()).log(Level.SEVERE, null, ex);
                     toRemove.add(session);
                 }
             });
-            dtSessions.removeAll(toRemove);
+            toSend.removeAll(toRemove);
         }
+    }
+    
+    private String buildMessage(String key){
+        if(key.equals(SessionType.DINING_TABLES.name())){
+            return buildDiningTablesMessage();
+        }else{
+            return buildOrdinationsMessage(key);
+        }
+    }
+    
+    private String buildDiningTablesMessage(){
+        List<DiningTableDTO> result = getSelectedEvening().getDiningTables()
+                .stream()
+                .map(DTOAssembler::fromDiningTable)
+                .collect(Collectors.toList());
+
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(DiningTableStatus.class, new DiningTableStatusSerializer());
+        
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(module);
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        String tables = "";
+        try {
+            tables = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(EveningManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return tables;
+    }
+    
+    private String buildOrdinationsMessage(String tableUuid){
+        DiningTable target = dtDao.findByUuid(tableUuid);
+        List<OrdinationDTO> result = target.getOrdinations()
+                .stream()
+                .map(DTOAssembler::fromOrdination)
+                .collect(Collectors.toList());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        String tables = "";
+        try {
+            tables = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(EveningManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return tables;
     }
 }

@@ -5,88 +5,95 @@
  */
 package com.naigoapps.restaurant.services.dto;
 
-import com.naigoapps.restaurant.model.DiningTableStatus;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
+
+import com.naigoapps.restaurant.model.DiningTableStatus;
 
 /**
  *
  * @author naigo
  */
-public class DiningTableDTO extends DTO{
+public class DiningTableDTO extends DTO {
 
-    private final String evening;
-    
-    private final int coverCharges;
-    
-    private final String waiter;
-    
-    private final List<String> ordinations;
-    
-    private final List<String> bills;
-    
-    private final LocalDateTime openingTime;
-    
-    private final String table;
-    
-    private final DiningTableStatus status;
+	private String evening;
 
-    public DiningTableDTO() {
-        this.coverCharges = 0;
-        this.evening = null;
-        this.waiter = null;
-        this.ordinations = null;
-        this.bills = null;
-        this.openingTime = null;
-        this.table = null;
-        this.status = null;
-    }
+	private int coverCharges;
 
-    public DiningTableDTO(String evening, int coverCharges, String waiter, List<String> ordinations, List<String> bills, LocalDateTime openingTime, String table, DiningTableStatus status, String uuid) {
-        super(uuid);
-        this.evening = evening;
-        this.coverCharges = coverCharges;
-        this.waiter = waiter;
-        this.ordinations = ordinations;
-        this.bills = bills;
-        this.openingTime = openingTime;
-        this.table = table;
-        this.status = status;
-    }
+	private String waiter;
 
-    public String getEvening() {
-        return evening;
-    }
+	private List<String> ordinations;
 
-    public int getCoverCharges() {
-        return coverCharges;
-    }
+	private List<String> bills;
 
-    public String getWaiter() {
-        return waiter;
-    }
+	private LocalDateTime openingTime;
 
-    public List<String> getOrdinations() {
-        return Collections.unmodifiableList(ordinations);
-    }
+	private String table;
 
-    public List<String> getBills() {
-        return Collections.unmodifiableList(bills);
-    }
+	private DiningTableStatus status;
 
-    public LocalDateTime getOpeningTime() {
-        return openingTime;
-    }
+	public String getEvening() {
+		return evening;
+	}
 
-    public String getTable() {
-        return table;
-    }
+	public void setEvening(String evening) {
+		this.evening = evening;
+	}
 
-    public DiningTableStatus getStatus() {
-        return status;
-    }
+	public int getCoverCharges() {
+		return coverCharges;
+	}
 
-    
+	public void setCoverCharges(int coverCharges) {
+		this.coverCharges = coverCharges;
+	}
+
+	public String getWaiter() {
+		return waiter;
+	}
+
+	public void setWaiter(String waiter) {
+		this.waiter = waiter;
+	}
+
+	public List<String> getOrdinations() {
+		return ordinations;
+	}
+
+	public void setOrdinations(List<String> ordinations) {
+		this.ordinations = ordinations;
+	}
+
+	public List<String> getBills() {
+		return bills;
+	}
+
+	public void setBills(List<String> bills) {
+		this.bills = bills;
+	}
+
+	public LocalDateTime getOpeningTime() {
+		return openingTime;
+	}
+
+	public void setOpeningTime(LocalDateTime openingTime) {
+		this.openingTime = openingTime;
+	}
+
+	public String getTable() {
+		return table;
+	}
+
+	public void setTable(String table) {
+		this.table = table;
+	}
+
+	public DiningTableStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(DiningTableStatus status) {
+		this.status = status;
+	}
 
 }

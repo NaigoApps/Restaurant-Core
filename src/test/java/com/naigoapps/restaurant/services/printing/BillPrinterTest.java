@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -68,6 +69,7 @@ public class BillPrinterTest {
         assertEquals(c, bPrinter.getCustomer());
     }
 
+    @Ignore
     @Test
     public void testApplyGenericReceipt() throws Exception {
         bPrinter = new BillPrinter(true);

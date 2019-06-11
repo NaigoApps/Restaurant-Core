@@ -10,5 +10,7 @@ package com.naigoapps.restaurant.services.exceptions;
  * @author naigo
  */
 public class AlreadyRegisteredCoverChargesException extends RuntimeException {
-    
+    public AlreadyRegisteredCoverChargesException(String msg) {
+    	super(msg);
+    }
 }

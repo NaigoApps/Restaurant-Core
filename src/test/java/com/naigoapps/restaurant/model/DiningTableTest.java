@@ -90,8 +90,8 @@ public class DiningTableTest {
     @Test
     public void testSetDate() {
         LocalDateTime now = LocalDateTime.now();
-        table.setDate(now);
-        assertEquals(now, table.getDate());
+        table.setOpeningTime(now);
+        assertEquals(now, table.getOpeningTime());
     }
 
     @Test

@@ -1,3 +1,5 @@
 /wildfly-10.1.0.Final/
 /nbproject/
 /src/main/webapp/
+/target/
+/.project
