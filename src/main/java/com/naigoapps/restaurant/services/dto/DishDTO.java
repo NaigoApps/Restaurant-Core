@@ -13,7 +13,7 @@ import com.naigoapps.restaurant.model.DishStatus;
  */
 public class DishDTO extends DTO{
     
-    private String category;
+    private String categoryId;
     
     private String name;
     
@@ -23,35 +23,14 @@ public class DishDTO extends DTO{
     
     private DishStatus status;
 
-    public DishDTO() {
+    private String color;
+    
+    public String getCategoryId() {
+        return categoryId;
     }
 
-    public DishDTO(String uuid, String categoryUuid, String name, float price, String description, DishStatus status) {
-        super(uuid);
-        this.category = categoryUuid;
-        this.name = name;
-        this.price = price;
-        this.description = description;
-        this.status = status;
-    }
-
-    
-    
-    public DishStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(DishStatus status) {
-        this.status = status;
-    }    
-    
-    public String getCategory() {
-        return category;
-    }
-    
-    
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getName() {
@@ -78,5 +57,20 @@ public class DishDTO extends DTO{
         this.description = description;
     }
 
+    public DishStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(DishStatus status) {
+        this.status = status;
+    }
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
     
 }

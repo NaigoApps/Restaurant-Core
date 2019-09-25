@@ -9,37 +9,35 @@ package com.naigoapps.restaurant.services.dto;
  *
  * @author naigo
  */
-public class PrinterDTO  extends DTO{
+public class PrinterDTO extends DTO {
 
-    private String name;
-    
-    private int lineCharacters;
+	private String name;
 
-    public PrinterDTO() {
-        super();
-    }
+	private int lineCharacters;
 
-    public PrinterDTO(String uuid, String name, int lineCharacters) {
-        super(uuid);
-        this.name = name;
-        this.lineCharacters = lineCharacters;
-    }
+	public PrinterDTO() {
+	}
+	
+	public PrinterDTO(String uuid, String name, int lineCharacters) {
+		super(uuid);
+		this.name = name;
+		this.lineCharacters = lineCharacters;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setLineCharacters(int lineCharacters) {
-        this.lineCharacters = lineCharacters;
-    }
+	public void setLineCharacters(int lineCharacters) {
+		this.lineCharacters = lineCharacters;
+	}
 
-    public int getLineCharacters() {
-        return lineCharacters;
-    }
+	public int getLineCharacters() {
+		return lineCharacters;
+	}
 
-    
 }

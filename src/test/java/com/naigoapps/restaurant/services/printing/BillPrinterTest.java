@@ -6,7 +6,6 @@
 package com.naigoapps.restaurant.services.printing;
 
 import com.naigoapps.restaurant.model.Bill;
-import com.naigoapps.restaurant.model.Customer;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Evening;
@@ -14,7 +13,6 @@ import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.RestaurantTable;
 import com.naigoapps.restaurant.model.builders.BillBuilder;
-import com.naigoapps.restaurant.model.builders.CustomerBuilder;
 import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import com.naigoapps.restaurant.model.builders.DishBuilder;
 import com.naigoapps.restaurant.model.builders.EveningBuilder;
@@ -40,7 +38,7 @@ import static org.junit.Assert.*;
  */
 public class BillPrinterTest {
 
-    private BillPrinter bPrinter;
+    private SoftBillPrinter bPrinter;
 
     private Printer printer;
     private PrintingService service;
@@ -56,23 +54,20 @@ public class BillPrinterTest {
 
     @Test
     public void testConstruct1() {
-        bPrinter = new BillPrinter(true);
+        bPrinter = new SoftBillPrinter(true);
         assertTrue(bPrinter.isGeneric());
-        assertNull(bPrinter.getCustomer());
     }
 
     @Test
     public void testConstruct2() {
-        Customer c = new CustomerBuilder().getContent();
-        bPrinter = new BillPrinter(false, c);
+        bPrinter = new SoftBillPrinter(false);
         assertFalse(bPrinter.isGeneric());
-        assertEquals(c, bPrinter.getCustomer());
     }
 
     @Ignore
     @Test
     public void testApplyGenericReceipt() throws Exception {
-        bPrinter = new BillPrinter(true);
+        bPrinter = new SoftBillPrinter(true);
         LocalDateTime time = LocalDateTime.of(2018, Month.MARCH, 3, 19, 19, 19);
         Bill b = bill(dTable(evening(2), rTable("T1")), 20, order("A", 1), order("B", 3), order("C", 6), order("D", 2), order("E", 7));
         bPrinter.apply(service, b, time);

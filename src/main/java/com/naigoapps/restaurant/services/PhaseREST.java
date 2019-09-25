@@ -13,11 +13,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import com.naigoapps.restaurant.model.dao.PhaseDao;
 import com.naigoapps.restaurant.services.dto.PhaseDTO;
-import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.dto.mappers.PhaseMapper;
 
 /**
  *
@@ -28,18 +27,16 @@ import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
 public class PhaseREST {
     
     @Inject
-    PhaseDao pDao;
+    private PhaseDao pDao;
+    
+    @Inject
+    private PhaseMapper mapper;
     
     @GET
-    public Response findAll() {
-        List<PhaseDTO> phases = pDao.findAll().stream()
-                .map(DTOAssembler::fromPhase)
-                .collect(Collectors.toList());
-        
-        return Response
-                .status(200)
-                .entity(phases)
-                .build();
+    public List<PhaseDTO> findAll() {
+        return pDao.findAll().stream()
+        	.map(mapper::map)
+        	.collect(Collectors.toList());
     }
     
 }

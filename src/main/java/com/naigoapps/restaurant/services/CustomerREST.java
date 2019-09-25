@@ -5,17 +5,13 @@
  */
 package com.naigoapps.restaurant.services;
 
-import com.naigoapps.restaurant.model.Customer;
-import com.naigoapps.restaurant.model.builders.CustomerBuilder;
-import com.naigoapps.restaurant.model.dao.CustomerDao;
-import com.naigoapps.restaurant.services.dto.CustomerDTO;
-import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
-import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -25,7 +21,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+
+import com.naigoapps.restaurant.model.Customer;
+import com.naigoapps.restaurant.model.builders.CustomerBuilder;
+import com.naigoapps.restaurant.model.dao.CustomerDao;
+import com.naigoapps.restaurant.services.dto.CustomerDTO;
+import com.naigoapps.restaurant.services.dto.mappers.CustomerMapper;
 
 /**
  *
@@ -36,21 +37,22 @@ import javax.ws.rs.core.Response;
 public class CustomerREST {
 
     @Inject
-    CustomerDao cDao;
+    private CustomerDao dao;
 
+    @Inject
+    private CustomerMapper mapper;
+    
     @GET
-    public Response getCustomers() {
-        List<CustomerDTO> data = cDao.findAll().stream()
-                .map(DTOAssembler::fromCustomer)
+    public List<CustomerDTO> getCustomers() {
+        return dao.findAll().stream()
+        		.map(mapper::map)
                 .collect(Collectors.toList());
-
-        return ResponseBuilder.ok(data);
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response createCustomer(CustomerDTO c) {
+    public CustomerDTO createCustomer(CustomerDTO c) {
         Customer newCustomer = new CustomerBuilder()
                 .name(c.getName())
                 .surname(c.getSurname())
@@ -61,82 +63,81 @@ public class CustomerREST {
                 .cap(c.getCap())
                 .district(c.getDistrict())
                 .getContent();
-        cDao.persist(newCustomer);
+        dao.persist(newCustomer);
 
-        return ResponseBuilder.created(DTOAssembler.fromCustomer(newCustomer));
+        return mapper.map(newCustomer);
     }
 
     @PUT
     @Path("{uuid}/name")
     @Transactional
-    public Response updateCustomerName(@PathParam("uuid") String uuid, String value) {
+    public CustomerDTO updateCustomerName(@PathParam("uuid") String uuid, String value) {
         return updateCustomerProperty(customer -> customer.setName(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/surname")
     @Transactional
-    public Response updateCustomerSurname(@PathParam("uuid") String uuid, String value) {
+    public CustomerDTO updateCustomerSurname(@PathParam("uuid") String uuid, String value) {
         return updateCustomerProperty(customer -> customer.setSurname(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/cf")
     @Transactional
-    public Response updateCustomerCf(@PathParam("uuid") String uuid, String value) {
+    public CustomerDTO updateCustomerCf(@PathParam("uuid") String uuid, String value) {
         return updateCustomerProperty(customer -> customer.setCf(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/piva")
     @Transactional
-    public Response updateCustomerPiva(@PathParam("uuid") String uuid, String value) {
+    public CustomerDTO updateCustomerPiva(@PathParam("uuid") String uuid, String value) {
         return updateCustomerProperty(customer -> customer.setPiva(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/city")
     @Transactional
-    public Response updateCustomerCity(@PathParam("uuid") String uuid, String value) {
+    public CustomerDTO updateCustomerCity(@PathParam("uuid") String uuid, String value) {
         return updateCustomerProperty(customer -> customer.setCity(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/cap")
     @Transactional
-    public Response updateCustomerCap(@PathParam("uuid") String uuid, String value) {
+    public CustomerDTO updateCustomerCap(@PathParam("uuid") String uuid, String value) {
         return updateCustomerProperty(customer -> customer.setCap(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/address")
     @Transactional
-    public Response updateCustomerAddress(@PathParam("uuid") String uuid, String value) {
+    public CustomerDTO updateCustomerAddress(@PathParam("uuid") String uuid, String value) {
         return updateCustomerProperty(customer -> customer.setAddress(value), uuid);
     }
 
     @PUT
     @Path("{uuid}/district")
     @Transactional
-    public Response updateCustomerDistrict(@PathParam("uuid") String uuid, String value) {
+    public CustomerDTO updateCustomerDistrict(@PathParam("uuid") String uuid, String value) {
         return updateCustomerProperty(customer -> customer.setDistrict(value), uuid);
     }
     
-    public Response updateCustomerProperty(Consumer<Customer> setter, String uuid){
-        Customer c = cDao.findByUuid(uuid);
+    public CustomerDTO updateCustomerProperty(Consumer<Customer> setter, String uuid){
+        Customer c = dao.findByUuid(uuid);
         if (c != null) {
             setter.accept(c);
-            return ResponseBuilder.ok(DTOAssembler.fromCustomer(c));
+            return mapper.map(c);
         } else {
-            return ResponseBuilder.notFound("Cliente non trovato");
+            throw new BadRequestException("Cliente non trovato");
         }
     }
 
     @DELETE
     @Transactional
     @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteCustomer(String uuid) {
-        cDao.getEntityManager().remove(cDao.findByUuid(uuid));
-        return ResponseBuilder.ok(uuid);
+    public void deleteCustomer(String uuid) {
+        dao.getEntityManager().remove(dao.findByUuid(uuid));
     }
 }

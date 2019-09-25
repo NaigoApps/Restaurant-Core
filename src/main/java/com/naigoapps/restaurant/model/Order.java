@@ -7,6 +7,9 @@ package com.naigoapps.restaurant.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -104,6 +107,10 @@ public class Order extends BaseEntity {
     public void setAdditions(List<Addition> additions) {
         this.additions = additions;
     }
+    
+    public void addAddition(Addition a) {
+    	this.additions.add(a);
+    }
 
     public void setOrdination(Ordination ordination) {
         if(this.ordination != null && this.ordination.equals(ordination)){
@@ -160,6 +167,12 @@ public class Order extends BaseEntity {
 
     private boolean checkPrice(Order other) {
         return price == other.price;
+    }
+    
+    public Set<String> getAdditionUuids(){
+    	return additions.stream()
+    			.map(BaseEntity::getUuid)
+    			.collect(Collectors.toSet());
     }
 
     @Override

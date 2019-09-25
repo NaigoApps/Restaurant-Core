@@ -5,20 +5,13 @@
  */
 package com.naigoapps.restaurant.services;
 
-import com.naigoapps.restaurant.model.Category;
-import com.naigoapps.restaurant.model.Dish;
-import com.naigoapps.restaurant.model.DishStatus;
-import com.naigoapps.restaurant.model.builders.DishBuilder;
-import com.naigoapps.restaurant.model.dao.CategoryDao;
-import com.naigoapps.restaurant.model.dao.DishDao;
-import com.naigoapps.restaurant.model.dao.OrderDao;
-import com.naigoapps.restaurant.services.dto.DishDTO;
-import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
-import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -28,125 +21,104 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+
+import com.naigoapps.restaurant.model.Category;
+import com.naigoapps.restaurant.model.Dish;
+import com.naigoapps.restaurant.model.DishStatus;
+import com.naigoapps.restaurant.model.builders.DishBuilder;
+import com.naigoapps.restaurant.model.dao.CategoryDao;
+import com.naigoapps.restaurant.model.dao.DishDao;
+import com.naigoapps.restaurant.model.dao.OrderDao;
+import com.naigoapps.restaurant.services.dto.DishDTO;
+import com.naigoapps.restaurant.services.dto.mappers.DishMapper;
+import com.naigoapps.restaurant.services.filters.Accessible;
 
 /**
  *
  * @author naigo
  */
+@Accessible
 @Path("/dishes")
 @Produces(MediaType.APPLICATION_JSON)
+@Transactional
 public class DishREST {
 
     @Inject
-    private DishDao dishDao;
+    private DishDao dao;
 
     @Inject
     private OrderDao oDao;
 
     @Inject
     private CategoryDao categoryDao;
-
+    
+    @Inject
+    private DishMapper mapper;
+    
     @GET
-    public Response findByCategory(@QueryParam("category") String catUuid) {
-        List<DishDTO> dishes = dishDao.findByCategory(catUuid).stream()
+    @Path("{uuid}")
+    public DishDTO findByUuid(@PathParam("uuid") String uuid) {
+    	return mapper.map(dao.findByUuid(uuid));
+    }
+    
+    @GET
+    public List<DishDTO> findByCategory(@QueryParam("category") String catUuid) {
+        return dao.findByCategory(catUuid).stream()
+                .filter(d -> DishStatus.SUSPENDED != d.getStatus())
                 .filter(d -> DishStatus.REMOVED != d.getStatus())
-                .map(DTOAssembler::fromDish)
+                .sorted((d1, d2) -> d1.getName().compareTo(d2.getName()))
+                .map(mapper::map)
                 .collect(Collectors.toList());
-
-        return Response
-                .status(200)
-                .entity(dishes)
-                .build();
     }
 
     @GET
     @Path("all")
-    public Response findAll() {
-        List<DishDTO> dishes = dishDao.findAll().stream()
+    public List<DishDTO> findAll() {
+        return dao.findAll().stream()
                 .filter(d -> DishStatus.REMOVED != d.getStatus())
-                .map(DTOAssembler::fromDish)
+                .sorted((d1, d2) -> d1.getName().compareTo(d2.getName()))
+                .map(mapper::map)
                 .collect(Collectors.toList());
-
-        return Response
-                .status(200)
-                .entity(dishes)
-                .build();
     }
 
     @PUT
     @Path("{uuid}/name")
-    @Transactional
-    public Response updateName(@PathParam("uuid") String uuid, String name) {
-        Dish d = dishDao.findByUuid(uuid);
-        if (d != null) {
-            d.setName(name);
-
-            return Response
-                    .status(Response.Status.OK)
-                    .entity(DTOAssembler.fromDish(d))
-                    .build();
-        } else {
-            return Response
-                    .status(Response.Status.NOT_FOUND)
-                    .build();
-        }
+    public DishDTO updateName(@PathParam("uuid") String uuid, String name) {
+    	return updateDishProperty(uuid, d -> d.setName(name));
     }
 
     @PUT
     @Path("{uuid}/description")
-    @Transactional
-    public Response updateDescription(@PathParam("uuid") String uuid, String description) {
-        Dish d = dishDao.findByUuid(uuid);
-        if (d != null) {
-            d.setDescription(description);
-
-            return Response
-                    .status(Response.Status.OK)
-                    .entity(DTOAssembler.fromDish(d))
-                    .build();
-        } else {
-            return Response
-                    .status(Response.Status.NOT_FOUND)
-                    .build();
-        }
+    public DishDTO updateDescription(@PathParam("uuid") String uuid, String description) throws Exception {
+    	return updateDishProperty(uuid, d -> d.setDescription(description));
     }
 
     @PUT
     @Path("{uuid}/price")
-    @Transactional
-    public Response updatePrice(@PathParam("uuid") String uuid, float price) {
-        Dish d = dishDao.findByUuid(uuid);
-        if (d != null) {
-            d.setPrice(price);
-
-            return Response
-                    .status(Response.Status.OK)
-                    .entity(DTOAssembler.fromDish(d))
-                    .build();
-        } else {
-            return Response
-                    .status(Response.Status.NOT_FOUND)
-                    .build();
-        }
+    public DishDTO updatePrice(@PathParam("uuid") String uuid, float price) {
+    	return updateDishProperty(uuid, d -> d.setPrice(price));
     }
 
     @PUT
     @Path("{uuid}/status")
-    @Transactional
-    public Response updateStatus(@PathParam("uuid") String uuid, String status) {
-        Dish d = dishDao.findByUuid(uuid);
-        if (d != null) {
-            if (!DishStatus.REMOVED.equals(DishStatus.fromName(status)) || !hasOrders(d)) {
-
-                d.setStatus(DishStatus.fromName(status));
-
-                return ResponseBuilder.ok(DTOAssembler.fromDish(d));
-            }
-            return ResponseBuilder.badRequest("Il piatto è usato in alcuni ordini");
-        } else {
-            return ResponseBuilder.notFound("Piatto non trovato");
-        }
+    public DishDTO updateStatus(@PathParam("uuid") String uuid, String statusText) {
+    	DishStatus status = DishStatus.valueOf(statusText);
+    	return updateDishProperty(uuid, d -> {    		
+    		if (!DishStatus.REMOVED.equals(status) || !hasOrders(d)) {
+    			d.setStatus(status);
+    		}else {
+    			throw new BadRequestException("Il piatto è usato in alcuni ordini");
+    		}
+    	});
+    }
+    
+    private DishDTO updateDishProperty(String dishUuid, Consumer<Dish> consumer) {
+    	Dish dish = dao.findByUuid(dishUuid);
+    	if(dish == null) {
+    		throw new BadRequestException("Piatto non trovato");
+    	}
+    	consumer.accept(dish);
+    	return mapper.map(dish);
     }
 
     private boolean hasOrders(Dish d) {
@@ -155,53 +127,31 @@ public class DishREST {
 
     @PUT
     @Path("{uuid}/category")
-    @Transactional
-    public Response updateCategory(@PathParam("uuid") String dishUuid, String catUuid) {
-        Dish d = dishDao.findByUuid(dishUuid);
-        Category cat = categoryDao.findByUuid(catUuid);
-        if (d != null) {
-            d.setCategory(cat);
-
-            return Response
-                    .status(Response.Status.OK)
-                    .entity(DTOAssembler.fromDish(d))
-                    .build();
-        } else {
-            return Response
-                    .status(Response.Status.NOT_FOUND)
-                    .build();
-        }
+    public DishDTO updateCategory(@PathParam("uuid") String dishUuid, String catUuid) {
+    	Category cat = categoryDao.findByUuid(catUuid);
+        return updateDishProperty(dishUuid, d -> d.setCategory(cat));
     }
 
     @POST
-    @Transactional
-    public Response createDish(DishDTO newDish) {
-
-        Category cat = categoryDao.findByUuid(newDish.getCategory());
+    public String createDish(@QueryParam("category") String category) {
+        Category cat = categoryDao.findByUuid(category);
 
         if (cat != null) {
             Dish dish = new DishBuilder()
                     .category(cat)
-                    .name(newDish.getName())
-                    .description(newDish.getDescription())
-                    .price(newDish.getPrice())
                     .getContent();
-            dishDao.persist(dish);
-            return Response
-                    .status(Response.Status.CREATED)
-                    .entity(DTOAssembler.fromDish(dish))
-                    .build();
+            dao.persist(dish);
+
+            return dish.getUuid();
+        }else {        	
+        	throw new BadRequestException("Categoria non valida");
         }
-        return Response
-                .status(Response.Status.BAD_REQUEST)
-                .build();
     }
 
     @DELETE
-    @Transactional
+    @Path("{uuid}")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteDish(String uuid) {
-        dishDao.deleteByUuid(uuid);
-        return ResponseBuilder.ok(uuid);
+    public void deleteDish(@PathParam("uuid") String uuid) {
+        dao.deleteByUuid(uuid);
     }
 }

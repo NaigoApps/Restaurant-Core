@@ -5,11 +5,14 @@
  */
 package com.naigoapps.restaurant.model;
 
-import java.awt.Color;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -67,8 +70,7 @@ public class CategoryTest {
 
     @Test
     public void testSetColor() {
-        Color c = new Color(123);
-        category.setColor(c);
-        assertEquals(c, category.getColor());
+        category.setColor("A");
+        assertEquals("A", category.getColor());
     }
 }

@@ -5,18 +5,16 @@
  */
 package com.naigoapps.restaurant.services;
 
-import com.naigoapps.restaurant.main.EveningManager;
-import com.naigoapps.restaurant.model.Location;
-import com.naigoapps.restaurant.model.Printer;
-import com.naigoapps.restaurant.model.dao.LocationDao;
-import com.naigoapps.restaurant.model.dao.PrinterDao;
-import com.naigoapps.restaurant.services.dto.LocationDTO;
-import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
-import com.naigoapps.restaurant.services.utils.ResponseBuilder;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
+import javax.print.PrintException;
 import javax.transaction.Transactional;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -28,90 +26,135 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.Location;
+import com.naigoapps.restaurant.model.Printer;
+import com.naigoapps.restaurant.model.dao.DiningTableDao;
+import com.naigoapps.restaurant.model.dao.LocationDao;
+import com.naigoapps.restaurant.model.dao.PrinterDao;
+import com.naigoapps.restaurant.services.dto.LocationDTO;
+import com.naigoapps.restaurant.services.dto.MessageRequestDTO;
+import com.naigoapps.restaurant.services.dto.mappers.LocationMapper;
+import com.naigoapps.restaurant.services.filters.Accessible;
+import com.naigoapps.restaurant.services.printing.services.PrintingService;
+import com.naigoapps.restaurant.services.printing.services.PrintingService.Size;
+import com.naigoapps.restaurant.services.printing.services.PrintingServiceProvider;
+import com.naigoapps.restaurant.services.utils.ResponseBuilder;
+
 /**
  *
  * @author naigo
  */
+@Accessible
 @Path("/locations")
 @Produces(MediaType.APPLICATION_JSON)
+@Transactional
 public class LocationREST {
 
     @Inject
-    LocationDao lDao;
+    private LocationDao dao;
 
     @Inject
-    PrinterDao pDao;
+    private PrinterDao pDao;
 
     @Inject
-    EveningManager manager;
-
+    private DiningTableDao dtDao;
+    
+    @Inject
+    private LocationMapper mapper;
+    
     @GET
-    public Response getLocations() {
-
-        List<LocationDTO> data = lDao.findAll().stream()
-                .map(DTOAssembler::fromLocation)
+    public List<LocationDTO> getLocations() {
+        return dao.findAll().stream()
+                .map(mapper::map)
                 .collect(Collectors.toList());
-
-        return Response
-                .status(200)
-                .entity(data)
-                .build();
+    }
+    
+    @GET
+    @Path("{uuid}")
+    public LocationDTO findLocation(@PathParam("uuid") String uuid) {
+    	return mapper.map(dao.findByUuid(uuid));
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Transactional
-    public Response createLocation(LocationDTO l) {
-        Printer printer = pDao.findByUuid(l.getPrinter());
-        if (printer != null) {
-            Location location = new Location();
-            location.setName(l.getName());
-            location.setPrinter(printer);
-            lDao.persist(location);
-
-            return ResponseBuilder.created(DTOAssembler.fromLocation(location));
-        } else {
-            return ResponseBuilder.notFound("Stampante non trovata");
-        }
+    public String createLocation() {
+    	Location location = new Location();
+    	dao.persist(location);
+    	return location.getUuid();
     }
 
     @PUT
     @Path("{uuid}/name")
-    @Transactional
-    public Response updateLocationName(@PathParam("uuid") String uuid, String name) {
-        Location l = lDao.findByUuid(uuid);
+    public LocationDTO updateLocationName(@PathParam("uuid") String uuid, String name) {
+        Location l = dao.findByUuid(uuid);
         if (l != null) {
             l.setName(name);
-            return ResponseBuilder.ok(DTOAssembler.fromLocation(l));
+            return mapper.map(l);
         } else {
-            return ResponseBuilder.notFound("Postazione non trovata");
+            throw new BadRequestException("Postazione non trovata");
         }
     }
 
     @PUT
     @Path("{uuid}/printer")
-    @Transactional
-    public Response updateLocationPrinter(@PathParam("uuid") String uuid, String printer) {
-        Location l = lDao.findByUuid(uuid);
+    public LocationDTO updateLocationPrinter(@PathParam("uuid") String uuid, String printer) {
+        Location l = dao.findByUuid(uuid);
         Printer p = pDao.findByUuid(printer);
-        if (l != null) {
-            if (p != null) {
-                l.setPrinter(p);
-                return ResponseBuilder.ok(DTOAssembler.fromLocation(l));
-            } else {
-                return ResponseBuilder.notFound("Stampante non trovata");
-            }
-        } else {
-            return ResponseBuilder.notFound("Postazione non trovata");
+		if (l != null) {
+			if (p != null) {
+				l.setPrinter(p);
+				return mapper.map(l);
+			} else {
+				throw new BadRequestException("Stampante non trovata");
+			}
+		} else {
+			throw new BadRequestException("Postazione non trovata");
         }
     }
     
     @DELETE
-    @Transactional
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteTable(String uuid){
-        lDao.deleteByUuid(uuid);   
-        return ResponseBuilder.ok(uuid);
+    @Path("{uuid}")
+    public void deleteLocation(@PathParam("uuid") String uuid){
+        dao.deleteByUuid(uuid);   
     }
 
+
+
+	@POST
+	@Path("message")
+	@Transactional
+	public Response printMessage(MessageRequestDTO message) throws PrintException {
+		DiningTable table = null;
+		if(message.getTableUuid() != null) {
+			table = dtDao.findByUuid(message.getTableUuid());
+		}
+		List<Location> locations = Arrays.stream(message.getLocationUuids())
+				.map(dao::findByUuid)
+				.collect(Collectors.toList());
+		
+		Set<Printer> printers = locations.stream()
+				.map(Location::getPrinter)
+				.collect(Collectors.toSet());
+		for(Printer p : printers) {
+			try {
+				if (p != null) {
+					PrintingService service = PrintingServiceProvider.get(p);
+					service.lf(5).size(Size.STANDARD).printCenter("MESSAGGIO");
+					if(table != null) {
+						service.printCenter("Tavolo: " + table.getTable().getName())
+						.printCenter("Cam. " + table.getWaiter().getName());
+					}
+					service.printCenter(message.getMessage())
+					.lf(5)
+					.cut()
+					.doPrint();
+				}
+			} catch (IOException ex) {
+				return ResponseBuilder.badRequest(ex.getMessage());
+			}
+		}
+		return ResponseBuilder.ok();
+	}
+    
 }

@@ -6,6 +6,8 @@
 package com.naigoapps.restaurant.services.dto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import com.naigoapps.restaurant.model.DiningTableStatus;
@@ -16,28 +18,39 @@ import com.naigoapps.restaurant.model.DiningTableStatus;
  */
 public class DiningTableDTO extends DTO {
 
-	private String evening;
+	private String eveningId;
+
+	private float coverCharge;
 
 	private int coverCharges;
 
-	private String waiter;
+	private WaiterDTO waiter;
+	
+	private List<OrdersGroupDTO> orders;
 
-	private List<String> ordinations;
+	private List<OrdinationDTO> ordinations;
 
-	private List<String> bills;
+	private List<BillDTO> bills;
 
 	private LocalDateTime openingTime;
 
-	private String table;
+	private RestaurantTableDTO table;
 
 	private DiningTableStatus status;
+	
+	private double total;
 
-	public String getEvening() {
-		return evening;
+	public DiningTableDTO() {
+		ordinations = new ArrayList<>();
+		bills = new ArrayList<>();
 	}
 
-	public void setEvening(String evening) {
-		this.evening = evening;
+	public String getEveningId() {
+		return eveningId;
+	}
+
+	public void setEveningId(String eveningId) {
+		this.eveningId = eveningId;
 	}
 
 	public int getCoverCharges() {
@@ -48,28 +61,20 @@ public class DiningTableDTO extends DTO {
 		this.coverCharges = coverCharges;
 	}
 
-	public String getWaiter() {
+	public WaiterDTO getWaiter() {
 		return waiter;
 	}
 
-	public void setWaiter(String waiter) {
+	public void setWaiter(WaiterDTO waiter) {
 		this.waiter = waiter;
 	}
 
-	public List<String> getOrdinations() {
+	public List<OrdinationDTO> getOrdinations() {
 		return ordinations;
 	}
 
-	public void setOrdinations(List<String> ordinations) {
+	public void setOrdinations(List<OrdinationDTO> ordinations) {
 		this.ordinations = ordinations;
-	}
-
-	public List<String> getBills() {
-		return bills;
-	}
-
-	public void setBills(List<String> bills) {
-		this.bills = bills;
 	}
 
 	public LocalDateTime getOpeningTime() {
@@ -80,11 +85,11 @@ public class DiningTableDTO extends DTO {
 		this.openingTime = openingTime;
 	}
 
-	public String getTable() {
+	public RestaurantTableDTO getTable() {
 		return table;
 	}
 
-	public void setTable(String table) {
+	public void setTable(RestaurantTableDTO table) {
 		this.table = table;
 	}
 
@@ -96,4 +101,39 @@ public class DiningTableDTO extends DTO {
 		this.status = status;
 	}
 
+	public List<BillDTO> getBills() {
+		return bills;
+	}
+
+	public void setBills(List<BillDTO> bills) {
+		this.bills = bills;
+	}
+
+	public static Comparator<DiningTableDTO> comparator() {
+		return (a, b) -> a.getOpeningTime().compareTo(b.getOpeningTime());
+	}
+
+	public void setCoverCharge(float coverCharge) {
+		this.coverCharge = coverCharge;
+	}
+
+	public float getCoverCharge() {
+		return coverCharge;
+	}
+	
+	public void setOrders(List<OrdersGroupDTO> orders) {
+		this.orders = orders;
+	}
+	
+	public List<OrdersGroupDTO> getOrders() {
+		return orders;
+	}
+	
+	public void setTotal(double total) {
+		this.total = total;
+	}
+	
+	public double getTotal() {
+		return total;
+	}
 }

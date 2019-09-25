@@ -11,15 +11,7 @@ package com.naigoapps.restaurant.services.dto;
  */
 public class RestaurantTableDTO extends DTO{
     private String name;
-
-    public RestaurantTableDTO() {
-        super();
-    }
-
-    public RestaurantTableDTO(String uuid, String name) {
-        super(uuid);
-        this.name = name;
-    }
+    private boolean busy;
 
     public String getName() {
         return name;
@@ -29,4 +21,11 @@ public class RestaurantTableDTO extends DTO{
         this.name = name;
     }
     
+    public boolean isBusy() {
+		return busy;
+	}
+    
+    public void setBusy(boolean busy) {
+		this.busy = busy;
+	}
 }

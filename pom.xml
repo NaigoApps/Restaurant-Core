@@ -134,6 +134,20 @@
 			<artifactId>classmate</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.license4j</groupId>
+			<artifactId>license4j-runtime-library</artifactId>
+			<version>4.7.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.javax0.license3j</groupId>
+			<artifactId>license3j</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+
+
+
 	</dependencies>
 
 	<build>

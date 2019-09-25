@@ -5,14 +5,16 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Location;
-import java.awt.Color;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -54,8 +56,8 @@ public class CategoryBuilderTest {
     
     @Test
     public void testColor(){
-        Category cat = builder.color(new Color(123)).getContent();
-        assertEquals(new Color(123), cat.getColor());
+        Category cat = builder.color("black").getContent();
+        assertEquals("black", cat.getColor());
     }
 
     @Test

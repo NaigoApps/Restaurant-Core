@@ -13,14 +13,14 @@ import java.util.List;
  */
 public class CategoryDTO extends DTO{
     private String name;
-    
-    private String location;
 
-    private Integer color;
+    private LocationDTO location;
     
-    private List<String> dishes;
+    private String color;
     
-    private List<String> additions;
+    private List<DishDTO> dishes;
+    
+    private List<AdditionDTO> additions;
     
     public String getName() {
         return name;
@@ -30,36 +30,36 @@ public class CategoryDTO extends DTO{
         this.name = name;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public void setDishes(List<String> dishes) {
+    public void setDishes(List<DishDTO> dishes) {
         this.dishes = dishes;
     }
 
-    public List<String> getDishes() {
+    public List<DishDTO> getDishes() {
         return dishes;
     }
 
-    public void setAdditions(List<String> additions) {
+    public void setAdditions(List<AdditionDTO> additions) {
         this.additions = additions;
     }
 
-    public List<String> getAdditions() {
+    public List<AdditionDTO> getAdditions() {
         return additions;
     }
 
-    public void setColor(Integer color) {
+    public void setColor(String color) {
         this.color = color;
     }
 
-    public Integer getColor() {
+    public String getColor() {
         return color;
     }
 
+	public LocationDTO getLocation() {
+		return location;
+	}
+
+	public void setLocation(LocationDTO location) {
+		this.location = location;
+	}
+    
 }

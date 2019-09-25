@@ -5,51 +5,25 @@
  */
 package com.naigoapps.restaurant.services.dto;
 
-import java.util.List;
-
 /**
  *
  * @author naigo
  */
 public class OrderDTO extends DTO{
 
-    private String ordination;
+    private String ordinationId;
     
-    private String dish;
+//    private DishDTO dish;
     
-    private List<String> additions;
+//    private List<AdditionDTO> additions;
     
     private float price;
     
     private String notes;
     
-    private String phase;
+    private PhaseDTO phase;
     
-    private String bill;
-
-	public String getOrdination() {
-		return ordination;
-	}
-
-	public void setOrdination(String ordination) {
-		this.ordination = ordination;
-	}
-
-	public String getDish() {
-		return dish;
-	}
-
-	public void setDish(String dish) {
-		this.dish = dish;
-	}
-
-	public List<String> getAdditions() {
-		return additions;
-	}
-
-	public void setAdditions(List<String> additions) {
-		this.additions = additions;
-	}
+    private String billId;
 
 	public float getPrice() {
 		return price;
@@ -67,20 +41,44 @@ public class OrderDTO extends DTO{
 		this.notes = notes;
 	}
 
-	public String getPhase() {
+	public PhaseDTO getPhase() {
 		return phase;
 	}
 
-	public void setPhase(String phase) {
+	public void setPhase(PhaseDTO phase) {
 		this.phase = phase;
 	}
 
-	public String getBill() {
-		return bill;
+	public String getOrdinationId() {
+		return ordinationId;
 	}
 
-	public void setBill(String bill) {
-		this.bill = bill;
+	public void setOrdinationId(String ordinationId) {
+		this.ordinationId = ordinationId;
+	}
+
+//	public List<AdditionDTO> getAdditions() {
+//		return additions;
+//	}
+//
+//	public void setAdditions(List<AdditionDTO> additions) {
+//		this.additions = additions;
+//	}
+//
+//	public DishDTO getDish() {
+//		return dish;
+//	}
+//
+//	public void setDish(DishDTO dish) {
+//		this.dish = dish;
+//	}
+
+	public String getBillId() {
+		return billId;
+	}
+
+	public void setBillId(String billId) {
+		this.billId = billId;
 	}
 
     

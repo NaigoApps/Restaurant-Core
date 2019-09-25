@@ -5,9 +5,9 @@
  */
 package com.naigoapps.restaurant.model;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -26,7 +26,7 @@ public class Category extends BaseEntity {
 
     private String name;
     
-    private Color color;
+    private String color;
 
     @ManyToOne
     private Location location;
@@ -90,11 +90,11 @@ public class Category extends BaseEntity {
         this.additions = additions;
     }
 
-    public Color getColor() {
+    public String getColor() {
         return color;
     }
 
-    public void setColor(Color color) {
+    public void setColor(String color) {
         this.color = color;
     }
 

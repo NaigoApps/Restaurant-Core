@@ -44,10 +44,10 @@ public class DiningTableTest {
         or2.setOrders(Arrays.asList(o3));
         table.setOrdinations(Arrays.asList(or1, or2));
 
-        assertEquals(3, table.listOrders().size());
-        assertTrue(table.listOrders().contains(o1));
-        assertTrue(table.listOrders().contains(o2));
-        assertTrue(table.listOrders().contains(o3));
+        assertEquals(3, table.getOrders().size());
+        assertTrue(table.getOrders().contains(o1));
+        assertTrue(table.getOrders().contains(o2));
+        assertTrue(table.getOrders().contains(o3));
     }
 
     @Test

@@ -5,38 +5,10 @@
  */
 package com.naigoapps.restaurant.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.naigoapps.restaurant.services.serializers.DiningTableStatusDeserializer;
-import com.naigoapps.restaurant.services.serializers.DiningTableStatusSerializer;
-
 /**
  *
  * @author naigo
  */
-@JsonSerialize(using = DiningTableStatusSerializer.class)
-@JsonDeserialize(using = DiningTableStatusDeserializer.class)
 public enum DiningTableStatus {
-    OPEN("APERTO"), CLOSING("IN CHIUSURA"), CLOSED("CHIUSO");
-    
-    private String name;
-    
-    DiningTableStatus(String name){
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-    
-    public static DiningTableStatus fromName(String name){
-        DiningTableStatus result = null;
-        for(DiningTableStatus status : DiningTableStatus.values()){
-            if(status.getName().equals(name)){
-                result = status;
-            }
-        }
-        return result;
-    }
-    
+	OPEN, CLOSING, CLOSED;
 }

@@ -5,6 +5,8 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
+import java.util.List;
+
 import com.naigoapps.restaurant.model.Addition;
 
 /**
@@ -22,5 +24,10 @@ public class AdditionDao extends AbstractDao<Addition>{
     public Class<Addition> getEntityClass() {
         return Addition.class;
     }
+    
+    public List<Addition> findGeneric(){
+    	return findWhere("generic = true");
+    }
+    
     
 }

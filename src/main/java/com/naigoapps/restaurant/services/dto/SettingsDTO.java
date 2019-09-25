@@ -11,69 +11,62 @@ package com.naigoapps.restaurant.services.dto;
  */
 public class SettingsDTO extends DTO {
 
-    private float defaultCoverCharge;
-    private String mainPrinter;
-    private String fiscalPrinter;
-    private String clientSettings;
-    private Boolean coverCharges;
-    private Boolean shrinkOrdination;
+	private float defaultCoverCharge;
 
-    public SettingsDTO(String uuid, float defaultCoverCharge, String mainPrinter, String fiscalPrinter, Boolean coverCharges, Boolean shrinkOrdinations, String clientSettings) {
-        super(uuid);
-        this.defaultCoverCharge = defaultCoverCharge;
-        this.mainPrinter = mainPrinter;
-        this.fiscalPrinter = fiscalPrinter;
-        this.coverCharges = coverCharges;
-        this.shrinkOrdination = shrinkOrdinations;
-        this.clientSettings = clientSettings;
-    }
+	private String fiscalPrinterAddress;
+	private int fiscalPrinterPort;
 
-    public String getClientSettings() {
-        return clientSettings;
-    }
+	private String clientSettings;
 
-    public void setClientSettings(String clientSettings) {
-        this.clientSettings = clientSettings;
-    }
+	private Boolean shrinkOrdinations;
+	
+	private PrinterDTO mainPrinter;
 
-    public float getDefaultCoverCharge() {
-        return defaultCoverCharge;
-    }
+	public String getClientSettings() {
+		return clientSettings;
+	}
 
-    public void setDefaultCoverCharge(float defaultCoverCharge) {
-        this.defaultCoverCharge = defaultCoverCharge;
-    }
+	public void setClientSettings(String clientSettings) {
+		this.clientSettings = clientSettings;
+	}
 
-    public void setFiscalPrinter(String fiscalPrinter) {
-        this.fiscalPrinter = fiscalPrinter;
-    }
+	public float getDefaultCoverCharge() {
+		return defaultCoverCharge;
+	}
 
-    public void setMainPrinter(String mainPrinter) {
-        this.mainPrinter = mainPrinter;
-    }
+	public void setDefaultCoverCharge(float defaultCoverCharge) {
+		this.defaultCoverCharge = defaultCoverCharge;
+	}
 
-    public String getFiscalPrinter() {
-        return fiscalPrinter;
-    }
+	public Boolean getShrinkOrdinations() {
+		return shrinkOrdinations;
+	}
 
-    public String getMainPrinter() {
-        return mainPrinter;
-    }
+	public void setShrinkOrdinations(Boolean shrinkOrdinations) {
+		this.shrinkOrdinations = shrinkOrdinations;
+	}
 
-    public Boolean getCoverCharges() {
-        return coverCharges;
-    }
+	public String getFiscalPrinterAddress() {
+		return fiscalPrinterAddress;
+	}
 
-    public Boolean getShrinkOrdination() {
-        return shrinkOrdination;
-    }
+	public void setFiscalPrinterAddress(String fiscalPrinterAddress) {
+		this.fiscalPrinterAddress = fiscalPrinterAddress;
+	}
 
-    public void setCoverCharges(Boolean coverCharges) {
-        this.coverCharges = coverCharges;
-    }
+	public int getFiscalPrinterPort() {
+		return fiscalPrinterPort;
+	}
 
-    public void setShrinkOrdination(Boolean shrinkOrdination) {
-        this.shrinkOrdination = shrinkOrdination;
-    }
+	public void setFiscalPrinterPort(int fiscalPrinterPort) {
+		this.fiscalPrinterPort = fiscalPrinterPort;
+	}
 
+	public void setMainPrinter(PrinterDTO mainPrinter) {
+		this.mainPrinter = mainPrinter;
+	}
+	
+	public PrinterDTO getMainPrinter() {
+		return mainPrinter;
+	}
 }

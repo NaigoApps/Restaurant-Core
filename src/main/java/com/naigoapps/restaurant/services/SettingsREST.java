@@ -5,13 +5,6 @@
  */
 package com.naigoapps.restaurant.services;
 
-import com.naigoapps.restaurant.model.Printer;
-import com.naigoapps.restaurant.model.Settings;
-import com.naigoapps.restaurant.model.dao.PrinterDao;
-import com.naigoapps.restaurant.model.dao.SettingsDao;
-import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
-import com.naigoapps.restaurant.services.utils.ResponseBuilder;
-import java.util.function.BiConsumer;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.GET;
@@ -19,7 +12,15 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+
+import com.naigoapps.restaurant.model.Settings;
+import com.naigoapps.restaurant.model.dao.PrinterDao;
+import com.naigoapps.restaurant.model.dao.SettingsDao;
+import com.naigoapps.restaurant.services.dto.PrinterDTO;
+import com.naigoapps.restaurant.services.dto.SettingsDTO;
+import com.naigoapps.restaurant.services.dto.WrapperDTO;
+import com.naigoapps.restaurant.services.dto.mappers.SettingsMapper;
+import com.naigoapps.restaurant.services.filters.Accessible;
 
 /**
  *
@@ -27,76 +28,53 @@ import javax.ws.rs.core.Response;
  */
 @Path("/settings")
 @Produces(MediaType.APPLICATION_JSON)
+@Accessible
+@Transactional
 public class SettingsREST {
 
     @Inject
-    SettingsDao settingsDao;
+    private SettingsDao dao;
 
     @Inject
-    PrinterDao pDao;
+    private PrinterDao pDao;
+    
+    @Inject
+    private SettingsMapper mapper;
     
     @GET
-    @Transactional
-    public Response getSettings() {
-        Settings settings = settingsDao.find();
-
-        return Response
-                .status(200)
-                .entity(DTOAssembler.fromSettings(settings))
-                .build();
+    public SettingsDTO getSettings() {
+        Settings settings = dao.find();
+        return mapper.map(settings);
     }
     
     @PUT
     @Path("client")
-    @Transactional
-    public Response setSettings(String value) {
-        Settings settings = settingsDao.find();
-        settings.setClientSettings(value);
-        
-        return Response.status(200).entity(DTOAssembler.fromSettings(settings)).build();
+    public void setSettings(String value) {
+        dao.find().setClientSettings(value);
+    }
+
+    @PUT
+    @Path("fiscal-printer-address")
+    public void setFiscalPrinterAddress(String value) {
+    	dao.find().setFiscalPrinterAddress(value);
+    }
+
+    @PUT
+    @Path("fiscal-printer-port")
+    public void setFiscalPrinterAddress(int value) {
+    	dao.find().setFiscalPrinterPort(value);
     }
     
     @PUT
-    @Path("main-printer")
-    @Transactional
-    public Response setMainPrinter(String value) {
-        return setPrinter((settings, printer) -> settings.setMainPrinter(printer), value);
-    }
-    
-    @PUT
-    @Path("fiscal-printer")
-    @Transactional
-    public Response setFiscalPrinter(String value) {
-        return setPrinter((settings, printer) -> settings.setFiscalPrinter(printer), value);
-    }
-    
-    @PUT
-    @Path("cover-charges")
-    @Transactional
-    public Response setUseCoverCharges(Boolean value){
-        Settings s = settingsDao.find();
-        s.setUseCoverCharges(value);;
-        return ResponseBuilder.ok(DTOAssembler.fromSettings(s));
+    @Path("mainPrinter")
+    public void setMainPrinter(PrinterDTO dto) {
+    	dao.find().setMainPrinter(pDao.findByUuid(dto.getUuid()));
     }
     
     @PUT
     @Path("shrink-ordination")
-    @Transactional
-    public Response setShrinkOrdinations(Boolean value){
-        Settings s = settingsDao.find();
-        s.setShrinkOrdinations(value);
-        return ResponseBuilder.ok(DTOAssembler.fromSettings(s));
+    public void setShrinkOrdinations(WrapperDTO<Boolean> value){
+        dao.find().setShrinkOrdinations(value.getValue());
     }
     
-    public Response setPrinter(BiConsumer<Settings, Printer> setter, String value){
-        Settings settings = settingsDao.find();
-        
-        Printer printer = pDao.findByUuid(value);
-        if(printer != null){
-            setter.accept(settings, printer);
-            return ResponseBuilder.ok(DTOAssembler.fromSettings(settings));
-        }else{
-            return ResponseBuilder.notFound("Stampante non trovata");
-        }
-    }
 }

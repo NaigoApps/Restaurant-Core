@@ -5,13 +5,13 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.Ordination;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  *

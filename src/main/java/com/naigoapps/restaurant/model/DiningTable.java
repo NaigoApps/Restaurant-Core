@@ -59,10 +59,10 @@ public class DiningTable extends BaseEntity {
         return ordinations;
     }
 
-    public List<Order> listOrders() {
+    public List<Order> getOrders() {
         return collectOrders();
     }
-
+    
     private List<Order> collectOrders() {
         List<Order> result = new ArrayList<>();
         ordinations.forEach(ordination -> result.addAll(ordination.getOrders()));
@@ -131,7 +131,7 @@ public class DiningTable extends BaseEntity {
     public float getTotalPrice() {
         return coverCharges * evening.getCoverCharge()
                 + collectOrders().stream()
-                        .map(order -> order.getPrice())
+                        .map(Order::getPrice)
                         .reduce(0.0f, (p1, p2) -> p1 + p2);
     }
 
@@ -166,11 +166,16 @@ public class DiningTable extends BaseEntity {
             this.status = DiningTableStatus.OPEN;
         }else{
             this.status = DiningTableStatus.CLOSING;
-            if (listOrders().stream()
+            if (getOrders().stream()
                     .noneMatch(order -> order.getBill() == null || 
                             order.getBill().getPrintDate() == null)) {
                 this.status = DiningTableStatus.CLOSED;
             }
         }
+    }
+    
+    public boolean canBeClosed() {
+    	return bills.stream().mapToInt(Bill::getCoverCharges).sum() == coverCharges &&
+    		collectOrders().stream().allMatch(o -> o.getBill() != null);
     }
 }

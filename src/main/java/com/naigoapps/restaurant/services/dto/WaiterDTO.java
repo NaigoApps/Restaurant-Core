@@ -5,7 +5,7 @@
  */
 package com.naigoapps.restaurant.services.dto;
 
-import com.naigoapps.restaurant.model.*;
+import com.naigoapps.restaurant.model.WaiterStatus;
 
 /**
  *

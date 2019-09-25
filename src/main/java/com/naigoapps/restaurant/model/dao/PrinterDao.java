@@ -18,25 +18,12 @@ public class PrinterDao extends AbstractDao<Printer> {
     @Inject
     private SettingsDao sDao;
 
-    public Printer findMainPrinter() {
+    public Printer findMainPrinter(){
         Settings s = sDao.find();
-        if (s != null) {
+        if(s != null){
             return s.getMainPrinter();
         }
         return null;
-    }
-
-    public Printer findFiscalPrinter() {
-        Settings s = sDao.find();
-        if (s != null) {
-            return s.getFiscalPrinter();
-        }
-        return null;
-    }
-
-    @Override
-    protected String getOrderByClause() {
-        return "name";
     }
 
     @Override

@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -17,7 +18,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import com.naigoapps.restaurant.main.EveningManager;
 import com.naigoapps.restaurant.model.Evening;
@@ -25,8 +25,9 @@ import com.naigoapps.restaurant.model.Settings;
 import com.naigoapps.restaurant.model.builders.EveningBuilder;
 import com.naigoapps.restaurant.model.dao.EveningDao;
 import com.naigoapps.restaurant.model.dao.SettingsDao;
-import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
-import com.naigoapps.restaurant.services.utils.ResponseBuilder;
+import com.naigoapps.restaurant.services.dto.EveningDTO;
+import com.naigoapps.restaurant.services.dto.mappers.EveningMapper;
+import com.naigoapps.restaurant.services.filters.Accessible;
 
 /**
  *
@@ -44,10 +45,14 @@ public class EveningREST {
 
     @Inject
     private SettingsDao sDao;
+    
+    @Inject
+    private EveningMapper mapper;
 
     @GET
     @Transactional
-    public Response selectEvening(@QueryParam("date") String date) {
+    @Accessible
+    public EveningDTO selectEvening(@QueryParam("date") String date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         LocalDate d = LocalDate.parse(date, formatter);
@@ -63,45 +68,31 @@ public class EveningREST {
                 eveningDao.persist(chosen);
             }
             eveningManager.setSelectedEvening(chosen.getUuid());
-            return Response
-                    .status(Response.Status.OK)
-                    .entity(DTOAssembler.fromEvening(chosen))
-                    .build();
-        }
 
-        return Response.status(Response.Status.BAD_REQUEST).build();
+            return mapper.map(chosen);
+        }
+        
+        throw new BadRequestException("Data non valida");
     }
 
     @GET
     @Path("selected")
     @Transactional
-    public Response getSelectedEvening() {
-        Evening e = eveningManager.getSelectedEvening();
-        if (e != null) {
-            return ResponseBuilder.ok(DTOAssembler.fromEvening(e));
-        } else {
-            return ResponseBuilder.notFound("Nessuna serata selezionata");
-        }
+    public EveningDTO getSelectedEvening() {
+    	return mapper.map(eveningManager.getSelectedEvening());
     }
 
     @PUT
     @Path("{uuid}/coverCharge")
     @Transactional
-    public Response updateCoverCharge(@PathParam("uuid") String uuid, float coverCharge) {
-        Evening e = eveningManager.getSelectedEvening();
+    public EveningDTO updateCoverCharge(@PathParam("uuid") String uuid, float coverCharge) {
+        Evening current = eveningManager.getSelectedEvening();
         Settings settings = sDao.find();
-        if (e.getUuid().equals(uuid)) {
+        if (current.getUuid().equals(uuid)) {
             settings.setDefaultCoverCharge(coverCharge);
-            e.setCoverCharge(coverCharge);
-            return Response
-                    .status(200)
-                    .entity(DTOAssembler.fromEvening(e))
-                    .build();
-        } else {
-            return Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity(DTOAssembler.fromEvening(e))
-                    .build();
+            current.setCoverCharge(coverCharge);
+            return mapper.map(current);
         }
+        throw new BadRequestException("Serata non valida");
     }
 }

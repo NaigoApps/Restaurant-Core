@@ -12,58 +12,46 @@ import java.util.List;
  *
  * @author naigo
  */
-public class OrdinationDTO extends DTO{
-    
-    private String table;
-    
+public class OrdinationDTO extends DTO {
+
+	private String diningTableId;
+	
     private LocalDateTime creationTime;
-    
-    private int progressive;
-    
-    private List<OrderDTO> orders;
-    
+
+    private List<PhaseOrdersDTO> orders;
+
     private boolean dirty;
 
-	public String getTable() {
-		return table;
+    public String getDiningTableId() {
+		return diningTableId;
 	}
-
-	public void setTable(String table) {
-		this.table = table;
-	}
-
-	public LocalDateTime getCreationTime() {
-		return creationTime;
-	}
-
-	public void setCreationTime(LocalDateTime creationTime) {
-		this.creationTime = creationTime;
-	}
-
-	public int getProgressive() {
-		return progressive;
-	}
-
-	public void setProgressive(int progressive) {
-		this.progressive = progressive;
-	}
-
-	public List<OrderDTO> getOrders() {
-		return orders;
-	}
-
-	public void setOrders(List<OrderDTO> orders) {
-		this.orders = orders;
-	}
-
-	public boolean isDirty() {
-		return dirty;
-	}
-
-	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
-	}
-
     
+    public void setDiningTableId(String diningTableId) {
+		this.diningTableId = diningTableId;
+	}
+
+    public LocalDateTime getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(LocalDateTime creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public List<PhaseOrdersDTO> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<PhaseOrdersDTO> orders) {
+        this.orders = orders;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
 
 }

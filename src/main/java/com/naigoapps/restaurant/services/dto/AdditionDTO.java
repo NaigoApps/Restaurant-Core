@@ -15,18 +15,6 @@ public class AdditionDTO extends DTO{
     private float price;
 
     private boolean generic;
-
-    public AdditionDTO() {
-    }
-
-    public AdditionDTO(String uuid, String name, float price, boolean generic) {
-        super(uuid);
-        this.name = name;
-        this.price = price;
-        this.generic = generic;
-    }
-
-    
     
     public String getName() {
         return name;

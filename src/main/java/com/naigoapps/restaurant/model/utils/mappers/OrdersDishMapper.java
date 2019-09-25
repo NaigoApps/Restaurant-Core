@@ -5,9 +5,6 @@
  */
 package com.naigoapps.restaurant.model.utils.mappers;
 
-import com.naigoapps.restaurant.model.Category;
-import com.naigoapps.restaurant.model.Dish;
-import com.naigoapps.restaurant.model.Order;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +16,9 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+
+import com.naigoapps.restaurant.model.Dish;
+import com.naigoapps.restaurant.model.Order;
 
 /**
  *

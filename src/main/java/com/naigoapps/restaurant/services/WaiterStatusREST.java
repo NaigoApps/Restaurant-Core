@@ -5,27 +5,26 @@
  */
 package com.naigoapps.restaurant.services;
 
-import com.naigoapps.restaurant.model.WaiterStatus;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+
+import com.naigoapps.restaurant.model.WaiterStatus;
+import com.naigoapps.restaurant.services.filters.Accessible;
 
 /**
  *
  * @author naigo
  */
+@Accessible
 @Path("/waiter-statuses")
 @Produces(MediaType.APPLICATION_JSON)
 public class WaiterStatusREST {
 
     @GET
-    public Response findAll() {
-        return Response
-                .status(200)
-                .entity(WaiterStatus.values())
-                .build();
+    public WaiterStatus[] findAll() {
+        return WaiterStatus.values();
     }
 
 }

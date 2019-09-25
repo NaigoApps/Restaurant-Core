@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.naigoapps.restaurant.services.dto;
 
 /**
@@ -12,16 +7,6 @@ package com.naigoapps.restaurant.services.dto;
 public class PhaseDTO extends DTO{
     private String name;
     private int priority;
-
-    public PhaseDTO() {
-        super();
-    }
-
-    public PhaseDTO(String uuid, String name, int priority) {
-        super(uuid);
-        this.name = name;
-        this.priority = priority;
-    }
 
     public String getName() {
         return name;

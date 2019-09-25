@@ -5,16 +5,9 @@
  */
 package com.naigoapps.restaurant.services;
 
-import com.naigoapps.restaurant.main.EveningManager;
-import com.naigoapps.restaurant.model.DiningTableStatus;
-import com.naigoapps.restaurant.model.RestaurantTable;
-import com.naigoapps.restaurant.model.builders.RestaurantTableBuilder;
-import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
-import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
-import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
-import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
@@ -26,83 +19,88 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+
+import com.naigoapps.restaurant.main.EveningManager;
+import com.naigoapps.restaurant.model.DiningTable;
+import com.naigoapps.restaurant.model.DiningTableStatus;
+import com.naigoapps.restaurant.model.RestaurantTable;
+import com.naigoapps.restaurant.model.builders.RestaurantTableBuilder;
+import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
+import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
+import com.naigoapps.restaurant.services.dto.mappers.RestaurantTableMapper;
+import com.naigoapps.restaurant.services.filters.Accessible;
 
 /**
  *
  * @author naigo
  */
+@Accessible
 @Path("/restaurant-tables")
 @Produces(MediaType.APPLICATION_JSON)
+@Transactional
 public class RestaurantTablesREST {
     
     @Inject
-    RestaurantTableDao tablesDao;
+    private RestaurantTableDao tablesDao;
 
     @Inject
-    EveningManager manager;
+    private EveningManager manager;
+    
+    @Inject
+    private RestaurantTableMapper mapper;
     
     @GET
-    public Response getAllTables() {
-        
-        List<RestaurantTableDTO> data = tablesDao.findAll().stream()
-                .map(DTOAssembler::fromRestaurantTable)
+    public List<RestaurantTableDTO> getAllTables() {
+        return tablesDao.findAll().stream()
+                .map(mapper::map)
                 .collect(Collectors.toList());
-        
-        return Response
-                .status(200)
-                .entity(data)
-                .build();
+    }
+    
+    @GET
+    @Path("{uuid}")
+    public RestaurantTableDTO find(@PathParam("uuid") String uuid) {
+    	return mapper.map(tablesDao.findByUuid(uuid));
     }
     
     @GET
     @Path("available")
-    public Response getAvailableTables() {
+    public List<RestaurantTableDTO> getAvailableTables() {
         
         List<RestaurantTable> open = manager.getSelectedEvening().getDiningTables().stream()
                 .filter(table -> table.getStatus().equals(DiningTableStatus.OPEN))
-                .map(diningTable -> diningTable.getTable())
+                .map(DiningTable::getTable)
                 .collect(Collectors.toList());
         
-        List<RestaurantTableDTO> data = tablesDao.findAll().stream()
-                .filter(table -> !open.contains(table))
-                .map(DTOAssembler::fromRestaurantTable)
+        return tablesDao.findAll().stream()
+        		.filter(table -> !open.contains(table))
+                .map(mapper::map)
                 .collect(Collectors.toList());
         
-        return Response
-                .status(200)
-                .entity(data)
-                .build();
     }
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createTable(RestaurantTableDTO t){
+    public String createTable(){
         RestaurantTable table = new RestaurantTableBuilder()
-                .name(t.getName())
                 .getContent();
+        
         tablesDao.persist(table);
         
-        return Response
-                .status(Response.Status.CREATED)
-                .entity(DTOAssembler.fromRestaurantTable(table))
-                .build();
+        return table.getUuid();
     }
     
     @PUT
     @Path("{uuid}/name")
-    @Transactional
-    public Response updateTableName(@PathParam("uuid") String uuid, String name){
+    public RestaurantTableDTO updateTableName(@PathParam("uuid") String uuid, String name){
         RestaurantTable rt = tablesDao.findByUuid(uuid);
         rt.setName(name);
-        return Response.status(200).entity(DTOAssembler.fromRestaurantTable(rt)).build();
+        return mapper.map(rt);
     }
     
     @DELETE
-    @Transactional
+    @Path("{uuid}")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteTable(String uuid){
+    public void deleteTable(@PathParam("uuid") String uuid){
         tablesDao.deleteByUuid(uuid);   
-        return ResponseBuilder.ok(uuid);
     }
 }

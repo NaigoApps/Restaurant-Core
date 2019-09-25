@@ -5,19 +5,12 @@
  */
 package com.naigoapps.restaurant.services;
 
-import com.naigoapps.restaurant.model.Waiter;
-import com.naigoapps.restaurant.model.WaiterStatus;
-import com.naigoapps.restaurant.model.builders.WaiterBuilder;
-import com.naigoapps.restaurant.model.dao.DiningTableDao;
-import com.naigoapps.restaurant.model.dao.WaiterDao;
-import com.naigoapps.restaurant.services.dto.WaiterDTO;
-import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
-import com.naigoapps.restaurant.services.utils.ResponseBuilder;
-import com.naigoapps.restaurant.services.websocket.WebSocketServer;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -27,118 +20,108 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+
+import com.naigoapps.restaurant.model.Waiter;
+import com.naigoapps.restaurant.model.WaiterStatus;
+import com.naigoapps.restaurant.model.dao.DiningTableDao;
+import com.naigoapps.restaurant.model.dao.WaiterDao;
+import com.naigoapps.restaurant.services.dto.WaiterDTO;
+import com.naigoapps.restaurant.services.dto.mappers.WaiterMapper;
+import com.naigoapps.restaurant.services.filters.Accessible;
 
 /**
  *
  * @author naigo
  */
+@Accessible
+@Transactional
 @Path("/waiters")
 @Produces(MediaType.APPLICATION_JSON)
 public class WaiterREST {
 
     @Inject
-    WaiterDao waiterDao;
+    private WaiterDao waiterDao;
 
     @Inject
-    WebSocketServer server;
+    private DiningTableDao dtDao;
 
     @Inject
-    DiningTableDao dtDao;
-
+    private WaiterMapper mapper;
+    
     @GET
     @Path("active")
-    public Response getAvailableWaiters() {
-        List<WaiterDTO> waiters = waiterDao.findActive().stream()
-                .map(DTOAssembler::fromWaiter)
+    public List<WaiterDTO> getAvailableWaiters() {
+        return waiterDao.findActive().stream()
+        		.filter(w -> WaiterStatus.REMOVED != w.getStatus())
+        		.filter(w -> WaiterStatus.SUSPENDED != w.getStatus())
+                .map(mapper::map)
                 .collect(Collectors.toList());
-
-        return Response
-                .status(200)
-                .entity(waiters)
-                .build();
     }
 
     @GET
-    public Response getAllWaiters() {
-        List<WaiterDTO> waiters = waiterDao.findAll().stream()
+    public List<WaiterDTO> getAllWaiters() {
+        return waiterDao.findAll().stream()
                 .filter(w -> WaiterStatus.REMOVED != w.getStatus())
-                .map(DTOAssembler::fromWaiter)
+                .map(mapper::map)
                 .collect(Collectors.toList());
-
-        return Response
-                .status(200)
-                .entity(waiters)
-                .build();
+    }
+    
+    @GET
+    @Path("{uuid}")
+    public WaiterDTO findByUuid(@PathParam("uuid") String uuid) {
+    	return mapper.map(waiterDao.findByUuid(uuid));
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createWaiter(WaiterDTO w) {
-        Waiter waiter = new WaiterBuilder()
-                .name(w.getName())
-                .surname(w.getSurname())
-                .cf(w.getCf())
-                .status(w.getStatus())
-                .getContent();
+    public String createWaiter() {
+        Waiter waiter = new Waiter();
         waiterDao.persist(waiter);
-
-        server.broadcastMessage("CREATED A WAITER");
-
-        return Response
-                .status(Response.Status.CREATED)
-                .entity(DTOAssembler.fromWaiter(waiter))
-                .build();
+        return waiter.getUuid();
     }
 
     @PUT
     @Path("{uuid}/name")
-    @Transactional
-    public Response updateWaiterName(@PathParam("uuid") String uuid, String name) {
+    public WaiterDTO updateWaiterName(@PathParam("uuid") String uuid, String name) {
         Waiter w = waiterDao.findByUuid(uuid);
         w.setName(name);
-        return Response.status(200).entity(DTOAssembler.fromWaiter(w)).build();
+        return mapper.map(w);
     }
 
     @PUT
     @Path("{uuid}/surname")
-    @Transactional
-    public Response updateWaiterSurname(@PathParam("uuid") String uuid, String surname) {
+    public WaiterDTO updateWaiterSurname(@PathParam("uuid") String uuid, String surname) {
         Waiter w = waiterDao.findByUuid(uuid);
         w.setSurname(surname);
-        return Response.status(200).entity(DTOAssembler.fromWaiter(w)).build();
+        return mapper.map(w);
     }
 
     @PUT
     @Path("{uuid}/cf")
-    @Transactional
-    public Response updateWaiterCf(@PathParam("uuid") String uuid, String cf) {
+    public WaiterDTO updateWaiterCf(@PathParam("uuid") String uuid, String cf) {
         Waiter w = waiterDao.findByUuid(uuid);
         w.setCf(cf);
-        return Response.status(200).entity(DTOAssembler.fromWaiter(w)).build();
+        return mapper.map(w);
     }
 
     @PUT
     @Path("{uuid}/status")
-    @Transactional
-    public Response updateWaiterStatus(@PathParam("uuid") String uuid, String status) {
+    public WaiterDTO updateWaiterStatus(@PathParam("uuid") String uuid, String statusText) {
         Waiter w = waiterDao.findByUuid(uuid);
-        if (!WaiterStatus.REMOVED.equals(WaiterStatus.fromName(status)) || !hasTables(w)) {
-            w.setStatus(WaiterStatus.fromName(status));
-            return Response.status(200).entity(DTOAssembler.fromWaiter(w)).build();
+        WaiterStatus status = WaiterStatus.valueOf(statusText);
+        if (status != WaiterStatus.REMOVED || !hasTables(w)) {
+            w.setStatus(status);
+            return mapper.map(w);
         } else {
-            return Response.status(Response.Status.FORBIDDEN).entity("Il cameriere ha tavoli assegnati.").build();
+            throw new BadRequestException("Il cameriere ha tavoli assegnati.");
         }
     }
 
     @DELETE
-    @Transactional
     @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteWaiter(String uuid) {
-
+    @Path("{uuid}")
+    public void deleteWaiter(@PathParam("uuid") String uuid) {
         waiterDao.deleteByUuid(uuid);
-
-        return ResponseBuilder.ok(uuid);
     }
 
     private boolean hasTables(Waiter w) {

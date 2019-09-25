@@ -5,16 +5,18 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
-import com.naigoapps.restaurant.model.BaseEntity;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
+
+import com.naigoapps.restaurant.model.BaseEntity;
 
 /**
  *
@@ -52,6 +54,18 @@ public abstract class AbstractDao<E extends BaseEntity> implements Dao<E>{
             Logger.getGlobal().log(Level.SEVERE, "Error during entity retrieve", ex);
         }
         return null;
+    }
+
+    public List<E> findWhere(String condition) {
+        String query = "FROM " + getEntityClass().getName();
+        if(condition != null) {
+        	query += " WHERE " + condition;
+        }
+        if (getOrderByClause() != null) {
+            query += " ORDER BY " + getOrderByClause();
+        }
+        Query q = getEntityManager().createQuery(query, getEntityClass());
+        return q.getResultList();
     }
 
     @Override

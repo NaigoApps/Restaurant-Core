@@ -29,7 +29,7 @@ public class CategoriesReviewPrinter implements ObjectPrinter<List<Order>> {
             List<Order> orders = entry.getValue();
             ps.printLine(orders.size() + " " + c.getName(),
                     PrintingService.formatPrice(orders.stream()
-                            .map(order -> order.getPrice())
+                            .map(Order::getPrice)
                             .reduce(0.0f, (p1, p2) -> p1 + p2)));
         }
         return ps;

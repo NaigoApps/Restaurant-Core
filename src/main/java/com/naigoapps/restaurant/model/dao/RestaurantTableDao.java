@@ -5,7 +5,6 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
-import com.naigoapps.restaurant.model.BaseEntity;
 import com.naigoapps.restaurant.model.RestaurantTable;
 
 /**

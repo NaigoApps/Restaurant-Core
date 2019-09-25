@@ -5,14 +5,14 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
-import com.naigoapps.restaurant.model.Addition;
-import com.naigoapps.restaurant.model.Bill;
-import com.naigoapps.restaurant.model.Dish;
-import com.naigoapps.restaurant.model.Ordination;
-import com.naigoapps.restaurant.model.Phase;
-import com.naigoapps.restaurant.model.Order;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.naigoapps.restaurant.model.Addition;
+import com.naigoapps.restaurant.model.Dish;
+import com.naigoapps.restaurant.model.Order;
+import com.naigoapps.restaurant.model.Ordination;
+import com.naigoapps.restaurant.model.Phase;
 
 /**
  *

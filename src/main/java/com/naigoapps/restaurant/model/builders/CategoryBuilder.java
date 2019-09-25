@@ -5,13 +5,13 @@
  */
 package com.naigoapps.restaurant.model.builders;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Location;
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -20,7 +20,7 @@ import java.util.List;
 public class CategoryBuilder implements Builder<Category>{
 
     private String name;
-    private Color color;
+    private String color;
     private Location location;
     private List<Dish> dishes;
     private List<Addition> additions;
@@ -41,7 +41,7 @@ public class CategoryBuilder implements Builder<Category>{
         return this;
     }
     
-    public CategoryBuilder color(Color c){
+    public CategoryBuilder color(String c){
         this.color = c;
         return this;
     }

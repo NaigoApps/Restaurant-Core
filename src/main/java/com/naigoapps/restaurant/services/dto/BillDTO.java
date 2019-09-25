@@ -1,83 +1,84 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.naigoapps.restaurant.services.dto;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 /**
  *
  * @author naigo
  */
-public class BillDTO extends DTO{
-    private Integer progressive;
-    private String customer;
-    private LocalDateTime printTime;
-    private String table;
-    private List<String> orders;
-    private int coverCharges;
-    private float total;
-    
-    public String getTable() {
-        return table;
-    }
+public class BillDTO extends DTO {
+	private Integer progressive;
+	private CustomerDTO customer;
+	private LocalDateTime printTime;
+	private String tableUuid;
+	private List<OrdersGroupDTO> orders;
+	private int coverCharges;
+	private float total;
+	private float estimatedTotal;
 
-    public List<String> getOrders() {
-        return Collections.unmodifiableList(orders);
-    }
+	public Integer getProgressive() {
+		return progressive;
+	}
 
-    public float getTotal() {
-        return total;
-    }
+	public void setProgressive(Integer progressive) {
+		this.progressive = progressive;
+	}
 
-    public int getCoverCharges() {
-        return coverCharges;
-    }
+	public CustomerDTO getCustomer() {
+		return customer;
+	}
 
-    public String getCustomer() {
-        return customer;
-    }
+	public void setCustomer(CustomerDTO customer) {
+		this.customer = customer;
+	}
 
-    public LocalDateTime getPrintTime() {
-        return printTime;
-    }
+	public LocalDateTime getPrintTime() {
+		return printTime;
+	}
 
-    public Integer getProgressive() {
-        return progressive;
-    }
+	public void setPrintTime(LocalDateTime printTime) {
+		this.printTime = printTime;
+	}
 
-    public void setProgressive(Integer progressive) {
-        this.progressive = progressive;
-    }
+	public String getTableUuid() {
+		return tableUuid;
+	}
 
-    public void setCustomer(String customer) {
-        this.customer = customer;
-    }
+	public void setTableUuid(String uuid) {
+		this.tableUuid = uuid;
+	}
 
-    public void setPrintTime(LocalDateTime printTime) {
-        this.printTime = printTime;
-    }
+	public int getCoverCharges() {
+		return coverCharges;
+	}
 
-    public void setTable(String table) {
-        this.table = table;
-    }
+	public void setCoverCharges(int coverCharges) {
+		this.coverCharges = coverCharges;
+	}
 
-    public void setOrders(List<String> orders) {
-        this.orders = orders;
-    }
+	public float getTotal() {
+		return total;
+	}
 
-    public void setCoverCharges(int coverCharges) {
-        this.coverCharges = coverCharges;
-    }
+	public void setTotal(float total) {
+		this.total = total;
+	}
 
-    public void setTotal(float total) {
-        this.total = total;
-    }
-    
-    
+	public List<OrdersGroupDTO> getOrders() {
+		return orders;
+	}
+
+	public void setOrders(List<OrdersGroupDTO> orders) {
+		this.orders = orders;
+	}
+
+	public float getEstimatedTotal() {
+		return estimatedTotal;
+	}
+
+	public void setEstimatedTotal(float estimatedTotal) {
+		this.estimatedTotal = estimatedTotal;
+	}
 
 }

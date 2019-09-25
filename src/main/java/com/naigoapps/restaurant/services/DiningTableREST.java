@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.swing.filechooser.FileSystemView;
 import javax.transaction.Transactional;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -23,7 +25,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.naigoapps.restaurant.main.EveningManager;
@@ -33,17 +34,18 @@ import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.Ordination;
-import com.naigoapps.restaurant.model.RestaurantTable;
-import com.naigoapps.restaurant.model.Waiter;
 import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
 import com.naigoapps.restaurant.model.dao.WaiterDao;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
+import com.naigoapps.restaurant.services.dto.DiningTableSkeletonDTO;
 import com.naigoapps.restaurant.services.dto.RemovedContent;
-import com.naigoapps.restaurant.services.dto.utils.DTOAssembler;
+import com.naigoapps.restaurant.services.dto.WrapperDTO;
+import com.naigoapps.restaurant.services.dto.mappers.BillMapper;
+import com.naigoapps.restaurant.services.dto.mappers.DiningTableMapper;
+import com.naigoapps.restaurant.services.dto.mappers.OrderMapper;
 import com.naigoapps.restaurant.services.exceptions.AlreadyRegisteredCoverChargesException;
-import com.naigoapps.restaurant.services.utils.ResponseBuilder;
 
 /**
  *
@@ -51,6 +53,7 @@ import com.naigoapps.restaurant.services.utils.ResponseBuilder;
  */
 @Path("/dining-tables")
 @Produces(MediaType.APPLICATION_JSON)
+@Transactional
 public class DiningTableREST {
 
 	private static final String EVENING_NOT_FOUND = "Serata non selezionata";
@@ -66,54 +69,83 @@ public class DiningTableREST {
 	private RestaurantTableDao rtDao;
 
 	@Inject
-	private DiningTableDao dtDao;
+	private DiningTableDao dao;
 
 	@Inject
 	private DiningTableWS dtWS;
 
+	@Inject
+	private DiningTableMapper mapper;
+
+	@Inject
+	private BillMapper bMapper;
+
+	@Inject
+	private OrderMapper oMapper;
+
 	@POST
-	@Transactional
-	public Response addDiningTable(DiningTableDTO newDiningTable) {
-
+	public DiningTableSkeletonDTO addDiningTable(DiningTableSkeletonDTO table) {
 		Evening currentEvening = eveningManager.getSelectedEvening();
-		if (currentEvening != null) {
-			Waiter w = wDao.findByUuid(newDiningTable.getWaiter());
-			RestaurantTable rt = rtDao.findByUuid(newDiningTable.getTable());
-			if (w != null && rt != null) {
-				DiningTable diningTable = createDiningTable(currentEvening, w, rt, newDiningTable.getCoverCharges());
-				dtDao.persist(diningTable);
-				dtWS.update();
-				return ResponseBuilder.created(DTOAssembler.fromDiningTable(diningTable));
-			}
-			return ResponseBuilder.badRequest("Dati del tavolo non validi");
-		} else {
-			return ResponseBuilder.badRequest(EVENING_NOT_FOUND);
-		}
+		DiningTable diningTable = new DiningTableBuilder()
+				.date(LocalDateTime.now())
+				.evening(currentEvening)
+				.ccs(table.getCoverCharges())
+				.waiter(wDao.findByUuid(table.getWaiter().getUuid()))
+				.table(rtDao.findByUuid(table.getTable().getUuid()))
+				.getContent();
+		dao.persist(diningTable);
+		dtWS.update();
+		return mapper.mapSkeleton(diningTable);
 	}
-
-	private DiningTable createDiningTable(Evening e, Waiter w, RestaurantTable rt, int ccs) {
-		return new DiningTableBuilder().date(LocalDateTime.now()).evening(e).waiter(w).table(rt).ccs(ccs).getContent();
+	
+	@PUT
+	@Path("{uuid}")
+	public DiningTableSkeletonDTO editDiningTable(@PathParam("uuid") String uuid, DiningTableSkeletonDTO table) {
+		DiningTable diningTable = dao.findByUuid(uuid);
+		diningTable.setCoverCharges(table.getCoverCharges());
+		diningTable.setWaiter(wDao.findByUuid(table.getWaiter().getUuid()));
+		diningTable.setTable(rtDao.findByUuid(table.getTable().getUuid()));
+		dtWS.update();
+		return mapper.mapSkeleton(diningTable);
 	}
 
 	@GET
-	@Transactional
-	public Response loadDiningTables() {
+	public List<DiningTableDTO> list() {
 		Evening currentEvening = eveningManager.getSelectedEvening();
-		if (currentEvening != null) {
-			List<DiningTableDTO> result = currentEvening.getDiningTables().stream().map(DTOAssembler::fromDiningTable)
-					.collect(Collectors.toList());
-			return Response.ok().entity(result).build();
-		}
-		return Response.status(Response.Status.BAD_REQUEST).build();
+		return currentEvening.getDiningTables().stream()
+				.filter(table -> DiningTableStatus.CLOSED != table.getStatus())
+				.map(mapper::map).sorted(Collections.reverseOrder(DiningTableDTO.comparator()))
+				.collect(Collectors.toList());
+	}
+	
+	@GET
+	@Path("open")
+	public List<DiningTableDTO> open() {
+		Evening currentEvening = eveningManager.getSelectedEvening();
+		return currentEvening.getDiningTables().stream()
+				.filter(table -> DiningTableStatus.OPEN == table.getStatus())
+				.map(mapper::map).sorted(Collections.reverseOrder(DiningTableDTO.comparator()))
+				.collect(Collectors.toList());
+	}
+
+	@GET
+	@Path("/{uuid}")
+	public DiningTableDTO load(@PathParam("uuid") String uuid) {
+		return mapper.map(dao.findByUuid(uuid));
+	}
+
+	@GET
+	@Path("/{uuid}/skeleton")
+	public DiningTableSkeletonDTO loadSkeleton(@PathParam("uuid") String uuid) {
+		return mapper.mapSkeleton(dao.findByUuid(uuid));
 	}
 
 	@PUT
-	@Path("{uuid}/cover-charges")
-	@Transactional
-	public Response updateCoverCharges(@PathParam(value = "uuid") String tableUuid, int coverCharges) {
+	@Path("{uuid}/coverCharges")
+	public DiningTableDTO updateCoverCharges(@PathParam(value = "uuid") String tableUuid, WrapperDTO<Integer> coverCharges) {
 		return updateTableProperty(tableUuid, table -> {
-			if (table.getBills().stream().collect(Collectors.summingInt(Bill::getCoverCharges)) <= coverCharges) {
-				table.setCoverCharges(coverCharges);
+			if (table.getBills().stream().collect(Collectors.summingInt(Bill::getCoverCharges)) <= coverCharges.getValue()) {
+				table.setCoverCharges(coverCharges.getValue());
 			} else {
 				throw new AlreadyRegisteredCoverChargesException("Coperti già inseriti in un conto");
 			}
@@ -122,24 +154,21 @@ public class DiningTableREST {
 
 	@PUT
 	@Path("{uuid}/waiter")
-	@Transactional
-	public Response updateWaiter(@PathParam("uuid") String tableUuid, String waiterUuid) {
-		return updateTableProperty(tableUuid, table -> table.setWaiter(wDao.findByUuid(waiterUuid)));
+	public DiningTableDTO updateWaiter(@PathParam("uuid") String tableUuid, WrapperDTO<String> waiterUuid) {
+		return updateTableProperty(tableUuid, table -> table.setWaiter(wDao.findByUuid(waiterUuid.getValue())));
 	}
 
 	@PUT
 	@Path("{uuid}/table")
-	@Transactional
-	public Response updateTable(@PathParam("uuid") String diningTableUuid, String tableUuid) {
-		return updateTableProperty(tableUuid, table -> table.setTable(rtDao.findByUuid(tableUuid)));
+	public DiningTableDTO updateTable(@PathParam("uuid") String diningTableUuid, WrapperDTO<String> tableUuid) {
+		return updateTableProperty(diningTableUuid, table -> table.setTable(rtDao.findByUuid(tableUuid.getValue())));
 	}
 
 	@POST
 	@Path("{uuid}/lock")
-	@Transactional
-	public Response lockTable(@PathParam("uuid") String tableUuid) {
+	public DiningTableDTO lockTable(@PathParam("uuid") String tableUuid) {
 		return updateTableProperty(tableUuid, table -> {
-			boolean ordersOk = table.listOrders().stream().allMatch(order -> order.getBill() != null);
+			boolean ordersOk = table.getOrders().stream().allMatch(order -> order.getBill() != null);
 			if (ordersOk) {
 				table.setStatus(DiningTableStatus.CLOSED);
 			}
@@ -153,15 +182,14 @@ public class DiningTableREST {
 
 		List<Bill> badBills = table.getBills().stream().filter(Bill::isGeneric).collect(Collectors.toList());
 
-		removedContent.addBills(badBills.stream().map(DTOAssembler::fromBill).collect(Collectors.toList()));
+		removedContent.addBills(badBills.stream().map(bMapper::map).collect(Collectors.toList()));
 
 		badBills.forEach(bill -> {
-			removedContent
-					.addOrders(bill.getOrders().stream().map(DTOAssembler::fromOrder).collect(Collectors.toList()));
+			removedContent.addOrders(bill.getOrders().stream().map(oMapper::map).collect(Collectors.toList()));
 			bill.setTable(null);
 			bill.clearOrders();
 			table.setCoverCharges(table.getCoverCharges() - bill.getCoverCharges());
-			dtDao.getEntityManager().remove(bill);
+			dao.getEntityManager().remove(bill);
 		});
 
 		table.getOrdinations().forEach(ordination -> {
@@ -169,7 +197,7 @@ public class DiningTableREST {
 					.collect(Collectors.toList());
 			badOrders.forEach(order -> {
 				order.setOrdination(null);
-				dtDao.getEntityManager().remove(order);
+				dao.getEntityManager().remove(order);
 			});
 		});
 
@@ -178,12 +206,12 @@ public class DiningTableREST {
 
 		badOrdinations.forEach(ordination -> {
 			ordination.setTable(null);
-			dtDao.getEntityManager().remove(ordination);
+			dao.getEntityManager().remove(ordination);
 		});
 
 		if (table.getOrdinations().isEmpty()) {
 			table.setEvening(null);
-			dtDao.getEntityManager().remove(table);
+			dao.getEntityManager().remove(table);
 		}
 
 		try {
@@ -213,51 +241,35 @@ public class DiningTableREST {
 		}
 	}
 
-	private Response updateTableProperty(String tableUuid, Consumer<DiningTable> updater) {
+	private DiningTableDTO updateTableProperty(String tableUuid, Consumer<DiningTable> updater) {
 		Evening currentEvening = eveningManager.getSelectedEvening();
 		if (currentEvening != null) {
-			DiningTable toUpdate = dtDao.findByUuid(tableUuid);
+			DiningTable toUpdate = dao.findByUuid(tableUuid);
 			if (toUpdate != null && toUpdate.getEvening().equals(currentEvening)) {
-				try {
-					updater.accept(toUpdate);
-					return ResponseBuilder.ok(DTOAssembler.fromDiningTable(toUpdate));
-				} catch (Exception ex) {
-					return ResponseBuilder.badRequest(ex.getMessage());
-				}
+				updater.accept(toUpdate);
+				return mapper.map(toUpdate);
 			} else {
-				return ResponseBuilder.notFound(TABLE_NOT_FOUND);
+				throw new BadRequestException(TABLE_NOT_FOUND);
 			}
 		} else {
-			return ResponseBuilder.badRequest(EVENING_NOT_FOUND);
+			throw new BadRequestException(EVENING_NOT_FOUND);
 		}
 	}
 
-	@DELETE
-	@Path("{uuid}")
-	@Transactional
-	public Response deleteDiningTable(@PathParam("uuid") String uuid) {
-		Evening currentEvening = eveningManager.getSelectedEvening();
-		DiningTable toRemove = dtDao.findByUuid(uuid);
-		if (currentEvening != null && currentEvening.equals(toRemove.getEvening())) {
-			if (!toRemove.getBills().isEmpty()) {
-				return ResponseBuilder.badRequest("Al tavolo sono collegati degli scontrini");
-			}
-			if (!toRemove.getOrdinations().isEmpty()) {
-				return ResponseBuilder.badRequest("Il tavolo contiene delle comande");
-			}
-			dtDao.deleteByUuid(uuid);
-			return ResponseBuilder.ok(DTOAssembler.fromEvening(currentEvening));
-		}
-		return ResponseBuilder.badRequest("Serata non correttamente selezionata");
+	@GET
+	@Path("{uuid}/mergeTargets")
+	public List<DiningTableDTO> mergeTargets(@PathParam("uuid") String sourceUuid) {
+		Evening evening = eveningManager.getSelectedEvening();
+		return evening.getDiningTables().stream().filter(dt -> !dt.getUuid().equals(sourceUuid))
+				.filter(dt -> dt.getStatus() != DiningTableStatus.CLOSED).map(mapper::map).collect(Collectors.toList());
 	}
 
 	@POST
 	@Path("{sid}/merge/{did}")
-	@Transactional
-	public Response mergeDiningTables(@PathParam("sid") String uuid1, @PathParam("did") String uuid2) {
+	public DiningTableDTO mergeDiningTables(@PathParam("sid") String uuid1, @PathParam("did") String uuid2) {
 		Evening currentEvening = eveningManager.getSelectedEvening();
-		DiningTable srcTable = dtDao.findByUuid(uuid1);
-		DiningTable dstTable = dtDao.findByUuid(uuid2);
+		DiningTable srcTable = dao.findByUuid(uuid1);
+		DiningTable dstTable = dao.findByUuid(uuid2);
 		if (currentEvening != null && currentEvening.equals(srcTable.getEvening())
 				&& currentEvening.equals(dstTable.getEvening())) {
 			if (!DiningTableStatus.CLOSED.equals(srcTable.getStatus())
@@ -270,13 +282,30 @@ public class DiningTableREST {
 
 				dstTable.setCoverCharges(dstTable.getCoverCharges() + srcTable.getCoverCharges());
 				srcTable.setEvening(null);
-				dtDao.getEntityManager().remove(srcTable);
-				return ResponseBuilder.ok(DTOAssembler.fromDiningTable(dstTable));
+				dao.getEntityManager().remove(srcTable);
+				return mapper.map(dstTable);
 			} else {
-				return ResponseBuilder.badRequest("Impossibile fondere tavoli chiusi");
+				throw new BadRequestException("Impossibile fondere tavoli chiusi");
 			}
 		}
-		return ResponseBuilder.badRequest("Tavoli non corretti");
+		throw new BadRequestException("Tavoli non corretti");
+	}
 
+	@DELETE
+	@Path("{uuid}")
+	public void deleteDiningTable(@PathParam("uuid") String uuid) {
+		Evening currentEvening = eveningManager.getSelectedEvening();
+		DiningTable toRemove = dao.findByUuid(uuid);
+		if (currentEvening != null && currentEvening.equals(toRemove.getEvening())) {
+			if (!toRemove.getBills().isEmpty()) {
+				throw new BadRequestException("Al tavolo cono collegati degli scontrini");
+			}
+			if (!toRemove.getOrdinations().isEmpty()) {
+				throw new BadRequestException("Il tavolo contiene delle comande");
+			}
+			dao.deleteByUuid(uuid);
+		} else {
+			throw new BadRequestException(EVENING_NOT_FOUND);
+		}
 	}
 }
