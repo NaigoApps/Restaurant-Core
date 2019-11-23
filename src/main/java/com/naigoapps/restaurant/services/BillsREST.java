@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -30,6 +32,7 @@ import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.Order;
+import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.builders.BillBuilder;
 import com.naigoapps.restaurant.model.dao.BillDao;
@@ -41,9 +44,8 @@ import com.naigoapps.restaurant.services.dto.BillDTO;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
 import com.naigoapps.restaurant.services.dto.OrderDTO;
 import com.naigoapps.restaurant.services.dto.mappers.BillMapper;
-import com.naigoapps.restaurant.services.dto.mappers.DiningTableMapper;
 import com.naigoapps.restaurant.services.dto.mappers.OrdinationMapper;
-import com.naigoapps.restaurant.services.fiscal.hydra.HydraPrintingService;
+import com.naigoapps.restaurant.services.fiscal.hydra.HydraFilePrintingService;
 import com.naigoapps.restaurant.services.printing.BillPrinter;
 import com.naigoapps.restaurant.services.printing.services.PrintingService;
 import com.naigoapps.restaurant.services.printing.services.PrintingServiceProvider;
@@ -82,13 +84,10 @@ public class BillsREST {
 	private BillMapper mapper;
 
 	@Inject
-	private DiningTableMapper dtMapper;
-
-	@Inject
 	private OrdinationMapper oMapper;
 
-	@Inject
-	private HydraPrintingService fpm;
+//	@Inject
+//	private HydraPrintingService fpm;
 
 	@GET
 	public List<BillDTO> getBills() {
@@ -125,31 +124,6 @@ public class BillsREST {
 				+ result.getOrders().stream().mapToDouble(o -> o.getPrice() * o.getQuantity()).sum());
 
 		return result;
-	}
-
-	@DELETE
-	@Path("{uuid}")
-	@Produces(MediaType.TEXT_PLAIN)
-	public void removeBill(@PathParam("uuid") String billUuid) {
-		Evening currentEvening = eveningManager.getSelectedEvening();
-		if (currentEvening != null) {
-			Bill bill = dao.findByUuid(billUuid);
-			if (bill != null) {
-				DiningTable table = bill.getTable();
-				if (bill.getTable().getEvening().equals(currentEvening)) {
-					bill.clearOrders();
-					bill.setTable(null);
-					dao.getEntityManager().remove(bill);
-					table.updateStatus();
-				} else {
-					throw new BadRequestException(EVENING_NOT_FOUND);
-				}
-			} else {
-				throw new BadRequestException("Conto non trovato");
-			}
-		} else {
-			throw new BadRequestException(EVENING_NOT_FOUND);
-		}
 	}
 
 	@POST
@@ -279,32 +253,30 @@ public class BillsREST {
 		dao.findByUuid(uuid).setTotal(total);
 	}
 
-    @POST
-    @Path("{uuid}/soft-print")
-    public void printSoftBill(@PathParam("uuid") String billUuid, @QueryParam("generic") Boolean generic) {
-        Bill bill = dao.findByUuid(billUuid);
-        if (bill != null) {
-            Printer mainPrinter = prDao.findMainPrinter();
-            if (mainPrinter != null) {
-                try {
-                    PrintingService service = PrintingServiceProvider.get(mainPrinter);
-                    service.accept(new BillPrinter(Boolean.TRUE.equals(generic)), bill, LocalDateTime.now())
-                            .lf(3)
-                            .cut()
-                            .doPrint();
-                    mapper.map(bill);
-                } catch (IOException ex) {
-                	throw new InternalServerErrorException("Problema di stampa inaspettato");
-                } catch (PrintException ex) {
-                	throw new InternalServerErrorException("Problema di stampa");
-                }
-            } else {
-            	throw new IllegalStateException("Stampante principale non trovata");
-            }
-        }else {
-        	throw new BadRequestException("Conto non trovato");
-        }
-    }
+	@POST
+	@Path("{uuid}/soft-print")
+	public void printSoftBill(@PathParam("uuid") String billUuid, @QueryParam("generic") Boolean generic) {
+		Bill bill = dao.findByUuid(billUuid);
+		if (bill != null) {
+			Printer mainPrinter = prDao.findMainPrinter();
+			if (mainPrinter != null) {
+				try {
+					PrintingService service = PrintingServiceProvider.get(mainPrinter);
+					service.accept(new BillPrinter(Boolean.TRUE.equals(generic)), bill, LocalDateTime.now()).lf(3).cut()
+							.doPrint();
+					mapper.map(bill);
+				} catch (IOException ex) {
+					throw new InternalServerErrorException("Problema di stampa inaspettato");
+				} catch (PrintException ex) {
+					throw new InternalServerErrorException("Problema di stampa");
+				}
+			} else {
+				throw new IllegalStateException("Stampante principale non trovata");
+			}
+		} else {
+			throw new BadRequestException("Conto non trovato");
+		}
+	}
 
 //	@POST
 //	@Path("{uuid}/soft-print")
@@ -341,46 +313,92 @@ public class BillsREST {
 //			throw new BadRequestException("Conto non trovato");
 //		}
 //	}
-    
-    @POST
-    @Path("{uuid}/print")
-    @Transactional
-    public void printBill(@PathParam("uuid") String billUuid, String customerId, @QueryParam("generic") Boolean generic) {
-        Bill bill = dao.findByUuid(billUuid);
-        Customer customer = null;
-        if (customerId != null && !customerId.isEmpty()) {
-            customer = cDao.findByUuid(customerId);
-        }
-        if (bill != null && (customer != null || customerId == null || customerId.isEmpty())) {
-            Printer fiscalPrinter = prDao.findMainPrinter();
-            if (fiscalPrinter != null) {
-                try {
-                    bill.getTable().setStatus(DiningTableStatus.CLOSING);
-                    if (customer != null) {
-                        bill.setCustomer(customer);
-                        bill.setProgressive(dao.nextInvoiceProgressive(LocalDate.now()));
-                    } else {
-                        bill.setProgressive(dao.nextReceiptProgressive(LocalDate.now()));
-                    }
-                    bill.setPrintTime(LocalDateTime.now());
 
-                    PrintingService service = PrintingServiceProvider.get(fiscalPrinter);
-                    service.accept(new BillPrinter(Boolean.TRUE.equals(generic), customer), bill, LocalDateTime.now())
-                            .lf(3)
-                            .cut()
-                            .doPrint();
+	@POST
+	@Path("{uuid}/print")
+	@Transactional
+	public void printBill(@PathParam("uuid") String billUuid, String customerId,
+			@QueryParam("generic") Boolean generic) {
+		Bill bill = dao.findByUuid(billUuid);
+		Customer customer = null;
+		if (customerId != null && !customerId.isEmpty()) {
+			customer = cDao.findByUuid(customerId);
+		}
+		if (bill != null && (customer != null || customerId == null || customerId.isEmpty())) {
+			Printer fiscalPrinter = prDao.findMainPrinter();
+			if (fiscalPrinter != null) {
+				try {
+					bill.getTable().setStatus(DiningTableStatus.CLOSING);
+					if (customer != null) {
+						bill.setCustomer(customer);
+						bill.setProgressive(dao.nextInvoiceProgressive(LocalDate.now()));
+					} else {
+						bill.setProgressive(dao.nextReceiptProgressive(LocalDate.now()));
+					}
+					bill.setPrintTime(LocalDateTime.now());
 
-                    bill.getTable().updateStatus();
+					HydraFilePrintingService service = new HydraFilePrintingService();
+					service.print(bill);
 
-                } catch (IOException | PrintException ex) {
-                    throw new InternalServerErrorException("Problema di stampa inaspettato");
-                }
-            } else {
-                throw new BadRequestException("Stampante fiscale non trovata");
-            }
-        }else {
-        	throw new BadRequestException("Conto o cliente non trovato");        	
-        }
-    }
+					bill.getTable().updateStatus();
+
+				} catch (IOException ex) {
+					throw new InternalServerErrorException("Problema di stampa inaspettato", ex);
+				}
+			} else {
+				throw new BadRequestException("Stampante fiscale non trovata");
+			}
+		} else {
+			throw new BadRequestException("Conto o cliente non trovato");
+		}
+	}
+
+	@DELETE
+	@Path("{uuid}")
+	public void removeBill(@PathParam("uuid") String billUuid) {
+		Bill bill = dao.findByUuid(billUuid);
+		if (bill != null) {
+			DiningTable table = bill.getTable();
+			bill.clearOrders();
+			bill.setTable(null);
+			dao.getEntityManager().remove(bill);
+			table.updateStatus();
+		} else {
+			throw new BadRequestException("Conto non trovato");
+		}
+	}
+
+	@DELETE
+	@Path("{uuid}/deep")
+	public void removeBillAndOrders(@PathParam("uuid") String billUuid) {
+		Bill bill = dao.findByUuid(billUuid);
+		if (bill != null) {
+			Set<Order> ordersToRemove = new HashSet<>(bill.getOrders());
+			Set<Ordination> ordinationsToCheck = ordersToRemove.stream()
+					.map(Order::getOrdination)
+					.collect(Collectors.toSet());
+
+			ordersToRemove.forEach(order -> {
+				order.setOrdination(null);
+				dao.delete(order);
+			});
+
+			ordinationsToCheck.stream()
+			.filter(ordination -> ordination.getOrders().isEmpty())
+			.forEach(ordination -> {
+				ordination.setTable(null);
+				dao.delete(ordination);
+			});
+
+			DiningTable table = bill.getTable();
+			table.setCoverCharges(table.getCoverCharges() - bill.getCoverCharges());
+			bill.setTable(null);
+			bill.clearOrders();
+			dao.delete(bill);
+			table.updateStatus();
+		} else {
+			throw new BadRequestException("Conto non trovato");
+		}
+	}
 
 }

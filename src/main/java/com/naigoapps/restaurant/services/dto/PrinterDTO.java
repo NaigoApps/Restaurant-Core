@@ -15,13 +15,11 @@ public class PrinterDTO extends DTO {
 
 	private int lineCharacters;
 
+	private String address;
+
+	private String port;
+
 	public PrinterDTO() {
-	}
-	
-	public PrinterDTO(String uuid, String name, int lineCharacters) {
-		super(uuid);
-		this.name = name;
-		this.lineCharacters = lineCharacters;
 	}
 
 	public String getName() {
@@ -38,6 +36,22 @@ public class PrinterDTO extends DTO {
 
 	public int getLineCharacters() {
 		return lineCharacters;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getPort() {
+		return port;
+	}
+
+	public void setPort(String port) {
+		this.port = port;
 	}
 
 }

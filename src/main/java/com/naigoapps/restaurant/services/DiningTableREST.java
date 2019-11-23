@@ -1,20 +1,16 @@
 package com.naigoapps.restaurant.services;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
-import javax.swing.filechooser.FileSystemView;
 import javax.transaction.Transactional;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DELETE;
@@ -26,25 +22,21 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.naigoapps.restaurant.main.EveningManager;
 import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
-import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.model.Ordination;
 import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
 import com.naigoapps.restaurant.model.dao.WaiterDao;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
+import com.naigoapps.restaurant.services.dto.DiningTableExportDTO;
 import com.naigoapps.restaurant.services.dto.DiningTableSkeletonDTO;
-import com.naigoapps.restaurant.services.dto.RemovedContent;
 import com.naigoapps.restaurant.services.dto.WrapperDTO;
-import com.naigoapps.restaurant.services.dto.mappers.BillMapper;
 import com.naigoapps.restaurant.services.dto.mappers.DiningTableMapper;
-import com.naigoapps.restaurant.services.dto.mappers.OrderMapper;
 import com.naigoapps.restaurant.services.exceptions.AlreadyRegisteredCoverChargesException;
 
 /**
@@ -78,26 +70,28 @@ public class DiningTableREST {
 	private DiningTableMapper mapper;
 
 	@Inject
-	private BillMapper bMapper;
-
-	@Inject
-	private OrderMapper oMapper;
-
+	private Event<DiningTablesUpdatedEvent> evt;
+	
 	@POST
 	public DiningTableSkeletonDTO addDiningTable(DiningTableSkeletonDTO table) {
 		Evening currentEvening = eveningManager.getSelectedEvening();
-		DiningTable diningTable = new DiningTableBuilder()
-				.date(LocalDateTime.now())
-				.evening(currentEvening)
-				.ccs(table.getCoverCharges())
-				.waiter(wDao.findByUuid(table.getWaiter().getUuid()))
-				.table(rtDao.findByUuid(table.getTable().getUuid()))
-				.getContent();
+		DiningTable diningTable = new DiningTableBuilder().date(LocalDateTime.now()).evening(currentEvening)
+				.ccs(table.getCoverCharges()).waiter(wDao.findByUuid(table.getWaiter().getUuid()))
+				.table(rtDao.findByUuid(table.getTable().getUuid())).getContent();
 		dao.persist(diningTable);
-		dtWS.update();
+		notifyDiningTablesUpdate();
 		return mapper.mapSkeleton(diningTable);
 	}
 	
+	public void notifyDiningTablesUpdate(@Observes(during = TransactionPhase.AFTER_COMPLETION) DiningTablesUpdatedEvent evt) {		
+		dtWS.update();
+	}
+	
+	public void notifyDiningTablesUpdate() {
+		evt.fire(new DiningTablesUpdatedEvent());
+	}
+	
+
 	@PUT
 	@Path("{uuid}")
 	public DiningTableSkeletonDTO editDiningTable(@PathParam("uuid") String uuid, DiningTableSkeletonDTO table) {
@@ -105,25 +99,23 @@ public class DiningTableREST {
 		diningTable.setCoverCharges(table.getCoverCharges());
 		diningTable.setWaiter(wDao.findByUuid(table.getWaiter().getUuid()));
 		diningTable.setTable(rtDao.findByUuid(table.getTable().getUuid()));
-		dtWS.update();
+		notifyDiningTablesUpdate();
 		return mapper.mapSkeleton(diningTable);
 	}
 
 	@GET
 	public List<DiningTableDTO> list() {
 		Evening currentEvening = eveningManager.getSelectedEvening();
-		return currentEvening.getDiningTables().stream()
-				.filter(table -> DiningTableStatus.CLOSED != table.getStatus())
+		return currentEvening.getDiningTables().stream().filter(table -> DiningTableStatus.CLOSED != table.getStatus())
 				.map(mapper::map).sorted(Collections.reverseOrder(DiningTableDTO.comparator()))
 				.collect(Collectors.toList());
 	}
-	
+
 	@GET
 	@Path("open")
 	public List<DiningTableDTO> open() {
 		Evening currentEvening = eveningManager.getSelectedEvening();
-		return currentEvening.getDiningTables().stream()
-				.filter(table -> DiningTableStatus.OPEN == table.getStatus())
+		return currentEvening.getDiningTables().stream().filter(table -> DiningTableStatus.OPEN == table.getStatus())
 				.map(mapper::map).sorted(Collections.reverseOrder(DiningTableDTO.comparator()))
 				.collect(Collectors.toList());
 	}
@@ -142,9 +134,11 @@ public class DiningTableREST {
 
 	@PUT
 	@Path("{uuid}/coverCharges")
-	public DiningTableDTO updateCoverCharges(@PathParam(value = "uuid") String tableUuid, WrapperDTO<Integer> coverCharges) {
+	public DiningTableDTO updateCoverCharges(@PathParam(value = "uuid") String tableUuid,
+			WrapperDTO<Integer> coverCharges) {
 		return updateTableProperty(tableUuid, table -> {
-			if (table.getBills().stream().collect(Collectors.summingInt(Bill::getCoverCharges)) <= coverCharges.getValue()) {
+			if (table.getBills().stream().collect(Collectors.summingInt(Bill::getCoverCharges)) <= coverCharges
+					.getValue()) {
 				table.setCoverCharges(coverCharges.getValue());
 			} else {
 				throw new AlreadyRegisteredCoverChargesException("Coperti già inseriti in un conto");
@@ -166,79 +160,22 @@ public class DiningTableREST {
 
 	@POST
 	@Path("{uuid}/lock")
-	public DiningTableDTO lockTable(@PathParam("uuid") String tableUuid) {
-		return updateTableProperty(tableUuid, table -> {
-			boolean ordersOk = table.getOrders().stream().allMatch(order -> order.getBill() != null);
-			if (ordersOk) {
-				table.setStatus(DiningTableStatus.CLOSED);
-			}
-			removeBadContent(table);
-		});
-	}
-
-	private void removeBadContent(DiningTable table) {
-		RemovedContent removedContent = new RemovedContent();
-		removedContent.setDate(table.getEvening().getDay());
-
-		List<Bill> badBills = table.getBills().stream().filter(Bill::isGeneric).collect(Collectors.toList());
-
-		removedContent.addBills(badBills.stream().map(bMapper::map).collect(Collectors.toList()));
-
-		badBills.forEach(bill -> {
-			removedContent.addOrders(bill.getOrders().stream().map(oMapper::map).collect(Collectors.toList()));
-			bill.setTable(null);
-			bill.clearOrders();
-			table.setCoverCharges(table.getCoverCharges() - bill.getCoverCharges());
-			dao.getEntityManager().remove(bill);
-		});
-
-		table.getOrdinations().forEach(ordination -> {
-			List<Order> badOrders = ordination.getOrders().stream().filter(order -> order.getBill() == null)
-					.collect(Collectors.toList());
-			badOrders.forEach(order -> {
-				order.setOrdination(null);
-				dao.getEntityManager().remove(order);
-			});
-		});
-
-		List<Ordination> badOrdinations = table.getOrdinations().stream()
-				.filter(ordination -> ordination.getOrders().isEmpty()).collect(Collectors.toList());
-
-		badOrdinations.forEach(ordination -> {
-			ordination.setTable(null);
-			dao.getEntityManager().remove(ordination);
-		});
-
-		if (table.getOrdinations().isEmpty()) {
-			table.setEvening(null);
-			dao.getEntityManager().remove(table);
-		}
-
-		try {
-			saveRemovedContent(table, removedContent);
-		} catch (IOException ex) {
-			Logger.getLogger(DiningTableREST.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
-
-	private static void saveRemovedContent(DiningTable table, RemovedContent list) throws IOException {
-		String tableUuid = table.getUuid();
-		FileSystemView fsv = FileSystemView.getFileSystemView();
-		File home = fsv.getHomeDirectory();
-		int i = 0;
-		File outFile = new File(home, tableUuid + String.format("%03d", i) + ".json");
-		while (outFile.exists()) {
-			i++;
-			outFile = new File(home, tableUuid + String.format("%03d", i) + ".json");
-		}
-		if (outFile.createNewFile()) {
-			try (OutputStream stream = new FileOutputStream(outFile)) {
-				ObjectMapper mapper = new ObjectMapper();
-				mapper.writeValue(stream, list);
-			}
+	public void lockTable(@PathParam("uuid") String tableUuid) {
+		DiningTable table = dao.findByUuid(tableUuid);
+		boolean ordersOk = table.getOrders().stream().allMatch(order -> order.getBill() != null);
+		if (ordersOk) {
+			table.setStatus(DiningTableStatus.CLOSED);
+			notifyDiningTablesUpdate();
 		} else {
-			throw new IOException("Cannot create backup file");
+			throw new BadRequestException("Il tavolo non può ancora essere chiuso");
 		}
+	}
+
+	@GET
+	@Path("{uuid}/export")
+	@Produces("application/json")
+	public DiningTableExportDTO exportTable(@PathParam("uuid") String tableUuid) {
+		return mapper.mapForExport(dao.findByUuid(tableUuid));
 	}
 
 	private DiningTableDTO updateTableProperty(String tableUuid, Consumer<DiningTable> updater) {
@@ -247,6 +184,7 @@ public class DiningTableREST {
 			DiningTable toUpdate = dao.findByUuid(tableUuid);
 			if (toUpdate != null && toUpdate.getEvening().equals(currentEvening)) {
 				updater.accept(toUpdate);
+				notifyDiningTablesUpdate();
 				return mapper.map(toUpdate);
 			} else {
 				throw new BadRequestException(TABLE_NOT_FOUND);
@@ -283,6 +221,7 @@ public class DiningTableREST {
 				dstTable.setCoverCharges(dstTable.getCoverCharges() + srcTable.getCoverCharges());
 				srcTable.setEvening(null);
 				dao.getEntityManager().remove(srcTable);
+				notifyDiningTablesUpdate();
 				return mapper.map(dstTable);
 			} else {
 				throw new BadRequestException("Impossibile fondere tavoli chiusi");
@@ -304,6 +243,7 @@ public class DiningTableREST {
 				throw new BadRequestException("Il tavolo contiene delle comande");
 			}
 			dao.deleteByUuid(uuid);
+			notifyDiningTablesUpdate();
 		} else {
 			throw new BadRequestException(EVENING_NOT_FOUND);
 		}

@@ -5,14 +5,17 @@
  */
 package com.naigoapps.restaurant.services.printing.services;
 
-import com.naigoapps.restaurant.model.Printer;
-import com.naigoapps.restaurant.services.printing.ObjectPrinter;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import javax.print.DocFlavor;
 import javax.print.PrintException;
 import javax.print.attribute.AttributeSet;
 import javax.print.attribute.HashPrintRequestAttributeSet;
+
+import com.naigoapps.restaurant.model.Printer;
+import com.naigoapps.restaurant.services.printing.ObjectPrinter;
 
 /**
  *
@@ -57,11 +60,17 @@ public interface PrintingService {
 
     public PrintingService align(Align a) throws IOException;
 
-    public static String formatPrice(float f) {
+    public static String formatPrice(double f) {
         return String.format("%.2f", f);
     }
+    
+	public static String formatTime(LocalDateTime date) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+		return date.format(formatter);
+	}
 
-    public <T> PrintingService accept(ObjectPrinter printer, T obj, LocalDateTime time) throws IOException;
+
+    public <T> PrintingService accept(ObjectPrinter<T> printer, T obj, LocalDateTime time) throws IOException;
 
     public void doPrint() throws PrintException, IOException;
 

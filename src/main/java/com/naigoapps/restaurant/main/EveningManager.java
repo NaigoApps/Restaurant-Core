@@ -5,35 +5,21 @@
  */
 package com.naigoapps.restaurant.main;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.websocket.Session;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.Evening;
-import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.EveningDao;
 import com.naigoapps.restaurant.services.DiningTableWS;
-import com.naigoapps.restaurant.services.dto.DiningTableDTO;
-import com.naigoapps.restaurant.services.dto.OrdinationDTO;
-import com.naigoapps.restaurant.services.dto.mappers.DiningTableMapper;
-import com.naigoapps.restaurant.services.dto.mappers.OrdinationMapper;
 import com.naigoapps.restaurant.services.websocket.SessionType;
 
 /**
@@ -50,15 +36,6 @@ public class EveningManager {
     @Inject
     private EveningDao eveningDao;
     
-    @Inject
-    private DiningTableDao dtDao;
-    
-    @Inject
-    private DiningTableMapper dtMapper;
-    
-    @Inject
-    private OrdinationMapper oMapper;
-
     @PostConstruct
     public void init() {
         Logger.getLogger(this.getClass().getName()).info("***** CREATED_EVENING_MANAGER *****");
@@ -97,7 +74,7 @@ public class EveningManager {
             toSend.stream().forEach(session -> {
                 try {
                     session.getBasicRemote().sendText(buildMessage(key));
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     Logger.getLogger(DiningTableWS.class.getName()).log(Level.SEVERE, null, ex);
                     toRemove.add(session);
                 }
@@ -115,42 +92,10 @@ public class EveningManager {
     }
     
     private String buildDiningTablesMessage(){
-        List<DiningTableDTO> result = getSelectedEvening().getDiningTables()
-                .stream()
-                .map(dtMapper::map)
-                .collect(Collectors.toList());
-
-        SimpleModule module = new SimpleModule();
-        
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(module);
-        mapper.registerModule(new JavaTimeModule());
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        String tables = "";
-        try {
-            tables = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
-        } catch (JsonProcessingException ex) {
-            Logger.getLogger(EveningManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return tables;
+    	return selectedEveningUuid;
     }
     
     private String buildOrdinationsMessage(String tableUuid){
-        DiningTable target = dtDao.findByUuid(tableUuid);
-        List<OrdinationDTO> result = target.getOrdinations()
-                .stream()
-                .map(oMapper::map)
-                .collect(Collectors.toList());
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        String tables = "";
-        try {
-            tables = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
-        } catch (JsonProcessingException ex) {
-            Logger.getLogger(EveningManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return tables;
+    	return tableUuid;
     }
 }

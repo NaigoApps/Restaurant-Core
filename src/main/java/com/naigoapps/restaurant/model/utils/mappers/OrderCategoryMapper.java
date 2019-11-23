@@ -63,7 +63,7 @@ public class OrderCategoryMapper implements Collector<Order, Map<Category, List<
         return set;
     }
 
-    private class OrderAdder implements BiConsumer<Map<Category, List<Order>>, Order>{
+    public class OrderAdder implements BiConsumer<Map<Category, List<Order>>, Order>{
         @Override
         public void accept(Map<Category, List<Order>> map, Order o) {
             List<Order> orders = map.get(o.getDish().getCategory());

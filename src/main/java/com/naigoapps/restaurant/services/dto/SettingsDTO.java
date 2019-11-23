@@ -19,8 +19,10 @@ public class SettingsDTO extends DTO {
 	private String clientSettings;
 
 	private Boolean shrinkOrdinations;
-	
+
 	private PrinterDTO mainPrinter;
+
+	private String cashPassword;
 
 	public String getClientSettings() {
 		return clientSettings;
@@ -65,8 +67,16 @@ public class SettingsDTO extends DTO {
 	public void setMainPrinter(PrinterDTO mainPrinter) {
 		this.mainPrinter = mainPrinter;
 	}
-	
+
 	public PrinterDTO getMainPrinter() {
 		return mainPrinter;
+	}
+
+	public String getCashPassword() {
+		return cashPassword;
+	}
+
+	public void setCashPassword(String cashPassword) {
+		this.cashPassword = cashPassword;
 	}
 }

@@ -47,14 +47,12 @@ public class BillPrinter implements ObjectPrinter<Bill> {
         }
         ps.printCenter("Tavolo " + obj.getTable().getTable().getName())
                 .printCenter(time.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")))
-                .lf()
-                .printLine(obj.getCoverCharges() + " COPERTI",
-                        PrintingService.formatPrice(obj.getTable().getEvening().getCoverCharge() * obj.getCoverCharges()));
+                .lf();
 
         if(generic){
-            ps.accept(new GenericReviewPrinter(), obj.getOrders(), time);
+            ps.accept(new GenericReviewPrinter(), obj, time);
         }else{
-            ps.accept(new CategoriesReviewPrinter(), obj.getOrders(), time);
+            ps.accept(new CategoriesReviewPrinter(), obj, time);
         }
 
         float estimatedTotal = obj.getEstimatedTotal();

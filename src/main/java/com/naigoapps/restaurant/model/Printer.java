@@ -16,24 +16,44 @@ import javax.persistence.Table;
 @Table(name = "printers")
 public class Printer extends BaseEntity {
 
-    private String name;
+	private String name;
 
-    private int lineCharacters;
+	private int lineCharacters;
 
-    public String getName() {
-        return name;
-    }
+	private String address;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	private String port;
 
-    public int getLineCharacters() {
-        return lineCharacters;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setLineCharacters(int lineCharacters) {
-        this.lineCharacters = lineCharacters;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getLineCharacters() {
+		return lineCharacters;
+	}
+
+	public void setLineCharacters(int lineCharacters) {
+		this.lineCharacters = lineCharacters;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getPort() {
+		return port;
+	}
+
+	public void setPort(String port) {
+		this.port = port;
+	}
 
 }

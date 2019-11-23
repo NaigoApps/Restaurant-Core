@@ -30,14 +30,10 @@ public class SoftBillPrinter implements ObjectPrinter<Bill> {
 		ps.printCenter("Tavolo " + obj.getTable().getTable().getName())
 				.printCenter(time.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"))).lf();
 
-		if (obj.getCoverCharges() > 0) {
-			float ccs = obj.getTable().getEvening().getCoverCharge() * obj.getCoverCharges();
-			ps.printLine(obj.getCoverCharges() + " COPERTI", PrintingService.formatPrice(ccs));
-		}
 		if (generic) {
-			ps.accept(new GenericReviewPrinter(), obj.getOrders(), time);
+			ps.accept(new GenericReviewPrinter(), obj, time);
 		} else {
-			ps.accept(new CategoriesReviewPrinter(), obj.getOrders(), time);
+			ps.accept(new CategoriesReviewPrinter(), obj, time);
 		}
 
 		float estimatedTotal = obj.getEstimatedTotal();

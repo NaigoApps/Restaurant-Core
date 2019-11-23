@@ -5,21 +5,15 @@
  */
 package com.naigoapps.restaurant.services.printing.services;
 
-import com.naigoapps.restaurant.model.Printer;
-import com.naigoapps.restaurant.services.printing.ObjectPrinter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import javax.print.Doc;
-import javax.print.DocFlavor;
-import javax.print.DocPrintJob;
-import javax.print.PrintException;
-import javax.print.PrintService;
-import javax.print.PrintServiceLookup;
-import javax.print.SimpleDoc;
-import javax.print.attribute.AttributeSet;
-import javax.print.attribute.HashPrintRequestAttributeSet;
+
+import com.naigoapps.restaurant.model.Printer;
+import com.naigoapps.restaurant.services.printing.ObjectPrinter;
 
 /**
  *
@@ -27,13 +21,8 @@ import javax.print.attribute.HashPrintRequestAttributeSet;
  */
 public class ThermalPrintingService implements PrintingService {
 
-    public static final DocFlavor.BYTE_ARRAY FLAVOR = DocFlavor.BYTE_ARRAY.AUTOSENSE;
-    public static final AttributeSet ATTRIBUTES = new HashPrintRequestAttributeSet();
-
     private final int ESC = 0x1B;
     private final int GS = 0x1D;
-
-    private final PrintService service;
 
     private Printer printer;
 
@@ -41,11 +30,6 @@ public class ThermalPrintingService implements PrintingService {
 
     public ThermalPrintingService(Printer printer) {
         this.printer = printer;
-        service = Arrays
-                .stream(PrintServiceLookup.lookupPrintServices(FLAVOR, ATTRIBUTES))
-                .filter(s -> s.getName().equals(printer.getName()))
-                .findFirst()
-                .orElse(null);
         text = new ByteArrayOutputStream();
     }
 
@@ -132,10 +116,14 @@ public class ThermalPrintingService implements PrintingService {
     }
 
     @Override
-    public void doPrint() throws PrintException {
-        DocPrintJob job = service.createPrintJob();
-        Doc doc = new SimpleDoc(text.toByteArray(), FLAVOR, null);
-        job.print(doc, null);
+    public void doPrint() throws IOException {
+    	InetAddress address = InetAddress.getByName(printer.getAddress());
+    	int port = Integer.parseInt(printer.getPort());
+    	try(Socket socket = new Socket(address, port)){    		
+    		socket.setSoTimeout(1000);
+    		OutputStream toPrinter = socket.getOutputStream();
+    		toPrinter.write(text.toByteArray());
+    	}
     }
 
     @Override
@@ -147,7 +135,7 @@ public class ThermalPrintingService implements PrintingService {
     }
 
     @Override
-    public <T> PrintingService accept(ObjectPrinter printer, T obj, LocalDateTime time) throws IOException {
+    public <T> PrintingService accept(ObjectPrinter<T> printer, T obj, LocalDateTime time) throws IOException {
         return printer.apply(this, obj, time);
     }
 

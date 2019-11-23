@@ -124,7 +124,7 @@ public class StringsPrintingService implements PrintingService {
 	}
 
 	@Override
-	public <T> PrintingService accept(ObjectPrinter printer, T obj, LocalDateTime time) throws IOException {
+	public <T> PrintingService accept(ObjectPrinter<T> printer, T obj, LocalDateTime time) throws IOException {
 		return printer.apply(this, obj, time);
 	}
 

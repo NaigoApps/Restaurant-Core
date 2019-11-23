@@ -5,19 +5,19 @@
  */
 package com.naigoapps.restaurant.services.printing.services;
 
-import com.naigoapps.restaurant.model.Printer;
-import com.naigoapps.restaurant.services.printing.ObjectPrinter;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+
 import javax.print.PrintException;
-import javax.print.PrintService;
-import javax.print.PrintServiceLookup;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+
+import com.naigoapps.restaurant.model.Printer;
+import com.naigoapps.restaurant.services.printing.ObjectPrinter;
 
 /**
  *
@@ -28,8 +28,6 @@ public class PDFPrintingService implements PrintingService {
     private static final int X_MARGIN = 30;
     private static final int Y_MARGIN = 30;
     
-    private final PrintService service;
-
     private Printer printer;
 
     private PDDocument document;
@@ -37,15 +35,9 @@ public class PDFPrintingService implements PrintingService {
 
     private PDFont currentFont;
     private float currentSize;
-    private float currentLine;
 
     public PDFPrintingService(Printer printer) throws IOException {
         this.printer = printer;
-        service = Arrays
-                .stream(PrintServiceLookup.lookupPrintServices(FLAVOR, ATTRIBUTES))
-                .filter(s -> s.getName().equals(printer.getName()))
-                .findFirst()
-                .orElse(null);
         resetImpl();
     }
 
@@ -70,7 +62,7 @@ public class PDFPrintingService implements PrintingService {
         document = new PDDocument();
         PDPage page = new PDPage();
         document.addPage(page);
-        currentLine = page.getBBox().getHeight() - Y_MARGIN;
+        float currentLine = page.getBBox().getHeight() - Y_MARGIN;
         this.stream = new PDPageContentStream(document, page);
         font(Font.A);
         size(Size.STANDARD);
@@ -157,7 +149,7 @@ public class PDFPrintingService implements PrintingService {
     }
 
     @Override
-    public <T> PrintingService accept(ObjectPrinter printer, T obj, LocalDateTime time) throws IOException {
+    public <T> PrintingService accept(ObjectPrinter<T> printer, T obj, LocalDateTime time) throws IOException {
         return printer.apply(this, obj, time);
     }
 

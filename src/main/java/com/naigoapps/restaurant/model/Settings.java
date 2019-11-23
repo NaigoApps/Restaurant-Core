@@ -18,42 +18,44 @@ import javax.persistence.Table;
 @Table(name = "settings")
 public class Settings extends BaseEntity {
 
-    private float defaultCoverCharge;
+	private float defaultCoverCharge;
 
-    private String fiscalPrinterAddress;
-    private int fiscalPrinterPort;
-    
-    @Lob
-    private String clientSettings;
+	private String fiscalPrinterAddress;
+	private int fiscalPrinterPort;
 
-    private Boolean shrinkOrdinations;
+	@Lob
+	private String clientSettings;
 
-    @ManyToOne
-    private Printer mainPrinter;
-    
-    public String getClientSettings() {
-        return clientSettings;
-    }
+	private String cashPassword;
 
-    public void setClientSettings(String clientSettings) {
-        this.clientSettings = clientSettings;
-    }
+	private Boolean shrinkOrdinations;
 
-    public float getDefaultCoverCharge() {
-        return defaultCoverCharge;
-    }
+	@ManyToOne
+	private Printer mainPrinter;
 
-    public void setDefaultCoverCharge(float defaultCoverCharge) {
-        this.defaultCoverCharge = defaultCoverCharge;
-    }
+	public String getClientSettings() {
+		return clientSettings;
+	}
 
-    public Boolean getShrinkOrdinations() {
-        return shrinkOrdinations;
-    }
+	public void setClientSettings(String clientSettings) {
+		this.clientSettings = clientSettings;
+	}
 
-    public void setShrinkOrdinations(Boolean shrinkOrdinations) {
-        this.shrinkOrdinations = shrinkOrdinations;
-    }
+	public float getDefaultCoverCharge() {
+		return defaultCoverCharge;
+	}
+
+	public void setDefaultCoverCharge(float defaultCoverCharge) {
+		this.defaultCoverCharge = defaultCoverCharge;
+	}
+
+	public Boolean getShrinkOrdinations() {
+		return shrinkOrdinations;
+	}
+
+	public void setShrinkOrdinations(Boolean shrinkOrdinations) {
+		this.shrinkOrdinations = shrinkOrdinations;
+	}
 
 	public String getFiscalPrinterAddress() {
 		return fiscalPrinterAddress;
@@ -70,13 +72,20 @@ public class Settings extends BaseEntity {
 	public void setFiscalPrinterPort(int fiscalPrinterPort) {
 		this.fiscalPrinterPort = fiscalPrinterPort;
 	}
-	
+
 	public Printer getMainPrinter() {
 		return mainPrinter;
 	}
-	
+
 	public void setMainPrinter(Printer mainPrinter) {
 		this.mainPrinter = mainPrinter;
 	}
 
+	public String getCashPassword() {
+		return cashPassword;
+	}
+
+	public void setCashPassword(String cashPassword) {
+		this.cashPassword = cashPassword;
+	}
 }

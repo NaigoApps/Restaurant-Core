@@ -6,6 +6,7 @@
 package com.naigoapps.restaurant.services;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnOpen;
@@ -19,6 +20,7 @@ import com.naigoapps.restaurant.services.websocket.SessionType;
  *
  * @author naigo
  */
+@Transactional
 @ServerEndpoint("/dining-tables")
 public class DiningTableWS {
  

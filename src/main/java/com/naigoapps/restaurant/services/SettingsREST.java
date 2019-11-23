@@ -77,4 +77,10 @@ public class SettingsREST {
         dao.find().setShrinkOrdinations(value.getValue());
     }
     
+    @PUT
+    @Path("cashPassword")
+    public void setCashPassword(WrapperDTO<String> value){
+        dao.find().setCashPassword(value.getValue());
+    }
+    
 }
