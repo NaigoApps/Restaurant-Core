@@ -34,6 +34,16 @@ public class Settings extends BaseEntity {
 	@ManyToOne
 	private Printer mainPrinter;
 
+	private String billHeader;
+
+	public String getBillHeader() {
+		return billHeader;
+	}
+
+	public void setBillHeader(String billHeader) {
+		this.billHeader = billHeader;
+	}
+
 	public String getClientSettings() {
 		return clientSettings;
 	}
@@ -73,11 +83,11 @@ public class Settings extends BaseEntity {
 	public void setFiscalPrinterPort(int fiscalPrinterPort) {
 		this.fiscalPrinterPort = fiscalPrinterPort;
 	}
-	
+
 	public String getFiscalPrinterPath() {
 		return fiscalPrinterPath;
 	}
-	
+
 	public void setFiscalPrinterPath(String fiscalPrinterPath) {
 		this.fiscalPrinterPath = fiscalPrinterPath;
 	}
