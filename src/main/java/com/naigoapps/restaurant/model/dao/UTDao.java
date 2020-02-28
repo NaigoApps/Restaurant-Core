@@ -5,12 +5,15 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
+import org.springframework.stereotype.Repository;
+
 import com.naigoapps.restaurant.model.UTEntry;
 
 /**
  *
  * @author naigo
  */
+@Repository
 public class UTDao extends AbstractDao<UTEntry>{
 
     @Override

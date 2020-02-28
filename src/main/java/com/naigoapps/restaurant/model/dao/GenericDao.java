@@ -5,14 +5,19 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
-import com.naigoapps.restaurant.model.BaseEntity;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Repository;
+
+import com.naigoapps.restaurant.model.BaseEntity;
 
 /**
  *
  * @author naigo
  */
-@Generic
+@Repository
+@Qualifier("generic")
 public class GenericDao extends AbstractDao<BaseEntity> {
 
     @Override

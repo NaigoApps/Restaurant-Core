@@ -16,6 +16,8 @@ public class SettingsDTO extends DTO {
 	private String fiscalPrinterAddress;
 	private int fiscalPrinterPort;
 
+	private String fiscalPrinterPath;
+
 	private String clientSettings;
 
 	private Boolean shrinkOrdinations;
@@ -78,5 +80,13 @@ public class SettingsDTO extends DTO {
 
 	public void setCashPassword(String cashPassword) {
 		this.cashPassword = cashPassword;
+	}
+
+	public String getFiscalPrinterPath() {
+		return fiscalPrinterPath;
+	}
+
+	public void setFiscalPrinterPath(String fiscalPrinterPath) {
+		this.fiscalPrinterPath = fiscalPrinterPath;
 	}
 }

@@ -20,7 +20,7 @@ import com.naigoapps.restaurant.services.dto.OrderExportDTO;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class, uses = { DishMapper.class, PhaseMapper.class, AdditionMapper.class })
+@Mapper(componentModel = "spring", config = MapperConfiguration.class, uses = { DishMapper.class, PhaseMapper.class, AdditionMapper.class })
 public interface OrderMapper {
 
 	public OrderDTO map(Order o);

@@ -5,18 +5,23 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
-import com.naigoapps.restaurant.model.Dish;
 import java.util.List;
-import javax.persistence.Query;
+
+import javax.persistence.TypedQuery;
+
+import org.springframework.stereotype.Repository;
+
+import com.naigoapps.restaurant.model.Dish;
 
 /**
  *
  * @author naigo
  */
+@Repository
 public class DishDao extends AbstractDao<Dish>{
     
     public List<Dish> findByCategory(String category){
-        Query q = getEntityManager().createQuery("FROM Dish d where d.category.uuid = :category", Dish.class);
+    	TypedQuery<Dish> q = getEntityManager().createQuery("FROM Dish d where d.category.uuid = :category", Dish.class);
         q.setParameter("category", category);
         return q.getResultList();
     }

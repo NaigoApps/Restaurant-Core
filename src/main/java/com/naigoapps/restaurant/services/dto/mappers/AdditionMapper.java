@@ -5,16 +5,16 @@
  */
 package com.naigoapps.restaurant.services.dto.mappers;
 
+import org.mapstruct.Mapper;
+
 import com.naigoapps.restaurant.model.Addition;
 import com.naigoapps.restaurant.services.dto.AdditionDTO;
-
-import org.mapstruct.Mapper;
 
 /**
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class)
+@Mapper(componentModel = "spring", config = MapperConfiguration.class)
 public interface AdditionMapper {
     
     public AdditionDTO map(Addition a);

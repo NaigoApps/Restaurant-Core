@@ -14,7 +14,7 @@ import com.naigoapps.restaurant.services.dto.SettingsDTO;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class, uses = { PrinterMapper.class })
+@Mapper(componentModel = "spring", config = MapperConfiguration.class, uses = { PrinterMapper.class })
 public interface SettingsMapper {
 
 	SettingsDTO map(Settings c);

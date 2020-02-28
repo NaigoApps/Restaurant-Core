@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.naigoapps.restaurant.services.fiscal.hydra.Pair;
+import com.naigoapps.restaurant.services.fiscal.hydra.commands.AckRequest;
 import com.naigoapps.restaurant.services.fiscal.hydra.fields.Field;
 import com.naigoapps.restaurant.services.fiscal.hydra.fields.IntegerField;
-import com.naigoapps.restaurant.services.fiscal.hydra.requests.AckRequest;
 
 public abstract class Response {
 
@@ -35,7 +35,9 @@ public abstract class Response {
 	protected byte[] data;
 
 	public void populate(byte[] data) {
-		this.data = Arrays.copyOf(data, data.length);
+		if(data != null){
+			this.data = Arrays.copyOf(data, data.length);
+		}
 	}
 
 	public boolean isAck() {
@@ -49,6 +51,9 @@ public abstract class Response {
 	protected abstract List<Field> extractAdditionalFields(ByteBuffer buffer);
 
 	public IntegerField getReplyCodeField() {
+		if(data == null){
+			return new IntegerField(-1);
+		}
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		byte[] replyCode = new byte[2];
 		buffer.position(1);
@@ -57,6 +62,9 @@ public abstract class Response {
 	}
 
 	public IntegerField getDeviceStatusField() {
+		if(data == null){
+			return new IntegerField(-1);
+		}
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		byte[] deviceStatus = new byte[2];
 		buffer.position(4);
@@ -65,6 +73,9 @@ public abstract class Response {
 	}
 
 	public IntegerField getFiscalStatusField() {
+		if(data == null){
+			return new IntegerField(-1);
+		}
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		byte[] fiscalStatus = new byte[2];
 		buffer.position(7);
@@ -74,6 +85,9 @@ public abstract class Response {
 
 	public List<Field> getFields() {
 		List<Field> fields = new ArrayList<>();
+		if(data == null){
+			return fields;
+		}
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		byte[] replyCode = new byte[2];
 		byte[] deviceStatus = new byte[2];

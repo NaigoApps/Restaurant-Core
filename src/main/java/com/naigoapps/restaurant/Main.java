@@ -5,33 +5,44 @@
  */
 package com.naigoapps.restaurant;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
+import java.io.IOException;
 
-import com.naigoapps.restaurant.model.dao.Generic;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.event.EventListener;
+
 import com.naigoapps.restaurant.model.dao.GenericDao;
 
 /**
  *
  * @author naigo
  */
-@Startup
-@Singleton
+@SpringBootApplication
+@PropertySource("classpath:restaurant.properties")
 public class Main {
+	
+	@Value("${browser}")
+	private String browser;
 
-    @Inject @Generic
+    @Autowired
+    @Qualifier("generic")
     private GenericDao dao;
 
-    @PostConstruct
+    public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
     public void init() {
-//        String chromePath = ResourceBundle.getBundle("properties").getString("CHROME");
-//        
-//        try {
-//            Process p = Runtime.getRuntime().exec(chromePath + " http://localhost:8080/restaurant");
-//        } catch (IOException ex) {
-//            Logger.getLogger(Main.class.getName()).log(Level.WARNING, null, ex);
-//        }
+        try {
+            Process p = Runtime.getRuntime().exec(browser + " http://localhost:8080");
+        } catch (IOException ex) {
+        	ex.printStackTrace();
+        }
     }
 }

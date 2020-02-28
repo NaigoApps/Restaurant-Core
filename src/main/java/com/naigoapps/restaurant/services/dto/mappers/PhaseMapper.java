@@ -14,7 +14,7 @@ import org.mapstruct.Mapper;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class)
+@Mapper(componentModel = "spring", config = MapperConfiguration.class)
 public interface PhaseMapper {
 
     public PhaseDTO map(Phase table);

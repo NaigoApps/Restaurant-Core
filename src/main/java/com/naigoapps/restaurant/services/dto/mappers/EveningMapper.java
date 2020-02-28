@@ -17,7 +17,7 @@ import com.naigoapps.restaurant.services.dto.EveningDTO;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class, uses = {DiningTableMapper.class})
+@Mapper(componentModel = "spring", config = MapperConfiguration.class, uses = {DiningTableMapper.class})
 public abstract class EveningMapper {
 
     public abstract EveningDTO map(Evening evening);

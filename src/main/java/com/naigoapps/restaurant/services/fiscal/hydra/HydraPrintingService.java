@@ -10,25 +10,20 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
-import javax.ws.rs.InternalServerErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.naigoapps.restaurant.model.Settings;
-import com.naigoapps.restaurant.model.dao.SettingsDao;
+import com.naigoapps.restaurant.services.fiscal.hydra.commands.AckRequest;
+import com.naigoapps.restaurant.services.fiscal.hydra.commands.ResetRequest;
+import com.naigoapps.restaurant.services.fiscal.hydra.commands.EnquireRequest;
+import com.naigoapps.restaurant.services.fiscal.hydra.commands.Request;
 import com.naigoapps.restaurant.services.fiscal.hydra.fields.Field;
 import com.naigoapps.restaurant.services.fiscal.hydra.fields.IntegerField;
-import com.naigoapps.restaurant.services.fiscal.hydra.requests.AckRequest;
-import com.naigoapps.restaurant.services.fiscal.hydra.requests.CancelRequest;
-import com.naigoapps.restaurant.services.fiscal.hydra.requests.EnquireRequest;
-import com.naigoapps.restaurant.services.fiscal.hydra.requests.Request;
 import com.naigoapps.restaurant.services.fiscal.hydra.responses.DefaultResponse;
 import com.naigoapps.restaurant.services.fiscal.hydra.responses.Response;
 
@@ -36,83 +31,34 @@ import com.naigoapps.restaurant.services.fiscal.hydra.responses.Response;
  *
  * @author naigo
  */
-@Startup
-@Singleton
+@Component
 public class HydraPrintingService {
-	
-	private static final int DEFAULT_PRINTER_PORT = 9101;
-	private static final String DEFAULT_PRINTER_ADDRESS = "192.168.1.24";
 
 	private DatagramSocket printer;
-	private boolean stopped;
 
 	private byte[] response;
 	private Semaphore sync;
 
-	@Inject
-	private SettingsDao settingsDao;
-	
+	@Autowired
+	private HydraGateway hydra;
+
 	private InetAddress address;
 	private int port;
-	
-	@PostConstruct
-	public void init() {
-		try {
-			Settings settings = settingsDao.find();
-			
-			port = settings.getFiscalPrinterPort();
-			if(port < 1024) {
-				port = DEFAULT_PRINTER_PORT;
-			}
-			
-			String addr = settings.getFiscalPrinterAddress();
-			if(addr == null) {
-				addr = DEFAULT_PRINTER_ADDRESS;
-			}
-			this.address = InetAddress.getByName(addr);
-			
-			sync = new Semaphore(0);
-			printer = new DatagramSocket(port);
-			stopped = false;
-
-			new Thread(() -> {
-				byte[] buffer = new byte[256];
-				while (!stopped) {
-					DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-					try {
-						printer.receive(packet);
-						ByteBuffer bytes = ByteBuffer.allocate(packet.getLength());
-						bytes.put(packet.getData(), 0, packet.getLength());
-						response = bytes.array();
-						sync.release();
-					} catch (IOException e) {
-						throw new InternalServerErrorException("Impossibile comunicare con la stampante fiscale");
-					}
-				}
-			}).start();
-		} catch (IOException ex) {
-			throw new InternalServerErrorException("Impossibile comunicare con la stampante fiscale", ex);
-		}
-	}
 
 	public void sendRequest(Request req, Response res) {
-		Response ackResponse = new DefaultResponse();
-		CancelRequest cancelRequest = new CancelRequest();
-		EnquireRequest startRequest = new EnquireRequest();
-		AckRequest ackRequest = new AckRequest();
-		sendMonoMessage(cancelRequest.getBytes());
-		sendMessage(startRequest.getBytes(), ackResponse);
-		if (ackResponse.isAck()) {
-			sendMessage(wrap(req.getContent()), ackResponse);
-			if (ackResponse.isAck()) {
-				sendMonoMessage(ackRequest.getBytes());
-				handleResponse(res);
-			} else {
-				throw new InternalServerErrorException("Richiesta non eseguita");
-			}
-		} else {
-			throw new InternalServerErrorException("Richiesta non accettata");
-		}
+//		Response ackResponse = new DefaultResponse();
+//		ResetRequest cancelRequest = new ResetRequest();
+//		EnquireRequest startRequest = new EnquireRequest();
+//		AckRequest ackRequest = new AckRequest();
+
+//		hydra.send(wrap(cancelRequest.getContent()));
+
+//		hydra.send(wrap(startRequest.getContent()));
+//
+//		hydra.send(wrap(req.getContent()));
+//
+//		hydra.send(wrap(ackRequest.getContent()));
+
 	}
 
 	private void sendMonoMessage(byte[] message) {
@@ -120,7 +66,7 @@ public class HydraPrintingService {
 		try {
 			printer.send(packet);
 		} catch (IOException ex) {
-			throw new InternalServerErrorException("Impossibile comunicare con la stampante");
+			throw new RuntimeException("Impossibile comunicare con la stampante");
 		}
 	}
 
@@ -130,7 +76,7 @@ public class HydraPrintingService {
 			printer.send(packet);
 			handleResponse(res);
 		} catch (IOException ex) {
-			throw new InternalServerErrorException("Impossibile comunicare con la stampante");
+			throw new RuntimeException("Impossibile comunicare con la stampante");
 		}
 	}
 
@@ -143,21 +89,21 @@ public class HydraPrintingService {
 		try {
 			boolean result = sync.tryAcquire(5, TimeUnit.SECONDS);
 			if (!result) {
-				throw new InternalServerErrorException("Timeout");
+				throw new RuntimeException("Timeout");
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new InternalServerErrorException("Error", e);
+			throw new RuntimeException("Error", e);
 		}
 	}
 
-	private byte[] wrap(List<Field> fields) {
+	private String wrap(List<Field> fields) {
 		int seps = fields.size();
 		int size = fields.stream().mapToInt(Field::size).sum();
 		ByteBuffer bb = ByteBuffer.allocate(seps + size + 4);
 		int index = 1;
 		bb.position(index);
-		for(Field f : fields) {
+		for (Field f : fields) {
 			bb.put(f.value());
 			index += f.size();
 			bb.position(index);
@@ -172,17 +118,13 @@ public class HydraPrintingService {
 		}
 		checksum %= 100;
 		IntegerField checksumField = new IntegerField(checksum, 2);
-		
+
 		bb.position(0);
 		bb.put(Codes.PRE);
 		bb.position(1 + seps + size);
 		bb.put(checksumField.value());
 		bb.put(Codes.POST);
-		return bb.array();
+		return new String(bb.array(), StandardCharsets.US_ASCII);
 	}
 
-	@PreDestroy
-	public void destroy() {
-		stopped = true;
-	}
 }

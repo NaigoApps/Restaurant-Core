@@ -19,7 +19,7 @@ import com.naigoapps.restaurant.services.dto.DiningTableSkeletonDTO;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class, uses = { BillMapper.class, WaiterMapper.class, PhaseMapper.class,
+@Mapper(componentModel = "spring", config = MapperConfiguration.class, uses = { BillMapper.class, WaiterMapper.class, PhaseMapper.class,
 		RestaurantTableMapper.class, OrdinationMapper.class })
 public abstract class DiningTableMapper {
 

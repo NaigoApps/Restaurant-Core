@@ -7,9 +7,10 @@ package com.naigoapps.restaurant.services.dto.mappers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,19 +26,19 @@ import com.naigoapps.restaurant.services.dto.PhaseOrdersDTO;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class, uses = { OrderMapper.class })
+@Mapper(componentModel = "spring", config = MapperConfiguration.class, uses = { OrderMapper.class })
 public abstract class OrdinationMapper {
 
-	@Inject
+	@Autowired
 	private PhaseMapper pMapper;
 
-	@Inject
+	@Autowired
 	private AdditionMapper aMapper;
 
-	@Inject
+	@Autowired
 	private DishMapper dMapper;
 
-	@Inject
+	@Autowired
 	private OrderMapper oMapper;
 
 	public abstract OrdinationExportDTO mapForExport(Ordination a);
@@ -50,6 +51,7 @@ public abstract class OrdinationMapper {
 		List<PhaseOrdersDTO> result = new ArrayList<>();
 		orders.stream().collect(Collectors.groupingBy(Order::getPhase)).forEach((phase, phaseOrders) -> {
 			PhaseOrdersDTO po = new PhaseOrdersDTO();
+			po.setUuid(phase.getUuid());
 			po.setPhase(pMapper.map(phase));
 			po.setOrders(group(phaseOrders));
 			result.add(po);
@@ -70,6 +72,7 @@ public abstract class OrdinationMapper {
 			}
 			if (!found) {
 				OrdersGroupDTO groupDto = new OrdersGroupDTO();
+				groupDto.setUuid(UUID.randomUUID().toString());
 				groupDto.setPhaseName(order.getPhase().getName());
 				groupDto.setDish(dMapper.map(order.getDish()));
 				groupDto.setAdditions(order.getAdditions().stream().map(aMapper::map).collect(Collectors.toList()));

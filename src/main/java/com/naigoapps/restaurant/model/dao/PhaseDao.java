@@ -5,12 +5,15 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
+import org.springframework.stereotype.Repository;
+
 import com.naigoapps.restaurant.model.Phase;
 
 /**
  *
  * @author naigo
  */
+@Repository
 public class PhaseDao extends AbstractDao<Phase> {
 
     @Override

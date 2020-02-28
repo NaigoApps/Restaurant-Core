@@ -14,7 +14,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import com.naigoapps.restaurant.model.BaseEntity;
 
@@ -23,6 +24,7 @@ import com.naigoapps.restaurant.model.BaseEntity;
  * @author naigo
  * @param <E>
  */
+
 public abstract class AbstractDao<E extends BaseEntity> implements Dao<E>{
 
     @PersistenceContext(name = "restaurant-pu")
@@ -64,7 +66,7 @@ public abstract class AbstractDao<E extends BaseEntity> implements Dao<E>{
         if (getOrderByClause() != null) {
             query += " ORDER BY " + getOrderByClause();
         }
-        Query q = getEntityManager().createQuery(query, getEntityClass());
+        TypedQuery<E> q = getEntityManager().createQuery(query, getEntityClass());
         return q.getResultList();
     }
 
@@ -74,7 +76,7 @@ public abstract class AbstractDao<E extends BaseEntity> implements Dao<E>{
         if (getOrderByClause() != null) {
             query += " ORDER BY " + getOrderByClause();
         }
-        Query q = getEntityManager().createQuery(query, getEntityClass());
+        TypedQuery<E> q = getEntityManager().createQuery(query, getEntityClass());
         return q.getResultList();
     }
 

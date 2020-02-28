@@ -5,6 +5,8 @@
  */
 package com.naigoapps.restaurant.services.dto;
 
+import java.util.UUID;
+
 /**
  *
  * @author naigo
@@ -14,7 +16,7 @@ public class DTO {
     private String uuid;
 
     public DTO() {
-        this.uuid = null;
+        this.uuid = UUID.randomUUID().toString();
     }
 
     public DTO(String uuid) {

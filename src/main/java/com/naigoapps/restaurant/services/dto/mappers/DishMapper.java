@@ -15,7 +15,7 @@ import org.mapstruct.Mapping;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class)
+@Mapper(componentModel = "spring", config = MapperConfiguration.class)
 public interface DishMapper {
     
 	@Mapping(target = "color", source="category.color")

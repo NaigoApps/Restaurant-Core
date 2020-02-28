@@ -14,7 +14,7 @@ import com.naigoapps.restaurant.services.dto.CustomerDTO;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class)
+@Mapper(componentModel = "spring", config = MapperConfiguration.class)
 public interface CustomerMapper {
 
 	CustomerDTO map(Customer c);

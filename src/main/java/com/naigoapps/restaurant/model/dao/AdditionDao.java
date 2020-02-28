@@ -7,12 +7,15 @@ package com.naigoapps.restaurant.model.dao;
 
 import java.util.List;
 
+import org.springframework.stereotype.Repository;
+
 import com.naigoapps.restaurant.model.Addition;
 
 /**
  *
  * @author naigo
  */
+@Repository
 public class AdditionDao extends AbstractDao<Addition>{
 
     @Override

@@ -7,15 +7,17 @@ package com.naigoapps.restaurant.model.dao;
 
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.model.Settings;
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author naigo
  */
+@Repository
 public class PrinterDao extends AbstractDao<Printer> {
 
-    @Inject
+    @Autowired
     private SettingsDao sDao;
 
     public Printer findMainPrinter(){

@@ -11,10 +11,13 @@ import java.time.LocalDate;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import org.springframework.stereotype.Repository;
+
 /**
  *
  * @author naigo
  */
+@Repository
 public class BillDao extends AbstractDao<Bill> {
 
     private static final String PROGRESSIVE_SELECT = "SELECT max(b.progressive) FROM Bill b WHERE ";

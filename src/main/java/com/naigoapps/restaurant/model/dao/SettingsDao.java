@@ -5,31 +5,29 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import com.naigoapps.restaurant.model.Settings;
-import com.naigoapps.restaurant.model.builders.SettingsBuilder;
-import java.util.List;
-import javax.persistence.Query;
 
 /**
  *
  * @author naigo
  */
-public class SettingsDao extends AbstractDao<Settings> {
+@Repository
+public interface SettingsDao extends JpaRepository<Settings, Long> {
 
-    public Settings find() {
-        Query q = getEntityManager().createQuery("FROM Settings s", Settings.class);
-        List<Settings> settings = q.getResultList();
-        if (settings.isEmpty()) {
-            Settings s = new SettingsBuilder().getContent();
-            getEntityManager().persist(s);
-            return s;
-        }
-        return settings.get(0);
+//    public SettingsDao(EntityManager em) {
+//		super(Settings.class, em);
+//	}
+//
+	default Settings find() {
+		return findAll().get(0);
     }
-
-    @Override
-    public Class<Settings> getEntityClass() {
-        return Settings.class;
-    }
+//
+//    @Override
+//    public Class<Settings> getEntityClass() {
+//        return Settings.class;
+//    }
 
 }

@@ -5,12 +5,15 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
+import org.springframework.stereotype.Repository;
+
 import com.naigoapps.restaurant.model.Customer;
 
 /**
  *
  * @author naigo
  */
+@Repository
 public class CustomerDao extends AbstractDao<Customer> {
 
     @Override

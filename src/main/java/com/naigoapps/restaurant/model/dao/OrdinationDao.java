@@ -10,10 +10,13 @@ import com.naigoapps.restaurant.model.Ordination;
 import java.util.List;
 import javax.persistence.TypedQuery;
 
+import org.springframework.stereotype.Repository;
+
 /**
  *
  * @author naigo
  */
+@Repository
 public class OrdinationDao extends AbstractDao<Ordination> {
 
     public List<Ordination> findByDiningTable(String uuid) {

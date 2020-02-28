@@ -5,21 +5,26 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+
+import org.springframework.stereotype.Repository;
+
 import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.model.Order;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
 /**
  *
  * @author naigo
  */
+@Repository
 public class OrderDao extends AbstractDao<Order> {
 
     public List<Order> findByOrdination(String uuid) {
         EntityManager em = getEntityManager();
-        Query q = em.createQuery("FROM Order rd where rd.ordination.uuid = :ordination", Order.class)
+        TypedQuery<Order> q = em.createQuery("FROM Order rd where rd.ordination.uuid = :ordination", Order.class)
                 .setParameter("ordination", uuid);
         List<Order> orders = q.getResultList();
         return orders;

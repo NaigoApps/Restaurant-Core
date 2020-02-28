@@ -20,7 +20,7 @@ import com.naigoapps.restaurant.services.dto.BillExportDTO;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class, uses = { CustomerMapper.class, OrdinationMapper.class, OrderMapper.class })
+@Mapper(componentModel = "spring", config = MapperConfiguration.class, uses = { CustomerMapper.class, OrdinationMapper.class, OrderMapper.class })
 public interface BillMapper {
 
 	@Mapping(source = "estimatedTotal", target = "estimatedTotal")

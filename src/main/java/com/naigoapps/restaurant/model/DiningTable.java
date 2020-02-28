@@ -14,7 +14,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
- *
  * @author naigo
  */
 @Entity
@@ -62,7 +61,7 @@ public class DiningTable extends BaseEntity {
     public List<Order> getOrders() {
         return collectOrders();
     }
-    
+
     private List<Order> collectOrders() {
         List<Order> result = new ArrayList<>();
         ordinations.forEach(ordination -> result.addAll(ordination.getOrders()));
@@ -119,7 +118,7 @@ public class DiningTable extends BaseEntity {
     }
 
     public void setEvening(Evening evening) {
-        if(this.evening != null && evening == null){
+        if (this.evening != null && evening == null) {
             this.evening.removeDiningTable(this);
         }
         this.evening = evening;
@@ -131,8 +130,8 @@ public class DiningTable extends BaseEntity {
     public float getTotalPrice() {
         return coverCharges * evening.getCoverCharge()
                 + collectOrders().stream()
-                        .map(Order::getPrice)
-                        .reduce(0.0f, (p1, p2) -> p1 + p2);
+                .map(Order::getPrice)
+                .reduce(0.0f, (p1, p2) -> p1 + p2);
     }
 
     public List<Bill> getBills() {
@@ -161,21 +160,27 @@ public class DiningTable extends BaseEntity {
         this.status = status;
     }
 
-    public void updateStatus(){
-        if(this.bills.isEmpty()){
+    public void updateStatus() {
+        if (this.bills.isEmpty()) {
             this.status = DiningTableStatus.OPEN;
-        }else{
+        } else {
             this.status = DiningTableStatus.CLOSING;
             if (getOrders().stream()
-                    .noneMatch(order -> order.getBill() == null || 
+                    .noneMatch(order -> order.getBill() == null ||
                             order.getBill().getPrintDate() == null)) {
                 this.status = DiningTableStatus.CLOSED;
             }
         }
     }
-    
+
     public boolean canBeClosed() {
-    	return bills.stream().mapToInt(Bill::getCoverCharges).sum() == coverCharges &&
-    		collectOrders().stream().allMatch(o -> o.getBill() != null);
+        return remainingCoverCharges() == 0 &&
+                collectOrders().stream().allMatch(o -> o.getBill() != null);
+    }
+
+    public int remainingCoverCharges() {
+        return coverCharges - bills.stream()
+                .mapToInt(Bill::getCoverCharges)
+                .sum();
     }
 }

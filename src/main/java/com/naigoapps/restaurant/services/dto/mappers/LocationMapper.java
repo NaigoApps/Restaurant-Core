@@ -14,7 +14,7 @@ import com.naigoapps.restaurant.services.dto.LocationDTO;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class, uses = { PrinterMapper.class })
+@Mapper(componentModel = "spring", config = MapperConfiguration.class, uses = { PrinterMapper.class })
 public interface LocationMapper {
 
 	LocationDTO map(Location l);

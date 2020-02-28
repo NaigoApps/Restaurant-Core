@@ -5,21 +5,26 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
-import com.naigoapps.restaurant.model.DiningTable;
 import java.time.LocalDate;
 import java.util.List;
+
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+
+import org.springframework.stereotype.Repository;
+
+import com.naigoapps.restaurant.model.DiningTable;
 
 /**
  *
  * @author naigo
  */
+@Repository
 public class DiningTableDao extends AbstractDao<DiningTable> {
 
     public List<DiningTable> findByDate(LocalDate date) {
         EntityManager em = getEntityManager();
-        Query q = em.createQuery("FROM DiningTable dt where DATE(dt.date) = :dateParam", DiningTable.class)
+        TypedQuery<DiningTable> q = em.createQuery("FROM DiningTable dt where DATE(dt.date) = :dateParam", DiningTable.class)
                 .setParameter("dateParam", date);
         List<DiningTable> tables = q.getResultList();
         return tables;
@@ -27,7 +32,7 @@ public class DiningTableDao extends AbstractDao<DiningTable> {
 
     public List<DiningTable> findByWaiter(String wUuid) {
         EntityManager em = getEntityManager();
-        Query q = em.createQuery("FROM DiningTable dt where dt.waiter.uuid = :wParam", DiningTable.class)
+        TypedQuery<DiningTable> q = em.createQuery("FROM DiningTable dt where dt.waiter.uuid = :wParam", DiningTable.class)
                 .setParameter("wParam", wUuid);
         List<DiningTable> tables = q.getResultList();
         return tables;

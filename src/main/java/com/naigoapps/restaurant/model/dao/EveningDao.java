@@ -10,10 +10,13 @@ import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.TypedQuery;
 
+import org.springframework.stereotype.Repository;
+
 /**
  *
  * @author naigo
  */
+@Repository
 public class EveningDao extends AbstractDao<Evening> {
 
     public Evening findByDate(LocalDate date) {

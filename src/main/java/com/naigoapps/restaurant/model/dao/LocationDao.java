@@ -10,10 +10,13 @@ import com.naigoapps.restaurant.model.Printer;
 import java.util.List;
 import javax.persistence.TypedQuery;
 
+import org.springframework.stereotype.Repository;
+
 /**
  *
  * @author naigo
  */
+@Repository
 public class LocationDao extends AbstractDao<Location> {
 
     public List<Location> findByPrinter(Printer p) {

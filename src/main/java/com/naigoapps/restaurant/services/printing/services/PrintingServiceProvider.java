@@ -6,14 +6,13 @@
 package com.naigoapps.restaurant.services.printing.services;
 
 import com.naigoapps.restaurant.model.Printer;
-import java.io.IOException;
 
 /**
  *
  * @author naigo
  */
 public class PrintingServiceProvider {
-    public static PrintingService get(Printer p) throws IOException{
-        return new ThermalPrintingService(p);
-    }
+	public static PrintingService get(Printer p) {
+		return new ThermalPrintingService(p);
+	}
 }

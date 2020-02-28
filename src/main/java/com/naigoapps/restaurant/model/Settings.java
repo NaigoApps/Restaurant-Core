@@ -21,6 +21,7 @@ public class Settings extends BaseEntity {
 	private float defaultCoverCharge;
 
 	private String fiscalPrinterAddress;
+	private String fiscalPrinterPath;
 	private int fiscalPrinterPort;
 
 	@Lob
@@ -71,6 +72,14 @@ public class Settings extends BaseEntity {
 
 	public void setFiscalPrinterPort(int fiscalPrinterPort) {
 		this.fiscalPrinterPort = fiscalPrinterPort;
+	}
+	
+	public String getFiscalPrinterPath() {
+		return fiscalPrinterPath;
+	}
+	
+	public void setFiscalPrinterPath(String fiscalPrinterPath) {
+		this.fiscalPrinterPath = fiscalPrinterPath;
 	}
 
 	public Printer getMainPrinter() {

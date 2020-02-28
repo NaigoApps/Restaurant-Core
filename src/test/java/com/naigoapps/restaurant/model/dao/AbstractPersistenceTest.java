@@ -5,14 +5,17 @@
  */
 package com.naigoapps.restaurant.model.dao;
 
-import com.naigoapps.restaurant.utils.WeldTestRunner;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import com.naigoapps.restaurant.utils.WeldTestRunner;
 
 /**
  *
@@ -25,23 +28,23 @@ public abstract class AbstractPersistenceTest {
     
     private EntityManager entityManager;
     
-    @Inject
-    @Generic
+    @Autowired
+    @Qualifier("generic")
     protected GenericDao genericDao;
     
-    @Inject
+    @Autowired
     protected AdditionDao additionDao;
     
-    @Inject
+    @Autowired
     protected CategoryDao categoryDao;
     
-    @Inject
+    @Autowired
     protected DishDao dishDao;
     
-    @Inject
+    @Autowired
     protected WaiterDao waiterDao;
     
-    @Inject
+    @Autowired
     protected BillDao billDao;
     
     @Before

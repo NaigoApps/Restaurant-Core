@@ -5,7 +5,7 @@
  */
 package com.naigoapps.restaurant.services.dto.mappers;
 
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -22,10 +22,10 @@ import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
  *
  * @author naigo
  */
-@Mapper(config = MapperConfiguration.class)
+@Mapper(componentModel = "spring", config = MapperConfiguration.class)
 public abstract class RestaurantTableMapper {
 
-	@Inject
+	@Autowired
 	private EveningManager eveningManager;
 
 	@Mapping(target = "busy", ignore = true)

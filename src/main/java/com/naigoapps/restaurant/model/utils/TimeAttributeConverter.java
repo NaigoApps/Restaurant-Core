@@ -8,13 +8,12 @@ package com.naigoapps.restaurant.model.utils;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 
 /**
  *
  * @author naigo
  */
-@Converter(autoApply = true)
+//@Converter(autoApply = true)
 public class TimeAttributeConverter implements AttributeConverter<LocalDateTime, Timestamp> {
 	
     @Override
