@@ -8,14 +8,17 @@ package com.naigoapps.restaurant.services.websocket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  *
  * @author naigo
  */
-@Component
+@Controller
+@RequestMapping("/")
 public class DiningTableWS {
-	
+
     @Autowired
     private SimpMessagingTemplate template;
 

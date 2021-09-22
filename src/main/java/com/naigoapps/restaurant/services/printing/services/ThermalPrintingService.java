@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 
 import com.naigoapps.restaurant.model.Printer;
 import com.naigoapps.restaurant.services.printing.ObjectPrinter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -46,16 +47,19 @@ public class ThermalPrintingService implements PrintingService {
 
     @Override
     public ThermalPrintingService printLeft(String line) throws IOException {
+        line = StringUtils.abbreviate(line, printer.getLineCharacters());
         return align(Align.LEFT).printString(line).lineFeed();
     }
 
     @Override
     public ThermalPrintingService printCenter(String line) throws IOException {
+        line = StringUtils.abbreviate(line, printer.getLineCharacters());
         return align(Align.CENTER).printString(line).lineFeed();
     }
 
     @Override
     public ThermalPrintingService printRight(String line) throws IOException {
+        line = StringUtils.abbreviate(line, printer.getLineCharacters());
         return align(Align.RIGHT).printString(line).lineFeed();
     }
 
@@ -119,7 +123,7 @@ public class ThermalPrintingService implements PrintingService {
     public void doPrint() throws IOException {
     	InetAddress address = InetAddress.getByName(printer.getAddress());
     	int port = Integer.parseInt(printer.getPort());
-    	try(Socket socket = new Socket(address, port)){    		
+    	try(Socket socket = new Socket(address, port)){
     		socket.setSoTimeout(1000);
     		OutputStream toPrinter = socket.getOutputStream();
     		toPrinter.write(text.toByteArray());

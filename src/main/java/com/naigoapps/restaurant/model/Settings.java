@@ -34,6 +34,7 @@ public class Settings extends BaseEntity {
 	@ManyToOne
 	private Printer mainPrinter;
 
+	@Lob
 	private String billHeader;
 
 	public String getBillHeader() {

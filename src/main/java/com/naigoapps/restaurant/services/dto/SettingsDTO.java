@@ -26,6 +26,16 @@ public class SettingsDTO extends DTO {
 
 	private String cashPassword;
 
+	private String billHeader;
+
+	public String getBillHeader() {
+		return billHeader;
+	}
+
+	public void setBillHeader(String billHeader) {
+		this.billHeader = billHeader;
+	}
+
 	public String getClientSettings() {
 		return clientSettings;
 	}

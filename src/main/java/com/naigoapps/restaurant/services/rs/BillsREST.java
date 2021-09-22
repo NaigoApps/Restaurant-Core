@@ -53,6 +53,9 @@ public class BillsREST {
     private BillDao dao;
 
     @Autowired
+    private SettingsDao sDao;
+
+    @Autowired
     private CustomerDao cDao;
 
     @Autowired
@@ -180,7 +183,11 @@ public class BillsREST {
             if (mainPrinter != null) {
                 try {
                     PrintingService service = PrintingServiceProvider.get(mainPrinter);
-                    service.accept(new BillPrinter(Boolean.TRUE.equals(generic)), bill, LocalDateTime.now()).lf(3).cut()
+                    service.accept(new BillPrinter(Boolean.TRUE.equals(generic), sDao.find().getBillHeader()),
+                            bill,
+                            LocalDateTime.now())
+                            .lf(3)
+                            .cut()
                             .doPrint();
                     mapper.map(bill);
                 } catch (IOException ex) {

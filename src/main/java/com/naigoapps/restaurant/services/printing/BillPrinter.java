@@ -8,26 +8,29 @@ package com.naigoapps.restaurant.services.printing;
 import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.Customer;
 import com.naigoapps.restaurant.services.printing.services.PrintingService;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- *
  * @author naigo
  */
 public class BillPrinter implements ObjectPrinter<Bill> {
 
     private boolean generic;
     private Customer customer;
+    private String headers;
 
-    public BillPrinter(boolean generic, Customer c) {
+    public BillPrinter(boolean generic, Customer c, String headers) {
         this.generic = generic;
         this.customer = c;
+        this.headers = headers;
     }
 
-    public BillPrinter(boolean generic) {
-        this(generic, null);
+    public BillPrinter(boolean generic, String headers) {
+        this(generic, null, headers);
     }
 
     @Override
@@ -35,6 +38,16 @@ public class BillPrinter implements ObjectPrinter<Bill> {
 
         ps.size(PrintingService.Size.STANDARD)
                 .lf(3);
+
+        if(StringUtils.isNotEmpty(headers)){
+            String[] split = headers.split("\n");
+            for(String s : split){
+                ps.printCenter(StringUtils.abbreviate(s, ps.getPrinter().getLineCharacters()));
+            }
+        }
+
+        ps.lf(1);
+
         if (obj.getPrintTime() != null) {
             if (customer != null) {
                 ps.printCenter("FATTURA " + obj.getProgressive());
@@ -49,9 +62,9 @@ public class BillPrinter implements ObjectPrinter<Bill> {
                 .printCenter(time.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")))
                 .lf();
 
-        if(generic){
+        if (generic) {
             ps.accept(new GenericReviewPrinter(), obj, time);
-        }else{
+        } else {
             ps.accept(new CategoriesReviewPrinter(), obj, time);
         }
 
@@ -76,6 +89,6 @@ public class BillPrinter implements ObjectPrinter<Bill> {
     public boolean isGeneric() {
         return generic;
     }
-    
-    
+
+
 }
