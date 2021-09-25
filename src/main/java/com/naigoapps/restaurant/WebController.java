@@ -5,7 +5,6 @@
  */
 package com.naigoapps.restaurant;
 
-import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -13,20 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author naigo
  */
 @Controller
-public class WebController implements ErrorController {
+public class WebController {
 
-    @RequestMapping(value = "/restaurant")
+    @RequestMapping(value = "/")
     public String index() {
         return "index";
     }
 
-    @RequestMapping("/error")
-    public String pages() {
-        return "forward:/";
-    }
-
-    @Override
-    public String getErrorPath() {
-        return "/error";
-    }
 }
