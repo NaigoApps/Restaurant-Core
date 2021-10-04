@@ -180,14 +180,14 @@
                         <executions>
                             <execution>
                                 <id>clean-webapp</id>
-                                <phase>process-resources</phase>
+                                <phase>initialize</phase>
                                 <goals>
                                     <goal>clean</goal>
                                 </goals>
                                 <configuration>
                                     <filesets>
                                         <fileset>
-                                            <directory>${basedir}/src/main/resources/templates</directory>
+                                            <directory>${basedir}/src/main/resources/static</directory>
                                         </fileset>
                                     </filesets>
                                 </configuration>
@@ -204,7 +204,7 @@
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${basedir}/src/main/resources/templates</outputDirectory>
+                                    <outputDirectory>${basedir}/src/main/resources/static</outputDirectory>
                                     <resources>
                                         <resource>
                                             <directory>src/main/webapp/build</directory>

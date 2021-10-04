@@ -6,14 +6,15 @@
 package com.naigoapps.restaurant.services.rs;
 
 import com.naigoapps.restaurant.model.dao.StatisticsDao;
+import com.naigoapps.restaurant.services.StatisticsService;
 import com.naigoapps.restaurant.services.dto.StatisticsDTO;
+import com.naigoapps.restaurant.services.printing.services.PrintingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.print.PrintException;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -26,14 +27,14 @@ import java.time.format.DateTimeFormatter;
 public class StatisticsREST {
 
     @Autowired
-    private StatisticsDao dao;
+    private StatisticsService service;
 
     @GetMapping("dishes-amount/{from}/{to}")
     public StatisticsDTO getMostSoldDishes(
             @PathVariable("from") String from,
             @PathVariable("to") String to
     ) {
-        return dao.getMostSoldDishes(toDate(from), toDate(to));
+        return service.getMostSoldDishes(toDate(from), toDate(to));
     }
 
     @GetMapping("dishes-profit/{from}/{to}")
@@ -41,7 +42,7 @@ public class StatisticsREST {
             @PathVariable("from") String from,
             @PathVariable("to") String to
     ) {
-        return dao.getMostProfitableDishes(toDate(from), toDate(to));
+        return service.getMostProfitableDishes(toDate(from), toDate(to));
     }
 
     @GetMapping("categories-amount/{from}/{to}")
@@ -49,7 +50,7 @@ public class StatisticsREST {
             @PathVariable("from") String from,
             @PathVariable("to") String to
     ) {
-        return dao.getMostSoldCategories(toDate(from), toDate(to));
+        return service.getMostSoldCategories(toDate(from), toDate(to));
     }
 
     @GetMapping("categories-profit/{from}/{to}")
@@ -57,7 +58,15 @@ public class StatisticsREST {
             @PathVariable("from") String from,
             @PathVariable("to") String to
     ) {
-        return dao.getMostProfitableCategories(toDate(from), toDate(to));
+        return service.getMostProfitableCategories(toDate(from), toDate(to));
+    }
+
+    @GetMapping("print/{from}/{to}")
+    public void printStatistics(
+            @PathVariable("from") String from,
+            @PathVariable("to") String to
+    ) throws PrintException, IOException {
+        service.printStatistics(toDate(from), toDate(to));
     }
 
     private LocalDate toDate(@PathVariable("from") String from) {

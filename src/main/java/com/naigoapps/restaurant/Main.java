@@ -25,7 +25,7 @@ import com.naigoapps.restaurant.model.dao.GenericDao;
 @SpringBootApplication
 @PropertySource("classpath:restaurant.properties")
 public class Main {
-	
+
 	@Value("${browser}")
 	private String browser;
 

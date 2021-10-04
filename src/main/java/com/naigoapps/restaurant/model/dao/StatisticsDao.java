@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import java.sql.Date;
 import java.time.LocalDate;
@@ -21,8 +22,8 @@ public class StatisticsDao {
     @PersistenceContext(name = "restaurant-pu")
     private EntityManager em;
 
-    public StatisticsDTO getMostSoldDishes(LocalDate from, LocalDate to) {
-        List<Object> resultList = (List<Object>) em.createQuery("SELECT " +
+    public StatisticsDTO getMostSoldDishes(LocalDate from, LocalDate to, int limit) {
+        Query query = em.createQuery("SELECT " +
                         "d.name as name, count(d.id) as value " +
                         "FROM Dish d, Order o, Ordination ot, DiningTable dt " +
                         "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
@@ -30,18 +31,24 @@ public class StatisticsDao {
                         "GROUP BY d.id " +
                         "ORDER BY value DESC")
                 .setParameter(1, Date.valueOf(from))
-                .setParameter(2, Date.valueOf(to))
-                .setMaxResults(5)
-                .getResultList();
+                .setParameter(2, Date.valueOf(to));
+        return getStatisticsDTO(from, to, limit, query, v -> Double.valueOf((Long) v));
+    }
+
+    private StatisticsDTO getStatisticsDTO(LocalDate from, LocalDate to, int limit, Query query, Function<Object, Double> doubleSupplier) {
+        if (limit > 0) {
+            query.setMaxResults(limit);
+        }
+        List<Object> resultList = (List<Object>) query.getResultList();
         StatisticsDTO result = new StatisticsDTO();
         result.setFrom(from);
         result.setTo(to);
-        result.setEntries(parseEntries(resultList, v -> Double.valueOf((Long) v)));
+        result.setEntries(parseEntries(resultList, doubleSupplier));
         return result;
     }
 
-    public StatisticsDTO getMostProfitableDishes(LocalDate from, LocalDate to) {
-        List<Object> resultList = (List<Object>) em.createQuery("SELECT " +
+    public StatisticsDTO getMostProfitableDishes(LocalDate from, LocalDate to, int limit) {
+        Query query = em.createQuery("SELECT " +
                         "d.name as name, sum(o.price) as value " +
                         "FROM Dish d, Order o, Ordination ot, DiningTable dt " +
                         "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
@@ -49,18 +56,12 @@ public class StatisticsDao {
                         "GROUP BY d.id " +
                         "ORDER BY value DESC")
                 .setParameter(1, Date.valueOf(from))
-                .setParameter(2, Date.valueOf(to))
-                .setMaxResults(5)
-                .getResultList();
-        StatisticsDTO result = new StatisticsDTO();
-        result.setFrom(from);
-        result.setTo(to);
-        result.setEntries(parseEntries(resultList, v -> (Double) v));
-        return result;
+                .setParameter(2, Date.valueOf(to));
+        return getStatisticsDTO(from, to, limit, query, v -> (Double) v);
     }
 
-    public StatisticsDTO getMostSoldCategories(LocalDate from, LocalDate to) {
-        List<Object> resultList = (List<Object>) em.createQuery("SELECT " +
+    public StatisticsDTO getMostSoldCategories(LocalDate from, LocalDate to, int limit) {
+        Query query = em.createQuery("SELECT " +
                         "c.name as name, count(c.id) as value " +
                         "FROM Category c, Dish d, Order o, Ordination ot, DiningTable dt " +
                         "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
@@ -68,18 +69,12 @@ public class StatisticsDao {
                         "GROUP BY c.id " +
                         "ORDER BY value DESC")
                 .setParameter(1, Date.valueOf(from))
-                .setParameter(2, Date.valueOf(to))
-                .setMaxResults(5)
-                .getResultList();
-        StatisticsDTO result = new StatisticsDTO();
-        result.setFrom(from);
-        result.setTo(to);
-        result.setEntries(parseEntries(resultList, v -> Double.valueOf((Long) v)));
-        return result;
+                .setParameter(2, Date.valueOf(to));
+        return getStatisticsDTO(from, to, limit, query, v -> Double.valueOf((Long) v));
     }
 
-    public StatisticsDTO getMostProfitableCategories(LocalDate from, LocalDate to) {
-        List<Object> resultList = (List<Object>) em.createQuery("SELECT " +
+    public StatisticsDTO getMostProfitableCategories(LocalDate from, LocalDate to, int limit) {
+        Query query = em.createQuery("SELECT " +
                         "c.name as name, sum(o.price) as value " +
                         "FROM Category c, Dish d, Order o, Ordination ot, DiningTable dt " +
                         "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
@@ -87,14 +82,8 @@ public class StatisticsDao {
                         "GROUP BY c.id " +
                         "ORDER BY value DESC")
                 .setParameter(1, Date.valueOf(from))
-                .setParameter(2, Date.valueOf(to))
-                .setMaxResults(5)
-                .getResultList();
-        StatisticsDTO result = new StatisticsDTO();
-        result.setFrom(from);
-        result.setTo(to);
-        result.setEntries(parseEntries(resultList, v -> (Double) v));
-        return result;
+                .setParameter(2, Date.valueOf(to));
+        return getStatisticsDTO(from, to, limit, query, v -> (Double) v);
     }
 
     private List<StatisticsEntryDTO> parseEntries(List<Object> resultList, Function<Object, Double> valueSupplier) {
@@ -105,5 +94,16 @@ public class StatisticsDao {
             dto.setValue(valueSupplier.apply(row[1]));
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    public Double getProfit(LocalDate from, LocalDate to) {
+        Query query = em.createQuery("SELECT " +
+                        "sum(o.price) as value " +
+                        "FROM Order o, Ordination ot, DiningTable dt " +
+                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
+                        "o.ordination = ot AND ot.table = dt")
+                .setParameter(1, Date.valueOf(from))
+                .setParameter(2, Date.valueOf(to));
+        return (Double) query.getSingleResult();
     }
 }
