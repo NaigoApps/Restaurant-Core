@@ -29,36 +29,20 @@ public class StatisticsREST {
     @Autowired
     private StatisticsService service;
 
-    @GetMapping("dishes-amount/{from}/{to}")
-    public StatisticsDTO getMostSoldDishes(
+    @GetMapping("dishes-profit/{from}/{to}")
+    public StatisticsDTO getMostProfitableDishes(
             @PathVariable("from") String from,
             @PathVariable("to") String to
     ) {
         return service.getMostSoldDishes(toDate(from), toDate(to));
     }
 
-    @GetMapping("dishes-profit/{from}/{to}")
-    public StatisticsDTO getMostProfitableDishes(
-            @PathVariable("from") String from,
-            @PathVariable("to") String to
-    ) {
-        return service.getMostProfitableDishes(toDate(from), toDate(to));
-    }
-
-    @GetMapping("categories-amount/{from}/{to}")
+    @GetMapping("categories-profit/{from}/{to}")
     public StatisticsDTO getMostSoldCategories(
             @PathVariable("from") String from,
             @PathVariable("to") String to
     ) {
         return service.getMostSoldCategories(toDate(from), toDate(to));
-    }
-
-    @GetMapping("categories-profit/{from}/{to}")
-    public StatisticsDTO getMostProfitableCategories(
-            @PathVariable("from") String from,
-            @PathVariable("to") String to
-    ) {
-        return service.getMostProfitableCategories(toDate(from), toDate(to));
     }
 
     @GetMapping("print/{from}/{to}")

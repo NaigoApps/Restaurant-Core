@@ -271,6 +271,9 @@ public class OrdinationREST {
                 PrintingService service = PrintingServiceProvider.get(p);
                 phasesMap.clear();
                 for (Order order : ord.getOrders()) {
+                    if (order.getDish() == null) {
+                        continue;
+                    }
                     if (p.equals(order.getDish().getCategory().getLocation().getPrinter())
                             || !s.getShrinkOrdinations()) {
                         if (!phasesMap.containsKey(order.getPhase())) {
@@ -346,6 +349,9 @@ public class OrdinationREST {
         for (Printer p : printers) {
             phasesMap.clear();
             for (Order order : ordination.getOrders()) {
+                if (order.getDish() == null) {
+                    continue;
+                }
                 if (p.equals(order.getDish().getCategory().getLocation().getPrinter())) {
                     result.add(p);
                     break;

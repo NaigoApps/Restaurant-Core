@@ -17,10 +17,10 @@ import java.util.Set;
  * @author naigo
  */
 public class OrderKind {
-    
-    private Dish orderDish;
-    private float orderPrice;
-    private Set<Addition> orderAdditions;
+
+    private final Dish orderDish;
+    private final float orderPrice;
+    private final Set<Addition> orderAdditions;
     private final String orderNotes;
 
     public OrderKind(Order o){
@@ -64,10 +64,7 @@ public class OrderKind {
         if(!this.orderAdditions.containsAll(other.orderAdditions)) {
         	return false;
         }
-        if(!other.orderAdditions.containsAll(this.orderAdditions)) {
-        	return false;
-        }
-        return true;
+        return other.orderAdditions.containsAll(this.orderAdditions);
     }
 
     public Dish getOrderDish() {
@@ -86,6 +83,6 @@ public class OrderKind {
         return orderNotes;
     }
 
-    
-    
+
+
 }

@@ -14,13 +14,12 @@ import java.util.stream.Collectors;
 import com.naigoapps.restaurant.model.Order;
 
 /**
- *
  * @author naigo
  */
 public class OrdersGroupDTO extends DTO {
 
-	private String phaseName;
-	
+    private String phaseName;
+
     private DishDTO dish;
 
     private List<AdditionDTO> additions;
@@ -32,19 +31,19 @@ public class OrdersGroupDTO extends DTO {
     private String notes;
 
     private List<OrderDTO> orders;
-    
+
     public OrdersGroupDTO() {
-    	orders = new ArrayList<>();
+        orders = new ArrayList<>();
     }
-    
+
     public void setPhaseName(String phaseName) {
-		this.phaseName = phaseName;
-	}
-    
+        this.phaseName = phaseName;
+    }
+
     public String getPhaseName() {
-		return phaseName;
-	}
-    
+        return phaseName;
+    }
+
     public DishDTO getDish() {
         return dish;
     }
@@ -84,35 +83,39 @@ public class OrdersGroupDTO extends DTO {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-    
-    public List<OrderDTO> getOrders() {
-		return orders;
-	}
-    
-    public void setOrders(List<OrderDTO> orders) {
-		this.orders = orders;
-	}
 
-    public Set<String> getAdditionUuids(){
-    	return additions.stream()
-    			.map(DTO::getUuid)
-    			.collect(Collectors.toSet());
+    public List<OrderDTO> getOrders() {
+        return orders;
     }
-    
+
+    public void setOrders(List<OrderDTO> orders) {
+        this.orders = orders;
+    }
+
+    public Set<String> getAdditionUuids() {
+        return additions.stream()
+                .map(DTO::getUuid)
+                .collect(Collectors.toSet());
+    }
+
     public boolean matches(Order other) {
         if (Float.floatToIntBits(this.price) != Float.floatToIntBits(other.getPrice())) {
             return false;
         }
-        if (!Objects.equals(this.dish.getUuid(), other.getDish().getUuid())) {
+        if (this.dish == null && other.getDish() != null ||
+                this.dish != null && other.getDish() == null) {
+            return false;
+        }
+        if (this.dish != null && other.getDish() != null && !Objects.equals(this.dish.getUuid(), other.getDish().getUuid())) {
             return false;
         }
         if (!Objects.equals(this.notes, other.getNotes())) {
             return false;
         }
-        
+
         Set<String> a1 = additions.stream().map(AdditionDTO::getUuid).collect(Collectors.toSet());
         Set<String> a2 = other.getAdditionUuids();
-        
+
         return a1.equals(a2);
     }
 }

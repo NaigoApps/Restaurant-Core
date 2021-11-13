@@ -7,12 +7,8 @@ package com.naigoapps.restaurant.model.utils.mappers;
 
 import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.model.Order;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -20,15 +16,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- *
  * @author naigo
  */
-public class OrderCategoryMapper implements Collector<Order, Map<Category, List<Order>>, Map<Category, List<Order>>>{
+public class OrderCategoryMapper implements Collector<Order, Map<Category, List<Order>>, Map<Category, List<Order>>> {
 
-    public static OrderCategoryMapper toCategoryMap(){
+    public static OrderCategoryMapper toCategoryMap() {
         return new OrderCategoryMapper();
     }
-    
+
     @Override
     public Supplier<Map<Category, List<Order>>> supplier() {
         return HashMap<Category, List<Order>>::new;
@@ -63,16 +58,15 @@ public class OrderCategoryMapper implements Collector<Order, Map<Category, List<
         return set;
     }
 
-    public class OrderAdder implements BiConsumer<Map<Category, List<Order>>, Order>{
+    public static class OrderAdder implements BiConsumer<Map<Category, List<Order>>, Order> {
         @Override
         public void accept(Map<Category, List<Order>> map, Order o) {
-            List<Order> orders = map.get(o.getDish().getCategory());
-            if(orders == null){
-                orders = new ArrayList<>();
-                map.put(o.getDish().getCategory(), orders);
+            if (o.getDish() == null) {
+                return;
             }
+            List<Order> orders = map.computeIfAbsent(o.getDish().getCategory(), k -> new ArrayList<>());
             orders.add(o);
         }
     }
-    
+
 }

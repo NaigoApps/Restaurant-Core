@@ -74,7 +74,9 @@ public abstract class OrdinationMapper {
             if (!found) {
                 OrdersGroupDTO groupDto = new OrdersGroupDTO();
                 groupDto.setUuid(UUID.randomUUID().toString());
-                groupDto.setPhaseName(order.getPhase().getName());
+                if(order.getPhase() != null) {
+                    groupDto.setPhaseName(order.getPhase().getName());
+                }
                 groupDto.setDish(dMapper.map(order.getDish()));
                 groupDto.setAdditions(order.getAdditions().stream().map(aMapper::map).collect(Collectors.toList()));
                 groupDto.setNotes(order.getNotes());

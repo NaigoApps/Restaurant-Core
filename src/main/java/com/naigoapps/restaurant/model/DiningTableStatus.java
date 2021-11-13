@@ -10,5 +10,5 @@ package com.naigoapps.restaurant.model;
  * @author naigo
  */
 public enum DiningTableStatus {
-	OPEN, CLOSING, CLOSED;
+	OPEN, CLOSING, CLOSED, ARCHIVED;
 }

@@ -35,23 +35,22 @@ public class StatisticsService {
                 .printLeft("A:  " + to.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
                 .lf();
 
-        ps.printCenter("Categorie più vendute");
-        StatisticsDTO mostSoldCategories = dao.getMostSoldCategories(from, to, 0);
-        for (StatisticsEntryDTO entry : mostSoldCategories.getEntries()) {
-            ps.printLine(entry.getName(), "" + entry.getValue());
+        ps.printLine("Coperti", String.valueOf(dao.getCoverCharges(from, to)));
+
+        ps.printCenter("Categorie");
+        StatisticsDTO categories = dao.getMostSoldCategories(from, to, 0);
+        for (StatisticsEntryDTO entry : categories.getEntries()) {
+            ps.printLine(String.valueOf(entry.getCount()), entry.getName());
+            ps.printRight(PrintingService.formatPrice(entry.getValue()));
         }
 
         ps.lf();
 
-        ps.printCenter("Categorie più redditizie");
-        StatisticsDTO mostProfitableCategories = dao.getMostProfitableCategories(from, to, 0);
-        for (StatisticsEntryDTO entry : mostProfitableCategories.getEntries()) {
-            ps.printLine(entry.getName(), PrintingService.formatPrice(entry.getValue()));
-        }
+        ps.printLine("Incasso totale:", PrintingService.formatPrice(dao.getProfit(from, to)))
+                .lf(3);
 
-        ps.lf();
+        ps.cut();
 
-        ps.printLine("Incasso totale:", PrintingService.formatPrice(dao.getProfit(from, to)));
         ps.doPrint();
     }
 
@@ -59,15 +58,8 @@ public class StatisticsService {
         return dao.getMostSoldDishes(from, to, 5);
     }
 
-    public StatisticsDTO getMostProfitableDishes(LocalDate from, LocalDate to) {
-        return dao.getMostProfitableDishes(from, to, 5);
-    }
-
     public StatisticsDTO getMostSoldCategories(LocalDate from, LocalDate to) {
         return dao.getMostSoldCategories(from, to, 0);
     }
 
-    public StatisticsDTO getMostProfitableCategories(LocalDate from, LocalDate to) {
-        return dao.getMostProfitableCategories(from, to, 0);
-    }
 }

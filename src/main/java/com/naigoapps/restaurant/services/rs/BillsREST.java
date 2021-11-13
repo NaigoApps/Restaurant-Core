@@ -65,6 +65,15 @@ public class BillsREST {
         return mapper.map(billsService.quickBill(tableUuid));
     }
 
+    @PostMapping("partial")
+    public void partialBill(
+            @RequestParam("table") String tableUuid,
+            @RequestParam("parts") Integer parts,
+            @RequestParam("price") Float price
+    ) {
+        billsService.partialBill(tableUuid, parts, price);
+    }
+
     @PostMapping("{uuid}/soft-print")
     public void printSoftBill(@PathVariable("uuid") String billUuid,
                               @RequestParam(required = false, value = "generic") Boolean generic) {

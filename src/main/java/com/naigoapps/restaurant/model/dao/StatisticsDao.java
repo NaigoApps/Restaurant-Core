@@ -1,15 +1,12 @@
 package com.naigoapps.restaurant.model.dao;
 
-import com.naigoapps.restaurant.model.Dish;
 import com.naigoapps.restaurant.services.dto.StatisticsDTO;
 import com.naigoapps.restaurant.services.dto.StatisticsEntryDTO;
-import org.hibernate.criterion.CriteriaQuery;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
@@ -24,7 +21,7 @@ public class StatisticsDao {
 
     public StatisticsDTO getMostSoldDishes(LocalDate from, LocalDate to, int limit) {
         Query query = em.createQuery("SELECT " +
-                        "d.name as name, count(d.id) as value " +
+                        "d.name as name, count(d.id), sum(o.price) as value " +
                         "FROM Dish d, Order o, Ordination ot, DiningTable dt " +
                         "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
                         "o.dish = d AND o.ordination = ot AND ot.table = dt " +
@@ -32,10 +29,33 @@ public class StatisticsDao {
                         "ORDER BY value DESC")
                 .setParameter(1, Date.valueOf(from))
                 .setParameter(2, Date.valueOf(to));
-        return getStatisticsDTO(from, to, limit, query, v -> Double.valueOf((Long) v));
+        return getStatisticsDTO(from, to, limit, query, v -> (Long) v, v -> (Double) v);
     }
 
-    private StatisticsDTO getStatisticsDTO(LocalDate from, LocalDate to, int limit, Query query, Function<Object, Double> doubleSupplier) {
+    public Long getCoverCharges(LocalDate from, LocalDate to) {
+        Query query = em.createQuery("SELECT " +
+                        "sum(dt.coverCharges) " +
+                        "FROM DiningTable dt " +
+                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2")
+                .setParameter(1, Date.valueOf(from))
+                .setParameter(2, Date.valueOf(to));
+        return (Long) query.getSingleResult();
+    }
+
+    public StatisticsDTO getMostSoldCategories(LocalDate from, LocalDate to, int limit) {
+        Query query = em.createQuery("SELECT " +
+                        "c.name as name, count(c.id), sum(o.price) as value " +
+                        "FROM Category c, Dish d, Order o, Ordination ot, DiningTable dt " +
+                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
+                        "d.category = c AND o.dish = d AND o.ordination = ot AND ot.table = dt " +
+                        "GROUP BY c.id " +
+                        "ORDER BY value DESC")
+                .setParameter(1, Date.valueOf(from))
+                .setParameter(2, Date.valueOf(to));
+        return getStatisticsDTO(from, to, limit, query, v -> (Long) v, v -> (Double) v);
+    }
+
+    private StatisticsDTO getStatisticsDTO(LocalDate from, LocalDate to, int limit, Query query, Function<Object, Long> longSupplier, Function<Object, Double> doubleSupplier) {
         if (limit > 0) {
             query.setMaxResults(limit);
         }
@@ -43,55 +63,17 @@ public class StatisticsDao {
         StatisticsDTO result = new StatisticsDTO();
         result.setFrom(from);
         result.setTo(to);
-        result.setEntries(parseEntries(resultList, doubleSupplier));
+        result.setEntries(parseEntries(resultList, longSupplier, doubleSupplier));
         return result;
     }
 
-    public StatisticsDTO getMostProfitableDishes(LocalDate from, LocalDate to, int limit) {
-        Query query = em.createQuery("SELECT " +
-                        "d.name as name, sum(o.price) as value " +
-                        "FROM Dish d, Order o, Ordination ot, DiningTable dt " +
-                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
-                        "o.dish = d AND o.ordination = ot AND ot.table = dt " +
-                        "GROUP BY d.id " +
-                        "ORDER BY value DESC")
-                .setParameter(1, Date.valueOf(from))
-                .setParameter(2, Date.valueOf(to));
-        return getStatisticsDTO(from, to, limit, query, v -> (Double) v);
-    }
-
-    public StatisticsDTO getMostSoldCategories(LocalDate from, LocalDate to, int limit) {
-        Query query = em.createQuery("SELECT " +
-                        "c.name as name, count(c.id) as value " +
-                        "FROM Category c, Dish d, Order o, Ordination ot, DiningTable dt " +
-                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
-                        "d.category = c AND o.dish = d AND o.ordination = ot AND ot.table = dt " +
-                        "GROUP BY c.id " +
-                        "ORDER BY value DESC")
-                .setParameter(1, Date.valueOf(from))
-                .setParameter(2, Date.valueOf(to));
-        return getStatisticsDTO(from, to, limit, query, v -> Double.valueOf((Long) v));
-    }
-
-    public StatisticsDTO getMostProfitableCategories(LocalDate from, LocalDate to, int limit) {
-        Query query = em.createQuery("SELECT " +
-                        "c.name as name, sum(o.price) as value " +
-                        "FROM Category c, Dish d, Order o, Ordination ot, DiningTable dt " +
-                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
-                        "d.category = c AND o.dish = d AND o.ordination = ot AND ot.table = dt " +
-                        "GROUP BY c.id " +
-                        "ORDER BY value DESC")
-                .setParameter(1, Date.valueOf(from))
-                .setParameter(2, Date.valueOf(to));
-        return getStatisticsDTO(from, to, limit, query, v -> (Double) v);
-    }
-
-    private List<StatisticsEntryDTO> parseEntries(List<Object> resultList, Function<Object, Double> valueSupplier) {
+    private List<StatisticsEntryDTO> parseEntries(List<Object> resultList, Function<Object, Long> longSupplier, Function<Object, Double> doubleSupplier) {
         return resultList.stream().map(obj -> {
             Object[] row = (Object[]) obj;
             StatisticsEntryDTO dto = new StatisticsEntryDTO();
             dto.setName((String) row[0]);
-            dto.setValue(valueSupplier.apply(row[1]));
+            dto.setCount(longSupplier.apply(row[1]));
+            dto.setValue(doubleSupplier.apply(row[2]));
             return dto;
         }).collect(Collectors.toList());
     }

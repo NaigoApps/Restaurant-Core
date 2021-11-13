@@ -3,6 +3,7 @@ package com.naigoapps.restaurant.services;
 import com.naigoapps.restaurant.main.EveningManager;
 import com.naigoapps.restaurant.model.*;
 import com.naigoapps.restaurant.model.builders.BillBuilder;
+import com.naigoapps.restaurant.model.builders.OrderBuilder;
 import com.naigoapps.restaurant.model.dao.*;
 import com.naigoapps.restaurant.services.fiscal.hydra.HydraNetworkPrintingService;
 import com.naigoapps.restaurant.services.printing.BillPrinter;
@@ -16,10 +17,7 @@ import javax.print.PrintException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -152,6 +150,28 @@ public class BillsService {
         return bill;
     }
 
+    public void partialBill(String tableUuid, Integer parts, Float price) {
+        DiningTable table = dtDao.findByUuid(tableUuid);
+        for (int i = 0; i < parts; i++) {
+            Order fixedOrder = createFixedOrder(price);
+            Bill bill = new BillBuilder()
+                    .progressive(bDao.nextBillProgressive(table.getEvening()))
+                    .table(table)
+                    .orders(Collections.singletonList(fixedOrder))
+                    .coverCharges(0)
+                    .total(price).getContent();
+            dtDao.persist(fixedOrder);
+            dtDao.persist(bill);
+        }
+    }
+
+    private Order createFixedOrder(Float price) {
+        return new OrderBuilder()
+                .notes("PASTO A PREZZO FISSO")
+                .price(price)
+                .getContent();
+    }
+
     public void printSoftBill(String billUuid, Boolean generic) {
         Bill bill = bDao.findByUuid(billUuid);
         if (bill != null) {
@@ -237,10 +257,12 @@ public class BillsService {
                 bDao.delete(order);
             });
 
-            ordinationsToCheck.stream().filter(ordination -> ordination.getOrders().isEmpty()).forEach(ordination -> {
-                ordination.setTable(null);
-                bDao.delete(ordination);
-            });
+            ordinationsToCheck.stream()
+                    .filter(Objects::nonNull)
+                    .filter(ordination -> ordination.getOrders().isEmpty()).forEach(ordination -> {
+                        ordination.setTable(null);
+                        bDao.delete(ordination);
+                    });
 
             DiningTable table = bill.getTable();
             table.setCoverCharges(table.getCoverCharges() - bill.getCoverCharges());
