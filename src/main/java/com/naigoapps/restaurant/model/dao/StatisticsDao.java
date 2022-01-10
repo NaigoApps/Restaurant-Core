@@ -9,7 +9,9 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,14 +34,23 @@ public class StatisticsDao {
         return getStatisticsDTO(from, to, limit, query, v -> (Long) v, v -> (Double) v);
     }
 
-    public Long getCoverCharges(LocalDate from, LocalDate to) {
+    public Map.Entry<Long, Double> getCoverCharges(LocalDate from, LocalDate to) {
         Query query = em.createQuery("SELECT " +
-                        "sum(dt.coverCharges) " +
-                        "FROM DiningTable dt " +
-                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2")
+                        "count(*) as n, sum(dt.coverCharges) * e.coverCharge as p " +
+                        "FROM Order o, Ordination ot, DiningTable dt, Evening e " +
+                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
+                        "o.ordination = ot AND ot.table = dt AND dt.evening = e " +
+                        "GROUP BY e")
                 .setParameter(1, Date.valueOf(from))
                 .setParameter(2, Date.valueOf(to));
-        return (Long) query.getSingleResult();
+        Long n = 0L;
+        Double p = 0D;
+        for (Object o : query.getResultList()) {
+            Object[] array = (Object[]) o;
+            n += (Long) array[0];
+            p += (Float) array[1];
+        }
+        return new AbstractMap.SimpleEntry<>(n, p);
     }
 
     public StatisticsDTO getMostSoldCategories(LocalDate from, LocalDate to, int limit) {
@@ -52,7 +63,7 @@ public class StatisticsDao {
                         "ORDER BY value DESC")
                 .setParameter(1, Date.valueOf(from))
                 .setParameter(2, Date.valueOf(to));
-        return getStatisticsDTO(from, to, limit, query, v -> (Long) v, v -> (Double) v);
+        return getStatisticsDTO(from, to, limit, query, Long.class::cast, Double.class::cast);
     }
 
     private StatisticsDTO getStatisticsDTO(LocalDate from, LocalDate to, int limit, Query query, Function<Object, Long> longSupplier, Function<Object, Double> doubleSupplier) {

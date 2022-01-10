@@ -198,6 +198,18 @@ public class BillsService {
         }
     }
 
+    public Bill updateBillClient(String billUuid, String customerUuid) {
+        Bill bill = bDao.findByUuid(billUuid);
+        Customer customer;
+        if (customerUuid != null && !customerUuid.isEmpty()) {
+            customer = cDao.findByUuid(customerUuid);
+            bill.setCustomer(customer);
+        } else {
+            bill.setCustomer(null);
+        }
+        return bill;
+    }
+
     public void printBill(String billUuid, String customerId) {
         Bill bill = bDao.findByUuid(billUuid);
         Customer customer = null;

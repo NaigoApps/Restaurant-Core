@@ -14,6 +14,7 @@ import javax.print.PrintException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @Service
 public class StatisticsService {
@@ -35,7 +36,8 @@ public class StatisticsService {
                 .printLeft("A:  " + to.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
                 .lf();
 
-        ps.printLine("Coperti", String.valueOf(dao.getCoverCharges(from, to)));
+        Map.Entry<Long, Double> coverCharges = dao.getCoverCharges(from, to);
+        ps.printLine(coverCharges.getKey() + " coperti", String.valueOf(coverCharges.getValue()));
 
         ps.printCenter("Categorie");
         StatisticsDTO categories = dao.getMostSoldCategories(from, to, 0);
@@ -46,7 +48,7 @@ public class StatisticsService {
 
         ps.lf();
 
-        ps.printLine("Incasso totale:", PrintingService.formatPrice(dao.getProfit(from, to)))
+        ps.printLine("Incasso totale:", PrintingService.formatPrice(dao.getProfit(from, to) + coverCharges.getValue()))
                 .lf(3);
 
         ps.cut();

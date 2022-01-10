@@ -24,8 +24,16 @@ import javax.persistence.Table;
 @Table(name = "categories")
 public class Category extends BaseEntity {
 
+    public static final Category FIXED_PRICE;
+
+    static {
+        FIXED_PRICE = new Category();
+        FIXED_PRICE.setUuid("FIXED_PRICE");
+        FIXED_PRICE.setName("PREZZO FISSO");
+    }
+
     private String name;
-    
+
     private String color;
 
     @ManyToOne
@@ -33,7 +41,7 @@ public class Category extends BaseEntity {
 
     @OneToMany(mappedBy = "category")
     private List<Dish> dishes;
-    
+
     @ManyToMany
     @JoinTable(name = "category_addition",
             joinColumns = {
@@ -46,8 +54,8 @@ public class Category extends BaseEntity {
         this.dishes = new ArrayList<>();
         this.additions = new ArrayList<>();
     }
-    
-    
+
+
     public String getName() {
         return name;
     }
@@ -62,7 +70,7 @@ public class Category extends BaseEntity {
             dish.setCategory(this);
         });
     }
-    
+
     public void addDish(Dish d){
         if(!this.dishes.contains(d)){
             this.dishes.add(d);
@@ -98,6 +106,6 @@ public class Category extends BaseEntity {
         this.color = color;
     }
 
-    
-    
+
+
 }

@@ -26,7 +26,7 @@ public class OrderCategoryMapper implements Collector<Order, Map<Category, List<
 
     @Override
     public Supplier<Map<Category, List<Order>>> supplier() {
-        return HashMap<Category, List<Order>>::new;
+        return HashMap::new;
     }
 
     @Override
@@ -38,9 +38,7 @@ public class OrderCategoryMapper implements Collector<Order, Map<Category, List<
     public BinaryOperator<Map<Category, List<Order>>> combiner() {
         return (Map<Category, List<Order>> map1, Map<Category, List<Order>> map2) -> {
             OrderAdder adder = new OrderAdder();
-            map2.values().forEach(list -> {
-                list.forEach(order -> adder.accept(map1, order));
-            });
+            map2.values().forEach(list -> list.forEach(order -> adder.accept(map1, order)));
             return map1;
         };
     }
@@ -61,10 +59,9 @@ public class OrderCategoryMapper implements Collector<Order, Map<Category, List<
     public static class OrderAdder implements BiConsumer<Map<Category, List<Order>>, Order> {
         @Override
         public void accept(Map<Category, List<Order>> map, Order o) {
-            if (o.getDish() == null) {
-                return;
-            }
-            List<Order> orders = map.computeIfAbsent(o.getDish().getCategory(), k -> new ArrayList<>());
+            Category cat = o.getDish() != null ? o.getDish().getCategory() : Category.FIXED_PRICE;
+
+            List<Order> orders = map.computeIfAbsent(cat, k -> new ArrayList<>());
             orders.add(o);
         }
     }

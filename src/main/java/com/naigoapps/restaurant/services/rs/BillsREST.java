@@ -40,6 +40,16 @@ public class BillsREST {
         return mapper.map(billsService.findBill(billUuid));
     }
 
+    @DeleteMapping("{billUuid}/customer")
+    public BillDTO removeCustomer(@PathVariable("billUuid") String billUuid) {
+        return mapper.map(billsService.updateBillClient(billUuid, null));
+    }
+
+    @PutMapping("{billUuid}/customer/{customerUuid}")
+    public BillDTO updateCustomer(@PathVariable("billUuid") String billUuid, @PathVariable("customerUuid") String customerUuid) {
+        return mapper.map(billsService.updateBillClient(billUuid, customerUuid));
+    }
+
     @GetMapping("remaining/{tableUuid}")
     public DiningTableDTO getRemaining(@PathVariable("tableUuid") String tableUuid) {
         int ccsToPay = billsService.getCoverChargesToPay(tableUuid);
