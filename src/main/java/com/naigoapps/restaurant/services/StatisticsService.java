@@ -25,7 +25,7 @@ public class StatisticsService {
     @Autowired
     private PrinterDao pDao;
 
-    public void printStatistics(LocalDate from, LocalDate to) throws IOException, PrintException {
+    public void printCategoriesStatistics(LocalDate from, LocalDate to, boolean dishes) throws IOException, PrintException {
         Printer mainPrinter = pDao.findMainPrinter();
         PrintingService ps = PrintingServiceProvider.get(mainPrinter);
 
@@ -44,6 +44,12 @@ public class StatisticsService {
         for (StatisticsEntryDTO entry : categories.getEntries()) {
             ps.printLine(String.valueOf(entry.getCount()), entry.getName());
             ps.printRight(PrintingService.formatPrice(entry.getValue()));
+            if (dishes && !entry.getChildren().isEmpty()) {
+                StatisticsEntryDTO dish = entry.getChildren().iterator().next();
+                ps.printLine(String.valueOf(dish.getCount()), dish.getName());
+                ps.printRight(PrintingService.formatPrice(dish.getValue()));
+            }
+            ps.lf();
         }
 
         ps.lf();

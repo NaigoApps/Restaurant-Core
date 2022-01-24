@@ -91,9 +91,8 @@ public class BillsREST {
     }
 
     @PostMapping("{uuid}/print")
-    public void printBill(@PathVariable("uuid") String billUuid, @RequestBody(required = false) String customerId,
-                          @RequestParam(required = false, value = "generic") Boolean generic) {
-        billsService.printBill(billUuid, customerId);
+    public void printBill(@PathVariable("uuid") String billUuid) {
+        billsService.printBill(billUuid);
     }
 
     @DeleteMapping("{uuid}")

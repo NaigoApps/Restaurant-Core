@@ -210,19 +210,15 @@ public class BillsService {
         return bill;
     }
 
-    public void printBill(String billUuid, String customerId) {
+    public void printBill(String billUuid) {
         Bill bill = bDao.findByUuid(billUuid);
-        Customer customer = null;
-        if (customerId != null && !customerId.isEmpty()) {
-            customer = cDao.findByUuid(customerId);
-        }
-        if (bill != null && (customer != null || customerId == null || customerId.isEmpty())) {
+        if (bill != null) {
+            Customer customer = bill.getCustomer();
             Printer fiscalPrinter = prDao.findMainPrinter();
             if (fiscalPrinter != null) {
                 try {
                     bill.getTable().setStatus(DiningTableStatus.CLOSING);
                     if (customer != null) {
-                        bill.setCustomer(customer);
                         bill.setProgressive(bDao.nextInvoiceProgressive(LocalDate.now()));
                     } else {
                         bill.setProgressive(bDao.nextReceiptProgressive(LocalDate.now()));

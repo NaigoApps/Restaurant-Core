@@ -8,12 +8,10 @@ package com.naigoapps.restaurant.services.printing.services;
 import com.naigoapps.restaurant.model.Printer;
 
 /**
- *
  * @author naigo
  */
 public class PrintingServiceProvider {
-	public static PrintingService get(Printer p) {
-//		return new ThermalPrintingService(p);
-		return new StringsPrintingService(p);
-	}
+    public static PrintingService get(Printer p) {
+        return new ThermalPrintingService(p);
+    }
 }
