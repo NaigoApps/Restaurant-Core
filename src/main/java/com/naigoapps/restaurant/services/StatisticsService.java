@@ -39,7 +39,7 @@ public class StatisticsService {
         Map.Entry<Long, Double> coverCharges = dao.getCoverCharges(from, to);
         ps.printLine(coverCharges.getKey() + " coperti", String.valueOf(coverCharges.getValue()));
 
-        ps.printCenter("Categorie");
+        ps.printCenter(dishes ? "Piatti piu' venduti" : "Categorie");
         StatisticsDTO categories = dao.getMostSoldCategories(from, to, 0);
         for (StatisticsEntryDTO entry : categories.getEntries()) {
             ps.printLine(String.valueOf(entry.getCount()), entry.getName());
@@ -63,11 +63,11 @@ public class StatisticsService {
     }
 
     public StatisticsDTO getMostSoldDishes(LocalDate from, LocalDate to) {
-        return dao.getMostSoldDishes(from, to, 5);
+        return dao.getMostSoldDishes(from, to, 10);
     }
 
     public StatisticsDTO getMostSoldCategories(LocalDate from, LocalDate to) {
-        return dao.getMostSoldCategories(from, to, 0);
+        return dao.getMostSoldCategories(from, to, 10);
     }
 
 }
