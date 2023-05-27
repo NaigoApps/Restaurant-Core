@@ -1,6 +1,8 @@
 /wildfly-10.1.0.Final/
 /nbproject/
-/src/main/webapp/
 /target/
 /.project
 /.metadata/
+/src/main/webapp/node_modules/
+/src/main/webapp/.idea/
+/src/main/webapp/build/
