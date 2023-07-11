@@ -7,6 +7,8 @@ package com.naigoapps.restaurant;
 
 import java.io.IOException;
 
+import com.naigoapps.restaurant.model.Settings;
+import com.naigoapps.restaurant.model.dao.SettingsDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.EventListener;
 
 import com.naigoapps.restaurant.model.dao.GenericDao;
+
+import javax.annotation.PostConstruct;
 
 /**
  *
@@ -33,8 +37,18 @@ public class Main {
     @Qualifier("generic")
     private GenericDao dao;
 
+    @Autowired
+    private SettingsDao settingsDao;
+
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
+    }
+
+    @PostConstruct
+    public void initApplication(){
+        if(settingsDao.count() == 0){
+            settingsDao.save(new Settings());
+        }
     }
 
     @EventListener(ApplicationReadyEvent.class)

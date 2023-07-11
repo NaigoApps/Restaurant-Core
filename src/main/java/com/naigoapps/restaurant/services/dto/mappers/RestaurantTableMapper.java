@@ -5,18 +5,17 @@
  */
 package com.naigoapps.restaurant.services.dto.mappers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-
 import com.naigoapps.restaurant.main.EveningManager;
+import com.naigoapps.restaurant.model.DiningTable;
 import com.naigoapps.restaurant.model.DiningTableStatus;
 import com.naigoapps.restaurant.model.Evening;
 import com.naigoapps.restaurant.model.RestaurantTable;
 import com.naigoapps.restaurant.services.dto.RestaurantTableDTO;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -35,8 +34,14 @@ public abstract class RestaurantTableMapper {
 	public void setIsBusy(@MappingTarget RestaurantTableDTO dto) {
 		Evening e = eveningManager.getSelectedEvening();
 		if (e != null) {
-			dto.setBusy(e.getDiningTables().stream().filter(dt -> dt.getStatus() != DiningTableStatus.CLOSED)
-					.filter(dt -> dt.getTable() != null && dt.getTable().getUuid().equals(dto.getUuid())).count() > 0);
+			boolean busy = e.getDiningTables().stream()
+					.filter(RestaurantTableMapper::isBusy)
+					.anyMatch(dt -> dt.getTable() != null && dt.getTable().getUuid().equals(dto.getUuid()));
+			dto.setBusy(busy);
 		}
+	}
+
+	private static boolean isBusy(DiningTable dt) {
+		return dt.getStatus() != DiningTableStatus.CLOSED && dt.getStatus() != DiningTableStatus.ARCHIVED;
 	}
 }
