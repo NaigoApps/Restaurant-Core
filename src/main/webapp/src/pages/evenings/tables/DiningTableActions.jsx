@@ -195,12 +195,12 @@ export default function DiningTableActions({
             icon={faPen}
             onClick={() => setEditing(true)}
           />
-          <Button
-            text="Esporta tavolo"
-            kind="info"
-            icon={faFileExport}
-            onClick={() => exportTable()}
-          />
+          {/* <Button */}
+          {/*  text="Esporta tavolo" */}
+          {/*  kind="info" */}
+          {/*  icon={faFileExport} */}
+          {/*  onClick={() => exportTable()} */}
+          {/* /> */}
           <Button
             text="Fondi tavolo"
             kind="warning"
@@ -213,12 +213,12 @@ export default function DiningTableActions({
             icon={faCheck}
             onClick={() => setClosing(true)}
           />
-          <Button
-            text="Archivia tavolo"
-            kind="warning"
-            icon={faArchive}
-            onClick={() => setArchiving(true)}
-          />
+          {/* <Button */}
+          {/*  text="Archivia tavolo" */}
+          {/*  kind="warning" */}
+          {/*  icon={faArchive} */}
+          {/*  onClick={() => setArchiving(true)} */}
+          {/* /> */}
           <Button
             text="Elimina tavolo"
             kind="danger"
