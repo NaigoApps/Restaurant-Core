@@ -16,7 +16,6 @@ import com.naigoapps.restaurant.services.dto.PrinterDTO;
 import com.naigoapps.restaurant.services.dto.WrapperDTO;
 import com.naigoapps.restaurant.services.dto.mappers.PrinterMapper;
 import com.naigoapps.restaurant.services.fiscal.hydra.HydraGateway;
-import com.naigoapps.restaurant.services.fiscal.hydra.HydraPrintingService;
 import com.naigoapps.restaurant.services.fiscal.hydra.Pair;
 import com.naigoapps.restaurant.services.fiscal.hydra.fsms.FeedFSM;
 import com.naigoapps.restaurant.services.fiscal.hydra.fsms.OpenDrawerFSM;
@@ -60,9 +59,6 @@ public class PrinterREST {
 
     @Autowired
     private PrinterMapper mapper;
-
-    @Autowired
-    private HydraPrintingService fpm;
 
     @Autowired
     private SettingsDao sDao;
