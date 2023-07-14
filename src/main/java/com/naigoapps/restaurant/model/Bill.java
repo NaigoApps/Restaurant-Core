@@ -5,16 +5,15 @@
  */
 package com.naigoapps.restaurant.model;
 
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
 /**
  *
@@ -24,11 +23,8 @@ import javax.persistence.Table;
 @Table(name = "bills")
 public class Bill extends BaseEntity {
 
-    @ManyToOne
-    private Customer customer;
-
     private LocalDateTime printTime;
-    
+
     private LocalDate printDate;
 
     @ManyToOne
@@ -121,14 +117,6 @@ public class Bill extends BaseEntity {
         this.progressive = progressive;
     }
 
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
     public void setPrintTime(LocalDateTime printTime) {
         this.printTime = printTime;
         if(this.printTime != null){
@@ -144,10 +132,6 @@ public class Bill extends BaseEntity {
 
     public LocalDate getPrintDate() {
         return printDate;
-    }
-    
-    public boolean isGeneric(){
-        return customer == null && printTime == null;
     }
 
 }

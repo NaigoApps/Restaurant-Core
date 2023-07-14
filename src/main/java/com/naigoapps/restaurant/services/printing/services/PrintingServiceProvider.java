@@ -12,6 +12,6 @@ import com.naigoapps.restaurant.model.Printer;
  */
 public class PrintingServiceProvider {
     public static PrintingService get(Printer p) {
-        return new ThermalPrintingService(p);
+        return new StringsPrintingService(p);
     }
 }

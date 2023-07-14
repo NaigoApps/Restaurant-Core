@@ -6,7 +6,6 @@
 package com.naigoapps.restaurant.services.printing;
 
 import com.naigoapps.restaurant.model.Bill;
-import com.naigoapps.restaurant.model.Customer;
 import com.naigoapps.restaurant.services.printing.services.PrintingService;
 import org.apache.commons.lang3.StringUtils;
 
@@ -20,17 +19,11 @@ import java.time.format.DateTimeFormatter;
 public class BillPrinter implements ObjectPrinter<Bill> {
 
     private boolean generic;
-    private Customer customer;
     private String headers;
 
-    public BillPrinter(boolean generic, Customer c, String headers) {
-        this.generic = generic;
-        this.customer = c;
-        this.headers = headers;
-    }
-
     public BillPrinter(boolean generic, String headers) {
-        this(generic, null, headers);
+        this.generic = generic;
+        this.headers = headers;
     }
 
     @Override
@@ -49,14 +42,7 @@ public class BillPrinter implements ObjectPrinter<Bill> {
         ps.lf(1);
 
         if (obj.getPrintTime() != null) {
-            if (customer != null) {
-                ps.printCenter("FATTURA " + obj.getProgressive());
-                ps.printCenter(customer.getName() + " " + customer.getSurname());
-                ps.printCenter("CF: " + customer.getCf());
-                ps.printCenter("P.IVA: " + customer.getPiva());
-            } else {
-                ps.printCenter("RICEVUTA " + obj.getProgressive());
-            }
+            ps.printCenter("RICEVUTA " + obj.getProgressive());
         }
         ps.printCenter("Tavolo " + obj.getTable().getTable().getName())
                 .printCenter(time.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")))
@@ -80,10 +66,6 @@ public class BillPrinter implements ObjectPrinter<Bill> {
                 .printLine("TOT: ", PrintingService.formatPrice(obj.getTotal()));
 
         return ps;
-    }
-
-    public Customer getCustomer() {
-        return customer;
     }
 
     public boolean isGeneric() {

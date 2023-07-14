@@ -5,7 +5,6 @@ import com.naigoapps.restaurant.model.*;
 import com.naigoapps.restaurant.model.builders.BillBuilder;
 import com.naigoapps.restaurant.model.builders.OrderBuilder;
 import com.naigoapps.restaurant.model.dao.*;
-import com.naigoapps.restaurant.services.fiscal.hydra.HydraNetworkPrintingService;
 import com.naigoapps.restaurant.services.printing.BillPrinter;
 import com.naigoapps.restaurant.services.printing.services.PrintingService;
 import com.naigoapps.restaurant.services.printing.services.PrintingServiceProvider;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import javax.print.PrintException;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,13 +40,7 @@ public class BillsService {
     private SettingsDao sDao;
 
     @Autowired
-    private CustomerDao cDao;
-
-    @Autowired
     private EveningManager eveningManager;
-
-    @Autowired
-    private HydraNetworkPrintingService printingService;
 
     public List<Bill> findEveningBills() {
         Evening e = eveningManager.getSelectedEvening();
@@ -121,10 +113,9 @@ public class BillsService {
                         .collect(Collectors.toList());
                 if (!orders.isEmpty()) {
                     if (orders.stream().allMatch(order -> order.getPrice() != 0)) {
-                        int doneCcs = toUpdate.getBills().stream()
-                                .collect(Collectors.summingInt(Bill::getCoverCharges));
+                        int doneCcs = toUpdate.getBills().stream().mapToInt(Bill::getCoverCharges).sum();
                         int coverCharges = toUpdate.getCoverCharges() - doneCcs;
-                        float total = orders.stream().collect(Collectors.summingDouble(Order::getPrice)).floatValue();
+                        float total = ((Double) orders.stream().mapToDouble(Order::getPrice).sum()).floatValue();
                         total += coverCharges * currentEvening.getCoverCharge();
                         Bill b = createBill(toUpdate, orders, coverCharges, total);
                         toUpdate.updateStatus();
@@ -195,48 +186,6 @@ public class BillsService {
             }
         } else {
             throw new RuntimeException("Conto non trovato");
-        }
-    }
-
-    public Bill updateBillClient(String billUuid, String customerUuid) {
-        Bill bill = bDao.findByUuid(billUuid);
-        Customer customer;
-        if (customerUuid != null && !customerUuid.isEmpty()) {
-            customer = cDao.findByUuid(customerUuid);
-            bill.setCustomer(customer);
-        } else {
-            bill.setCustomer(null);
-        }
-        return bill;
-    }
-
-    public void printBill(String billUuid) {
-        Bill bill = bDao.findByUuid(billUuid);
-        if (bill != null) {
-            Customer customer = bill.getCustomer();
-            Printer fiscalPrinter = prDao.findMainPrinter();
-            if (fiscalPrinter != null) {
-                try {
-                    bill.getTable().setStatus(DiningTableStatus.CLOSING);
-                    if (customer != null) {
-                        bill.setProgressive(bDao.nextInvoiceProgressive(LocalDate.now()));
-                    } else {
-                        bill.setProgressive(bDao.nextReceiptProgressive(LocalDate.now()));
-                    }
-                    bill.setPrintTime(LocalDateTime.now());
-
-                    printingService.print(bill);
-
-                    bill.getTable().updateStatus();
-
-                } catch (IOException ex) {
-                    throw new RuntimeException("Problema di stampa inaspettato", ex);
-                }
-            } else {
-                throw new RuntimeException("Stampante fiscale non trovata");
-            }
-        } else {
-            throw new RuntimeException("Conto o cliente non trovato");
         }
     }
 

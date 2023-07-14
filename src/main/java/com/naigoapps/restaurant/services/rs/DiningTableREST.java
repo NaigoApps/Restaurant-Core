@@ -1,45 +1,32 @@
 package com.naigoapps.restaurant.services.rs;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.naigoapps.restaurant.main.EveningManager;
-import com.naigoapps.restaurant.model.Bill;
-import com.naigoapps.restaurant.model.DiningTable;
-import com.naigoapps.restaurant.model.DiningTableStatus;
-import com.naigoapps.restaurant.model.Evening;
-import com.naigoapps.restaurant.model.Ordination;
+import com.naigoapps.restaurant.model.*;
 import com.naigoapps.restaurant.model.builders.DiningTableBuilder;
 import com.naigoapps.restaurant.model.dao.DiningTableDao;
 import com.naigoapps.restaurant.model.dao.RestaurantTableDao;
 import com.naigoapps.restaurant.model.dao.WaiterDao;
 import com.naigoapps.restaurant.services.DiningTablesUpdatedEvent;
 import com.naigoapps.restaurant.services.dto.DiningTableDTO;
-import com.naigoapps.restaurant.services.dto.DiningTableExportDTO;
 import com.naigoapps.restaurant.services.dto.DiningTableSkeletonDTO;
 import com.naigoapps.restaurant.services.dto.WrapperDTO;
 import com.naigoapps.restaurant.services.dto.mappers.DiningTableMapper;
 import com.naigoapps.restaurant.services.exceptions.AlreadyRegisteredCoverChargesException;
 import com.naigoapps.restaurant.services.websocket.DiningTableWS;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * @author naigo
@@ -159,21 +146,6 @@ public class DiningTableREST {
         DiningTable table = dao.findByUuid(tableUuid);
         table.setStatus(DiningTableStatus.CLOSED);
         notifyDiningTablesUpdate();
-    }
-
-    @PutMapping("{uuid}/archive")
-    public void archiveTable(@PathVariable("uuid") String tableUuid) {
-        DiningTable table = dao.findByUuid(tableUuid);
-        if (table.getStatus() != DiningTableStatus.CLOSED) {
-            throw new IllegalArgumentException("Chiudere il tavolo prima di archiviarlo");
-        }
-        table.setStatus(DiningTableStatus.ARCHIVED);
-        notifyDiningTablesUpdate();
-    }
-
-    @GetMapping("{uuid}/export")
-    public DiningTableExportDTO exportTable(@PathVariable("uuid") String tableUuid) {
-        return mapper.mapForExport(dao.findByUuid(tableUuid));
     }
 
     private DiningTableDTO updateTableProperty(String tableUuid, Consumer<DiningTable> updater) {

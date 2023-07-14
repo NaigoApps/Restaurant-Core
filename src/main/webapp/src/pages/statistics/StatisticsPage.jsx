@@ -44,10 +44,6 @@ export default function StatisticsPage() {
     .toString(16)}`, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  useEffect(() => {
     if (data) {
       setStats({
         ...data,
@@ -79,15 +75,19 @@ export default function StatisticsPage() {
           && (
             <p className="has-text-centered">
               <strong>
-                Totale incasso:
-                {' '}
-                {data.entries.map(entry => entry.value)
-                  .reduce((a, b) => a + b, 0)}
+                {`Totale incasso: ${data.entries.map(entry => entry.value).reduce((a, b) => a + b, 0)}€`}
               </strong>
             </p>
           )}
         </Column>
-        <Column grow>
+        <Column grow spaced>
+          <Button
+            text="Calcola"
+            kind="primary"
+            onClick={() => {
+              refresh();
+            }}
+          />
           <Button
             text="Stampa"
             onClick={() => {

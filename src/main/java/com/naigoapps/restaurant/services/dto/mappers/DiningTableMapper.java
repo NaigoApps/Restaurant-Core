@@ -34,11 +34,6 @@ public abstract class DiningTableMapper {
 	@Mapping(target = "total", source = "totalPrice")
 	public abstract DiningTableSkeletonDTO mapSkeleton(DiningTable table);
 
-	@Mapping(target = "evening", source = "evening.uuid")
-	@Mapping(target = "waiter", source = "waiter.uuid")
-	@Mapping(target = "table", source = "table.uuid")
-	public abstract DiningTableExportDTO mapForExport(DiningTable table);
-
 	@AfterMapping
 	public void afterMapping(@MappingTarget DiningTableDTO dto) {
 		dto.getOrdinations().sort((o1, o2) -> o2.getCreationTime().compareTo(o1.getCreationTime()));

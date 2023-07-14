@@ -5,7 +5,6 @@
         <class>com.naigoapps.restaurant.model.Addition</class>
         <class>com.naigoapps.restaurant.model.Bill</class>
         <class>com.naigoapps.restaurant.model.Category</class>
-        <class>com.naigoapps.restaurant.model.Customer</class>
         <class>com.naigoapps.restaurant.model.DiningTable</class>
         <class>com.naigoapps.restaurant.model.Dish</class>
         <class>com.naigoapps.restaurant.model.Evening</class>

@@ -83,19 +83,6 @@ export default function ({ navigate }) {
             fill
           />
         </Column>
-        <Column>
-          <RoundButton
-            text="Clienti"
-            icon={faUser}
-            onClick={() => {
-              navigate('customers');
-              screenfull.request();
-            }}
-            size="xl"
-            vertical
-            fill
-          />
-        </Column>
       </Row>
     </Fragment>
   );

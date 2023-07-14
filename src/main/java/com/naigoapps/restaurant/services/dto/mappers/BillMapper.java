@@ -5,22 +5,21 @@
  */
 package com.naigoapps.restaurant.services.dto.mappers;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
 import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.Order;
 import com.naigoapps.restaurant.services.dto.BillDTO;
 import com.naigoapps.restaurant.services.dto.BillExportDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
  * @author naigo
  */
-@Mapper(componentModel = "spring", config = MapperConfiguration.class, uses = { CustomerMapper.class, OrdinationMapper.class, OrderMapper.class })
+@Mapper(componentModel = "spring", config = MapperConfiguration.class, uses = { OrdinationMapper.class, OrderMapper.class })
 public interface BillMapper {
 
 	@Mapping(source = "estimatedTotal", target = "estimatedTotal")

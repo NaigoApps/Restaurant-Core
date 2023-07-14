@@ -4,8 +4,7 @@ import AppContext from './ApplicationContext';
 import AdditionsConfigurationPage from './pages/configuration/additions/AdditionsConfigurationPage';
 import ConfigurationHomePage from './pages/configuration/ConfigurationHomePage';
 import ConfigurationPage from './pages/configuration/ConfigurationPage';
-import CategoriesConfigurationSection
-  from './pages/configuration/menu/CategoriesConfigurationSection';
+import CategoriesConfigurationSection from './pages/configuration/menu/CategoriesConfigurationSection';
 import CategoryEditor from './pages/configuration/menu/CategoryEditor';
 import MenuConfigurationPage from './pages/configuration/menu/MenuConfigurationPage';
 import PrintersConfigurationPage from './pages/configuration/printers/PrintersConfigurationPage';
@@ -22,7 +21,6 @@ import NotFound from './pages/NotFound';
 import SettingsPage from './pages/settings/SettingsPage';
 import MODE from './pages/evenings/tables/mode';
 import StatisticsPage from './pages/statistics/StatisticsPage';
-import CustomersConfigurationPage from './pages/configuration/customers/CustomersConfigurationPage';
 
 export default function App() {
   const [error, setError] = useState(null);
@@ -67,7 +65,6 @@ export default function App() {
               <CategoryEditor path=":categoryUuid" />
             </MenuConfigurationPage>
             <AdditionsConfigurationPage path="additions" />
-            <CustomersConfigurationPage path="customers" />
           </ConfigurationPage>
           <SettingsPage path="settings" />
         </Main>

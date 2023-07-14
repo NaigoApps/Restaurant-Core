@@ -28,7 +28,6 @@ export default function NavContent() {
             </CategoryNav>
           </DefaultNav>
           <DefaultNav path="additions" label="Varianti" />
-          <DefaultNav path="customers" label="Clienti" />
         </DefaultNav>
         <DefaultNav path="settings" label="Impostazioni" />
       </HomePageNav>

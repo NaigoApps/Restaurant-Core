@@ -1,14 +1,6 @@
 import {
-  faArchive,
-  faCheck,
-  faDollarSign,
-  faFileExport,
-  faHandshake,
-  faPen,
-  faPlus,
-  faTrash,
+  faCheck, faDollarSign, faHandshake, faPen, faPlus, faTrash,
 } from '@fortawesome/free-solid-svg-icons';
-import fileDownload from 'js-file-download';
 import React, { Fragment, useState } from 'react';
 import RemoteSelectInput from '../../../inputs/RemoteSelectInput';
 import useNetwork from '../../../utils/useNetwork';
@@ -24,8 +16,6 @@ import MODE from './mode';
 import Alert from '../../../widgets/Alert';
 import PriceFiller from './bills/editor/PriceFiller';
 import OptionsDialog from '../../../widgets/OptionsDialog';
-import IntegerInput from '../../../inputs/IntegerInput';
-import FloatInput from '../../../inputs/FloatInput';
 import { tableOrdersTotal } from '../../../utils/OrdinationUtils';
 import IntegerEditor from '../../../inputs/IntegerEditor';
 import FloatEditor from '../../../inputs/FloatEditor';
@@ -37,7 +27,6 @@ export default function DiningTableActions({
   navigate,
 }) {
   const {
-    get,
     post,
     put,
     remove,
@@ -49,7 +38,6 @@ export default function DiningTableActions({
 
   const [choosingBill, setChoosingBill] = useState(false);
   const [closing, setClosing] = useState(false);
-  const [archiving, setArchiving] = useState(false);
   const [creating, setCreating] = useState(false);
   const [merging, setMerging] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -139,25 +127,10 @@ export default function DiningTableActions({
     }
   }
 
-  async function archiveTable() {
-    const result = await put(`dining-tables/${table.uuid}/archive`);
-    if (result !== null) {
-      setArchiving(false);
-      navigate('..');
-    }
-  }
-
   async function deleteTable() {
     const result = await remove(`dining-tables/${table.uuid}`);
     if (result !== null) {
       navigate('..');
-    }
-  }
-
-  async function exportTable() {
-    const result = await get(`dining-tables/${table.uuid}/export`);
-    if (result !== null) {
-      fileDownload(JSON.stringify(result), `${table.uuid}.json`);
     }
   }
 
@@ -195,12 +168,6 @@ export default function DiningTableActions({
             icon={faPen}
             onClick={() => setEditing(true)}
           />
-          {/* <Button */}
-          {/*  text="Esporta tavolo" */}
-          {/*  kind="info" */}
-          {/*  icon={faFileExport} */}
-          {/*  onClick={() => exportTable()} */}
-          {/* /> */}
           <Button
             text="Fondi tavolo"
             kind="warning"
@@ -213,12 +180,6 @@ export default function DiningTableActions({
             icon={faCheck}
             onClick={() => setClosing(true)}
           />
-          {/* <Button */}
-          {/*  text="Archivia tavolo" */}
-          {/*  kind="warning" */}
-          {/*  icon={faArchive} */}
-          {/*  onClick={() => setArchiving(true)} */}
-          {/* /> */}
           <Button
             text="Elimina tavolo"
             kind="danger"
@@ -298,15 +259,6 @@ export default function DiningTableActions({
         >
           <p>Chiudere il tavolo?</p>
         </OptionsDialog>
-      )}
-      {archiving && (
-        <OkCancelDialog
-          visible
-          onOk={archiveTable}
-          onCancel={() => setArchiving(false)}
-        >
-          <p>Archiviare il tavolo?</p>
-        </OkCancelDialog>
       )}
       {merging && (
         <OkCancelDialog

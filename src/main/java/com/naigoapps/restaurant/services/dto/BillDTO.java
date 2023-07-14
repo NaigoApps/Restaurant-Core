@@ -9,7 +9,6 @@ import java.util.List;
  */
 public class BillDTO extends DTO {
 	private Integer progressive;
-	private CustomerDTO customer;
 	private LocalDateTime printTime;
 	private String tableUuid;
 	private List<OrdersGroupDTO> orders;
@@ -23,14 +22,6 @@ public class BillDTO extends DTO {
 
 	public void setProgressive(Integer progressive) {
 		this.progressive = progressive;
-	}
-
-	public CustomerDTO getCustomer() {
-		return customer;
-	}
-
-	public void setCustomer(CustomerDTO customer) {
-		this.customer = customer;
 	}
 
 	public LocalDateTime getPrintTime() {

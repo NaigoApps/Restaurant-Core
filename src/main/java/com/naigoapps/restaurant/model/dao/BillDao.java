@@ -7,11 +7,10 @@ package com.naigoapps.restaurant.model.dao;
 
 import com.naigoapps.restaurant.model.Bill;
 import com.naigoapps.restaurant.model.Evening;
-import java.time.LocalDate;
+import org.springframework.stereotype.Repository;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-
-import org.springframework.stereotype.Repository;
 
 /**
  *
@@ -25,38 +24,9 @@ public class BillDao extends AbstractDao<Bill> {
     public int nextBillProgressive(Evening evening) {
         EntityManager em = getEntityManager();
         Query q = em.createQuery(PROGRESSIVE_SELECT
-                + "b.customer IS NULL AND "
                 + "b.printTime IS NULL AND "
                 + "b.table.evening = :evening");
         q.setParameter("evening", evening);
-        Integer progressive = (Integer) q.getSingleResult();
-        if (progressive != null) {
-            return progressive + 1;
-        }
-        return 1;
-    }
-
-    public int nextReceiptProgressive(LocalDate day) {
-        EntityManager em = getEntityManager();
-        Query q = em.createQuery(PROGRESSIVE_SELECT
-                + "b.customer IS NULL AND "
-                + "b.printTime IS NOT NULL AND "
-                + "b.printDate = :day");
-        q.setParameter("day", day);
-        Integer progressive = (Integer) q.getSingleResult();
-        if (progressive != null) {
-            return progressive + 1;
-        }
-        return 1;
-    }
-
-    public int nextInvoiceProgressive(LocalDate day) {
-        EntityManager em = getEntityManager();
-        Query q = em.createQuery(PROGRESSIVE_SELECT
-                + "b.customer IS NOT NULL AND "
-                + "b.printTime IS NOT NULL AND "
-                + "YEAR(b.printTime) = :year");
-        q.setParameter("year", day.getYear());
         Integer progressive = (Integer) q.getSingleResult();
         if (progressive != null) {
             return progressive + 1;
