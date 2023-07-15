@@ -55,6 +55,7 @@ public class StatisticsService {
         ps.lf();
 
         ps.printLine("Incasso totale:", PrintingService.formatPrice(dao.getProfit(from, to) + coverCharges.getValue()))
+                .printLine("Incasso finale:", PrintingService.formatPrice(dao.getFinalProfit(from, to)))
                 .lf(3);
 
         ps.cut();

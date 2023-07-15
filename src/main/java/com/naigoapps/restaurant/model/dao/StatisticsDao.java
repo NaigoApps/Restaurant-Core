@@ -1,6 +1,5 @@
 package com.naigoapps.restaurant.model.dao;
 
-import com.naigoapps.restaurant.model.Category;
 import com.naigoapps.restaurant.services.dto.StatisticsDTO;
 import com.naigoapps.restaurant.services.dto.StatisticsEntryDTO;
 import org.springframework.stereotype.Repository;
@@ -25,9 +24,9 @@ public class StatisticsDao {
     public StatisticsDTO getMostSoldDishes(LocalDate from, LocalDate to, int limit) {
         Query query = em.createQuery("SELECT " +
                         "d.uuid as uuid, d.name as name, count(d.id), sum(o.price) as value " +
-                        "FROM Dish d, Order o, Ordination ot, DiningTable dt " +
-                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
-                        "o.dish = d AND o.ordination = ot AND ot.table = dt " +
+                        "FROM Dish d, Order o, Ordination ot, DiningTable dt, Evening ev " +
+                        "WHERE DATE(ev.day) >= ?1 AND DATE(ev.day) <= ?2 AND " +
+                        "o.dish = d AND o.ordination = ot AND ot.table = dt AND dt.evening = ev " +
                         "GROUP BY d.id, d.uuid " +
                         "ORDER BY value DESC")
                 .setParameter(1, Date.valueOf(from))
@@ -37,10 +36,10 @@ public class StatisticsDao {
 
     public Map.Entry<Long, Double> getCoverCharges(LocalDate from, LocalDate to) {
         Query query = em.createQuery("SELECT " +
-                        "count(*) as n, sum(dt.coverCharges) * e.coverCharge as p " +
-                        "FROM Order o, Ordination ot, DiningTable dt, Evening e " +
-                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
-                        "o.ordination = ot AND ot.table = dt AND dt.evening = e " +
+                        "sum(dt.coverCharges) as n, sum(dt.coverCharges) * e.coverCharge as p " +
+                        "FROM DiningTable dt, Evening e " +
+                        "WHERE DATE(e.day) >= ?1 AND DATE(e.day) <= ?2 AND " +
+                        "dt.evening = e " +
                         "GROUP BY e")
                 .setParameter(1, Date.valueOf(from))
                 .setParameter(2, Date.valueOf(to));
@@ -57,9 +56,9 @@ public class StatisticsDao {
     public StatisticsDTO getMostSoldCategories(LocalDate from, LocalDate to, int limit) {
         Query query = em.createQuery("SELECT " +
                         "c.uuid as uuid, c.name as name, count(c.id), sum(o.price) as value " +
-                        "FROM Category c, Dish d, Order o, Ordination ot, DiningTable dt " +
-                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
-                        "d.category = c AND o.dish = d AND o.ordination = ot AND ot.table = dt " +
+                        "FROM Category c, Dish d, Order o, Ordination ot, DiningTable dt, Evening ev " +
+                        "WHERE DATE(ev.day) >= ?1 AND DATE(ev.day) <= ?2 AND " +
+                        "d.category = c AND o.dish = d AND o.ordination = ot AND ot.table = dt AND dt.evening = ev " +
                         "GROUP BY c.id, c.uuid " +
                         "ORDER BY value DESC")
                 .setParameter(1, Date.valueOf(from))
@@ -77,9 +76,9 @@ public class StatisticsDao {
     public List<StatisticsEntryDTO> getMostSoldDishes(LocalDate from, LocalDate to, String category, int limit) {
         Query query = em.createQuery("SELECT " +
                         "d.uuid, d.name as name, count(d.id) as n, sum(o.price) as value " +
-                        "FROM Dish d, Order o, Ordination ot, DiningTable dt " +
-                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
-                        "d.category.uuid = ?3 AND o.dish = d AND o.ordination = ot AND ot.table = dt " +
+                        "FROM Dish d, Order o, Ordination ot, DiningTable dt, Evening ev " +
+                        "WHERE DATE(ev.day) >= ?1 AND DATE(ev.day) <= ?2 AND " +
+                        "d.category.uuid = ?3 AND o.dish = d AND o.ordination = ot AND ot.table = dt AND dt.evening = ev " +
                         "GROUP BY d.id " +
                         "ORDER BY value DESC")
                 .setParameter(1, Date.valueOf(from))
@@ -123,9 +122,20 @@ public class StatisticsDao {
     public Double getProfit(LocalDate from, LocalDate to) {
         Query query = em.createQuery("SELECT " +
                         "sum(o.price) as value " +
-                        "FROM Order o, Ordination ot, DiningTable dt " +
-                        "WHERE DATE(dt.openingTime) >= ?1 AND DATE(dt.openingTime) <= ?2 AND " +
-                        "o.ordination = ot AND ot.table = dt")
+                        "FROM Order o, Ordination ot, DiningTable dt, Evening ev " +
+                        "WHERE DATE(ev.day) >= ?1 AND DATE(ev.day) <= ?2 AND " +
+                        "o.ordination = ot AND ot.table = dt AND dt.evening = ev")
+                .setParameter(1, Date.valueOf(from))
+                .setParameter(2, Date.valueOf(to));
+        return (Double) query.getSingleResult();
+    }
+
+    public Double getFinalProfit(LocalDate from, LocalDate to) {
+        Query query = em.createQuery("SELECT " +
+                        "sum(b.total) as value " +
+                        "FROM DiningTable dt, Evening ev, Bill b " +
+                        "WHERE DATE(ev.day) >= ?1 AND DATE(ev.day) <= ?2 AND " +
+                        "dt.evening = ev AND b.table = dt")
                 .setParameter(1, Date.valueOf(from))
                 .setParameter(2, Date.valueOf(to));
         return (Double) query.getSingleResult();
