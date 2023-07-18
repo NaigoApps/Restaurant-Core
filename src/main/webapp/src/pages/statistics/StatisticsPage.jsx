@@ -62,6 +62,22 @@ export default function StatisticsPage() {
           <DateInput label="Da" date={from} onDateChange={date => setFrom(date)} />
           <DateInput label="A" date={to} onDateChange={date => setTo(date)} />
         </Column>
+        <Column grow spaced>
+          <Button
+            text="Ieri"
+            onClick={() => {
+              setFrom(moment().subtract(1, 'days'));
+              setTo(moment().subtract(1, 'days'));
+            }}
+          />
+          <Button
+            text="Oggi"
+            onClick={() => {
+              setFrom(moment());
+              setTo(moment());
+            }}
+          />
+        </Column>
         <Column grow>
           <SelectEditor
             label="Statistica"
@@ -71,14 +87,6 @@ export default function StatisticsPage() {
             options={Stats}
             onSelectOption={opt => setOption(opt)}
           />
-          {data
-          && (
-            <p className="has-text-centered">
-              <strong>
-                {`Totale incasso: ${data.entries.map(entry => entry.value).reduce((a, b) => a + b, 0)}€`}
-              </strong>
-            </p>
-          )}
         </Column>
         <Column grow spaced>
           <Button
